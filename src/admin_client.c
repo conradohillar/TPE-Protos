@@ -1,0 +1,3 @@
+#include "admin_client.h"
+
+// ...implementación futura del cliente de administración...

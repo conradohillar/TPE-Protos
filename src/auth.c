@@ -1,0 +1,3 @@
+#include "auth.h"
+
+// ...implementación futura de autenticación...
