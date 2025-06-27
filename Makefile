@@ -17,7 +17,7 @@ SERVER_OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/auth.o $(OBJ_DIR)/config.o \
 	$(OBJ_DIR)/netutils.o $(OBJ_DIR)/parser.o $(OBJ_DIR)/parser_utils.o \
 	$(OBJ_DIR)/selector.o $(OBJ_DIR)/stm.o
 
-ADMIN_CLIENT_OBJS = $(OBJ_DIR)/admin_client.o $(OBJ_DIR)/netutils.o
+ADMIN_CLIENT_OBJS = $(OBJ_DIR)/admin_client.o $(OBJ_DIR)/netutils.o $(OBJ_DIR)/buffer.o
 
 SERVER_BIN = $(BIN_DIR)/server
 ADMIN_CLIENT_BIN = $(BIN_DIR)/admin_client
