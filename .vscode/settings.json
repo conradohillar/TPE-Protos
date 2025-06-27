@@ -3,6 +3,10 @@
         "stddef.h": "c",
         "stdlib.h": "c",
         "auth.h": "c",
-        "pthread.h": "c"
+        "pthread.h": "c",
+        "stdio.h": "c",
+        "netutils.h": "c",
+        "buffer.h": "c",
+        "config.h": "c"
     }
 }

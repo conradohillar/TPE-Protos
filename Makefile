@@ -4,7 +4,7 @@
 # El parámetro -p <puerto> se debe pasar al ejecutar los binarios, no en la compilación
 
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -g
+CFLAGS = -Wall -Wextra -std=c11 -g -fsanitize=address
 SRC_DIR = src
 OBJ_DIR = obj
 BIN_DIR = bin
@@ -16,6 +16,8 @@ SERVER_OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/auth.o $(OBJ_DIR)/config.o \
 	$(OBJ_DIR)/metrics.o $(OBJ_DIR)/logger.o $(OBJ_DIR)/buffer.o \
 	$(OBJ_DIR)/netutils.o $(OBJ_DIR)/parser.o $(OBJ_DIR)/parser_utils.o \
 	$(OBJ_DIR)/selector.o $(OBJ_DIR)/stm.o
+
+ADMIN_CLIENT_SRC_DIR = src/admin_client
 
 ADMIN_CLIENT_OBJS = $(OBJ_DIR)/admin_client.o $(OBJ_DIR)/netutils.o $(OBJ_DIR)/buffer.o
 
@@ -32,6 +34,9 @@ admin_client: dirs $(ADMIN_CLIENT_BIN)
 
 dirs:
 	@mkdir -p $(OBJ_DIR) $(BIN_DIR)
+
+$(OBJ_DIR)/admin_client.o: $(ADMIN_CLIENT_SRC_DIR)/admin_client.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
