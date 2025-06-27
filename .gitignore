@@ -50,3 +50,9 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+.vscode
+.idea
+
+src/auth_test.c
+src/auth_test
