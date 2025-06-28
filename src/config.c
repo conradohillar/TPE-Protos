@@ -72,35 +72,69 @@ config_cmd_parsed_t *config_parse_command(const char *cmd) {
         parsed->cmd = CMD_ADD_USER;
         token = strtok_r(NULL, " \r\n", &saveptr);
         if (token) strncpy(parsed->arg1, token, sizeof(parsed->arg1) - 1);
+        else {parsed->cmd = CMD_INVALID;} // Falta el usuario
         token = strtok_r(NULL, " \r\n", &saveptr);
         if (token) strncpy(parsed->arg2, token, sizeof(parsed->arg2) - 1);
+        else {parsed->cmd = CMD_INVALID;} // Falta la contraseña
+        token = strtok_r(NULL, " \r\n", &saveptr);
+        if (token) {parsed->cmd = CMD_INVALID;} // Demasiados argumentos
+    
     } else if (strcmp(token, "REMOVE_USER") == 0) {
         parsed->cmd = CMD_REMOVE_USER;
         token = strtok_r(NULL, " \r\n", &saveptr);
         if (token) strncpy(parsed->arg1, token, sizeof(parsed->arg1) - 1);
+        else {parsed->cmd = CMD_INVALID;} // Falta el usuario
+        token = strtok_r(NULL, " \r\n", &saveptr);
+        if (token) {parsed->cmd = CMD_INVALID;} // Demasiados argumentos
+
     } else if (strcmp(token, "LIST_USERS") == 0) {
         parsed->cmd = CMD_LIST_USERS;
+        token = strtok_r(NULL, " \r\n", &saveptr);
+        if (token) {parsed->cmd = CMD_INVALID;} // Demasiados argumentos
+
     } else if (strcmp(token, "GET_METRICS") == 0) {
         parsed->cmd = CMD_GET_METRICS;
+        token = strtok_r(NULL, " \r\n", &saveptr);
+        if (token) {parsed->cmd = CMD_INVALID;} // Demasiados argumentos
+
     } else if (strcmp(token, "GET_LOG") == 0) {
         parsed->cmd = CMD_GET_LOG;
+        token = strtok_r(NULL, " \r\n", &saveptr);
+        if (token) {parsed->cmd = CMD_INVALID;} // Demasiados argumentos
+
     } else if (strcmp(token, "SET_TIMEOUT") == 0) {
         parsed->cmd = CMD_SET_TIMEOUT;
         token = strtok_r(NULL, " \r\n", &saveptr);
         if (token) strncpy(parsed->arg1, token, sizeof(parsed->arg1) - 1);
+        else {parsed->cmd = CMD_INVALID;} // Falta el valor del timeout
+        token = strtok_r(NULL, " \r\n", &saveptr);
+        if (token) {parsed->cmd = CMD_INVALID;} // Demasiados argumentos
+
     } else if (strcmp(token, "SET_BUFF") == 0) {
         parsed->cmd = CMD_SET_BUFF;
         token = strtok_r(NULL, " \r\n", &saveptr);
         if (token) strncpy(parsed->arg1, token, sizeof(parsed->arg1) - 1);
+        else {parsed->cmd = CMD_INVALID;} // Falta el valor del buffer
+        token = strtok_r(NULL, " \r\n", &saveptr);
+        if (token) {parsed->cmd = CMD_INVALID;} // Demasiados argumentos
+    
     } else if (strcmp(token, "GET_CONFIG") == 0) {
         parsed->cmd = CMD_GET_CONFIG;
+        token = strtok_r(NULL, " \r\n", &saveptr);
+        if (token) {parsed->cmd = CMD_INVALID;} // Demasiados argumentos
+
     } else if (strcmp(token, "HELP") == 0) {
         parsed->cmd = CMD_HELP;
+        token = strtok_r(NULL, " \r\n", &saveptr);
+        if (token) {parsed->cmd = CMD_INVALID;} // Demasiados argumentos
+    
     } else if (strcmp(token, "PING") == 0) {
         parsed->cmd = CMD_PING;
+        token = strtok_r(NULL, " \r\n", &saveptr);
+        if (token) {parsed->cmd = CMD_INVALID;} // Demasiados argumentos
+
     } else {
-        // Comando desconocido
-        parsed->cmd = CMD_INVALID;
+        parsed->cmd = CMD_INVALID; // Comando desconocido
     }
 
     return parsed;
