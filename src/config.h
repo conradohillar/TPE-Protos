@@ -27,6 +27,7 @@ typedef enum {
     CMD_GET_CONFIG,
     CMD_HELP,
     CMD_PING,
+    CMD_EXIT,
     CMD_INVALID
 } config_command_t;
 
@@ -46,11 +47,14 @@ typedef struct {
  * Maneja un comando de configuración recibido del cliente administrador.
  * @param sockfd El socket del cliente administrador.
  * @param cmd El comando recibido (ej. "SET timeout 30").
+ * @param response El buffer donde se escribirá la respuesta.
+ * @param response_size El tamaño máximo del buffer de respuesta.
+ * @return El tamaño de la respuesta escrita en el buffer, o -1 si hubo error de parseo
  */
-void config_handler(int sockfd, const char *cmd);
+int config_handler(const char *cmd, char *response, size_t response_size);
 
 /**
- * Ejecuta la acción correspondiente al comando de configuración y devuelve la respuesta.
+ * Ejecuta la acción correspondiente al comando de configuración y devuelve la respuesta correspondiente.
  * @param cmd El comando a procesar (ej. "SET timeout 30").
  * @param response El buffer donde se escribirá la respuesta.
  * @param response_size El tamaño máximo del buffer de respuesta.

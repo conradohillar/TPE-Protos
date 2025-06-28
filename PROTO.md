@@ -59,6 +59,10 @@ Este documento describe el protocolo de texto utilizado para la administración 
   - Prueba de conectividad.
   - Respuesta: `PONG`
 
+### 3.5 Cerrar conexión
+- `EXIT`
+  - Respuesta: `BYE`
+
 ## 4. Ejemplo de Sesión
 ```
 > ADD_USER juan 1234

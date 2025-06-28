@@ -5,7 +5,7 @@ void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, siz
     switch (parsed_cmd->cmd) {
         case CMD_HELP:
             snprintf(response, response_size,
-                "ADD_USER <usuario> <password>\nREMOVE_USER <usuario>\nLIST_USERS\nGET_METRICS\nGET_LOG\nSET_TIMEOUT <segundos>\nSET_BUFF <bytes>\nGET_CONFIG\nHELP\nPING\nEND\n");
+                "ADD_USER <usuario> <password>\nREMOVE_USER <usuario>\nLIST_USERS\nGET_METRICS\nGET_LOG\nSET_TIMEOUT <segundos>\nSET_BUFF <bytes>\nGET_CONFIG\nHELP\nPING\nEXIT\nEND\n");
             break;
         case CMD_PING:
             snprintf(response, response_size, "PONG\n");
@@ -37,6 +37,9 @@ void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, siz
             break;
         case CMD_GET_CONFIG:
             snprintf(response, response_size, "Configuración actual: timeout=30, buffer_size=1024\nOK\n");
+            break;
+        case CMD_EXIT:
+            snprintf(response, response_size, "BYE\n");
             break;
         case CMD_INVALID:
             snprintf(response, response_size, "ERROR\n");
@@ -133,6 +136,11 @@ config_cmd_parsed_t *config_parse_command(const char *cmd) {
         token = strtok_r(NULL, " \r\n", &saveptr);
         if (token) {parsed->cmd = CMD_INVALID;} // Demasiados argumentos
 
+    } else if (strcmp(token, "EXIT") == 0) {
+        parsed->cmd = CMD_EXIT;
+        token = strtok_r(NULL, " \r\n", &saveptr);
+        if (token) {parsed->cmd = CMD_INVALID;} // Demasiados argumentos
+
     } else {
         parsed->cmd = CMD_INVALID; // Comando desconocido
     }
@@ -140,23 +148,13 @@ config_cmd_parsed_t *config_parse_command(const char *cmd) {
     return parsed;
 }
 
-void config_handler(int sockfd, const char *cmd) {
-    uint8_t buf_data[MAX_RESPONSE_LEN];
-    buffer buf;
-    buffer_init(&buf, sizeof(buf_data), buf_data);
-    char response[MAX_RESPONSE_LEN];
-    
+int config_handler(const char *cmd, char *response, size_t response_size) {
     config_cmd_parsed_t *parsed = config_parse_command(cmd);
     if (!parsed) {
-        snprintf(response, sizeof(response), "Error en el parseo\n");
-    } else {
-        // Procesar el comando
-        config_process_command(parsed, response, sizeof(response));
+        fprintf(stderr, "Error de parseo\n");
+        return -1;
     }
-
-    size_t len = strlen(response);
-    memcpy(buf.data, response, len);
-    buf.write = buf.data + len;
-    sock_blocking_write(sockfd, &buf);
+    config_process_command(parsed, response, response_size);
     free(parsed);
+    return strlen(response);
 }
