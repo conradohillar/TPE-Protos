@@ -22,7 +22,7 @@ static unsigned long hash(const char *str) {
   return hash % HASHMAP_SIZE;
 }
 
-void auth_init(void) { memset(hashmap, 0, sizeof(hashmap)); }
+void auth_init() { memset(hashmap, 0, sizeof(hashmap)); }
 
 void auth_destroy(void) {
   for (int i = 0; i < HASHMAP_SIZE; i++) {
