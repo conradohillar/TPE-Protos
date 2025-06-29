@@ -32,9 +32,9 @@ Este documento describe el protocolo de texto utilizado para la administración 
 - `GET_METRICS`
   - Devuelve métricas actuales del servidor.
   - Respuesta ejemplo: `CONNECTIONS:5 HISTORICAL:20 BYTES:10240`
-- `GET_LOG`
-  - Devuelve los últimos eventos de acceso/errores.
-  - Respuesta: una línea por evento, luego `END`.
+- `GET_ACCESS_REGISTER`
+  - Devuelve las entradas del registro de accesos.
+  - Respuesta: una línea por entrada, indicando nombre de usuario, destino y tiempo de acceso. Luego, `END`.
 
 ### 3.3 Configuración Dinámica
 - `SET_TIMEOUT <segundos>`

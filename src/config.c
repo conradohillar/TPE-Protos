@@ -1,11 +1,11 @@
 #include "config.h"
 
-void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, size_t response_size) {
+void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, size_t response_size, access_register_t *access_register) {
     //TODO: Implementar la lógica de cada comando
     switch (parsed_cmd->cmd) {
         case CMD_HELP:
             snprintf(response, response_size,
-                "ADD_USER <usuario> <password>\nREMOVE_USER <usuario>\nLIST_USERS\nGET_METRICS\nGET_LOG\nSET_TIMEOUT <segundos>\nSET_BUFF <bytes>\nGET_CONFIG\nHELP\nPING\nEXIT\nEND\n");
+                "ADD_USER <usuario> <password>\nREMOVE_USER <usuario>\nLIST_USERS\nGET_METRICS\nGET_ACCESS_REGISTER\nSET_TIMEOUT <segundos>\nSET_BUFF <bytes>\nGET_CONFIG\nHELP\nPING\nEXIT\nEND\n");
             break;
         case CMD_PING:
             snprintf(response, response_size, "PONG\n");
@@ -24,8 +24,8 @@ void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, siz
         case CMD_GET_METRICS:
             snprintf(response, response_size, "Conexiones: 100, Bytes: 2048, Errores: 0\nOK\n");
             break;
-        case CMD_GET_LOG:
-            snprintf(response, response_size, "Log: [2023-10-01 12:00:00] Conexión aceptada desde 192.168.1.1\nOK\n");
+        case CMD_GET_ACCESS_REGISTER:
+            access_register_print(access_register, response, response_size);
             break;
         case CMD_SET_TIMEOUT:
             printf("Timeout configurado a %s segundos (simulado)\n", parsed_cmd->arg1);
@@ -100,8 +100,8 @@ config_cmd_parsed_t *config_parse_command(const char *cmd) {
         token = strtok_r(NULL, " \r\n", &saveptr);
         if (token) {parsed->cmd = CMD_INVALID;} // Demasiados argumentos
 
-    } else if (strcmp(token, "GET_LOG") == 0) {
-        parsed->cmd = CMD_GET_LOG;
+    } else if (strcmp(token, "GET_ACCESS_REGISTER") == 0) {
+        parsed->cmd = CMD_GET_ACCESS_REGISTER;
         token = strtok_r(NULL, " \r\n", &saveptr);
         if (token) {parsed->cmd = CMD_INVALID;} // Demasiados argumentos
 
@@ -148,13 +148,13 @@ config_cmd_parsed_t *config_parse_command(const char *cmd) {
     return parsed;
 }
 
-int config_handler(const char *cmd, char *response, size_t response_size) {
+int config_handler(const char *cmd, char *response, size_t response_size, access_register_t *access_register) {
     config_cmd_parsed_t *parsed = config_parse_command(cmd);
     if (!parsed) {
         fprintf(stderr, "Error de parseo\n");
         return -1;
     }
-    config_process_command(parsed, response, response_size);
+    config_process_command(parsed, response, response_size, access_register);
     free(parsed);
     return strlen(response);
 }

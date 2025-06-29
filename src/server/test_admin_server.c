@@ -23,6 +23,8 @@ static void accept_handler(struct selector_key *key);
 static void admin_read(struct selector_key *key);
 static void admin_write(struct selector_key *key);
 
+static access_register_t *access_register = NULL;
+
 static const fd_handler admin_handler = {
     .handle_read = admin_read,
     .handle_write = admin_write,
@@ -45,7 +47,7 @@ static void admin_read(struct selector_key *key) {
     char *newline = strchr(conn->inbuf, '\n');
     if (newline) {
         *newline = '\0';
-        conn->outbuf_len = config_handler(conn->inbuf, conn->outbuf, sizeof(conn->outbuf));
+        conn->outbuf_len = config_handler(conn->inbuf, conn->outbuf, sizeof(conn->outbuf), access_register);
         conn->outbuf_sent = 0;
         selector_set_interest_key(key, OP_WRITE);
         // Mover datos restantes (si hay más de un comando en el buffer)
@@ -95,6 +97,12 @@ int main(int argc, char *argv[]) {
     selector_fd_set_nio(listenfd);
     printf("Servidor admin multiplexado escuchando en puerto %d...\n", port);
 
+    access_register = access_register_init();
+    if (!access_register) {
+        close(listenfd);
+        exit(1);
+    }
+
     struct selector_init conf = {
         .signal = SIGALRM,
         .select_timeout = { .tv_sec = 10, .tv_nsec = 0 }
@@ -124,6 +132,7 @@ int main(int argc, char *argv[]) {
     selector_destroy(selector);
     selector_close();
     close(listenfd);
+    free(access_register);
     return 0;
 }
 

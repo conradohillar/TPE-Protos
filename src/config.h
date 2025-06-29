@@ -2,6 +2,7 @@
 #define CONFIG_H
 
 #include "netutils.h"
+#include "access_register.h"
 
 #include <stdio.h>
 #include <stddef.h>
@@ -10,7 +11,7 @@
 
 #define ARGS_LEN 256
 #define MAX_CMD_LEN 512
-#define MAX_RESPONSE_LEN 1024
+#define MAX_RESPONSE_LEN 1024 * 100
 
 #define DEFAULT_CONFIG_HOST "127.0.0.1"
 #define DEFAULT_CONFIG_PORT 9090
@@ -21,7 +22,7 @@ typedef enum {
     CMD_REMOVE_USER,
     CMD_LIST_USERS,
     CMD_GET_METRICS,
-    CMD_GET_LOG,
+    CMD_GET_ACCESS_REGISTER,
     CMD_SET_TIMEOUT,
     CMD_SET_BUFF,
     CMD_GET_CONFIG,
@@ -51,7 +52,7 @@ typedef struct {
  * @param response_size El tamaño máximo del buffer de respuesta.
  * @return El tamaño de la respuesta escrita en el buffer, o -1 si hubo error de parseo
  */
-int config_handler(const char *cmd, char *response, size_t response_size);
+int config_handler(const char *cmd, char *response, size_t response_size, access_register_t *access_register);
 
 /**
  * Ejecuta la acción correspondiente al comando de configuración y devuelve la respuesta correspondiente.
@@ -60,7 +61,7 @@ int config_handler(const char *cmd, char *response, size_t response_size);
  * @param response_size El tamaño máximo del buffer de respuesta.
  * @return 0 en caso de éxito, o un código de error negativo.
  */
-void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, size_t response_size);
+void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, size_t response_size, access_register_t *access_register);
 
 /**
  * Parsea un comando de configuración recibido del cliente administrador.

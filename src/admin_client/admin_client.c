@@ -91,8 +91,10 @@ static void sock_read_handler(struct selector_key *key) {
         state->inbuf_len = rem;
         state->inbuf[state->inbuf_len] = '\0';
     }
-    printf(">: ");
-    fflush(stdout);
+    if(state->inbuf_len == 0){
+        printf(">: ");
+        fflush(stdout);
+    }
 }
 
 static void sock_write_handler(struct selector_key *key) {
