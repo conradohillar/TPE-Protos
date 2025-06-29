@@ -105,13 +105,13 @@ int main(int argc, char *argv[]) {
   const struct fd_handler socksv5 = {
     .handle_read       = socksv5_passive_accept,
     .handle_write      = NULL,
-    .handle_close      = NULL, // nada que liberar
+    .handle_close      = NULL, 
   };
 
   const struct fd_handler conf_protocol = {
-    .handle_read       = NULL,  //aca va un confprotocol_passive_accept
+    .handle_read       = s5admin_passive_accept,  
     .handle_write      = NULL,
-    .handle_close      = NULL, // nada que liberar
+    .handle_close      = NULL, 
   };
 
   if(create_and_register_passive_socket(&fd_selector, args.socks_addr, args.socks_port, &socksv5, &ss, &error_msg, SOCKS5) == -1) goto error;

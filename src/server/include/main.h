@@ -15,7 +15,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <socks5nio.h>
+#include <socks5.h>
+#include <s5admin.h>
 
 
 #define FD_STDIN 0

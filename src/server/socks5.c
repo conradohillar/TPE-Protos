@@ -1,8 +1,8 @@
 /**
- * socks5nio.c  - controla el flujo de un proxy SOCKSv5 (sockets no bloqueantes)
+ * socks5.c - accepta conexiones y controla el flujo de un proxy SOCKSv5 (sockets no bloqueantes)
  */
 
-#include <socks5nio.h>
+#include <socks5.h>
 
 #include <stdio.h>
 #include <stdlib.h>  // malloc
@@ -14,6 +14,7 @@
 #include <pthread.h>
 #include <arpa/inet.h>
 #include <selector.h>
+#include <connection_helper.h>
 
 
 #define N(x) (sizeof(x)/sizeof((x)[0]))
@@ -51,27 +52,6 @@ enum socks_v5state {
     ERROR,
 };
 
-////////////////////////////////////////////////////////////////////
-// Definición de variables para cada estado
-
-/** usado por HELLO_READ, HELLO_WRITE */
-// struct hello_st {
-//     /** buffer utilizado para I/O */
-//     buffer               *rb, *wb;
-//     // struct hello_parser   parser;
-//     /** el método de autenticación seleccionado */
-//     uint8_t               method;
-// } ;
-
-
-/*
- * Si bien cada estado tiene su propio struct que le da un alcance
- * acotado, disponemos de la siguiente estructura para hacer una única
- * alocación cuando recibimos la conexión.
- *
- * Se utiliza un contador de referencias (references) para saber cuando debemos
- * liberarlo finalmente, y un pool para reusar alocaciones previas.
- */
 struct socks5 {
     /** maquinas de estados */
     // struct state_machine          stm;
@@ -112,23 +92,8 @@ static const struct fd_handler socks5_handler = {
 
 /** Intenta aceptar la nueva conexión entrante*/
 void socksv5_passive_accept(struct selector_key *key) {
-
-    struct sockaddr client_addr;
-    socklen_t client_addr_len;
-    
-    const int client = accept(key->fd, &client_addr, &client_addr_len);
-    if(client == -1) goto fail;
-
-    if(selector_fd_set_nio(client) == -1) goto fail;
-    
-    // ACA TENEMOS QUE VER QUE DATA NOS QUEREMOS GUARDAR, CUANDO INTEGREMOS CON LO DE CONRA VEMOS QUE PONEMOS ACA
-
-    if(selector_register(key->s, client, &socks5_handler, OP_READ, NULL) != SELECTOR_SUCCESS) goto fail;
-    
-    fail:
-        if(client != -1) {
-            close(client);
-        }
+    //crear el struct
+    int fd = passive_accept(key, NULL, &socks5_handler);
 }
 
 

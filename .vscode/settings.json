@@ -1,0 +1,23 @@
+{
+    "files.associations": {
+        "stddef.h": "c",
+        "stdlib.h": "c",
+        "auth.h": "c",
+        "pthread.h": "c",
+        "stdio.h": "c",
+        "netutils.h": "c",
+        "buffer.h": "c",
+        "config.h": "c",
+        "socket.h": "c",
+        "selector.h": "c",
+        "access_register.h": "c",
+        "admin_client.h": "c",
+        "main.h": "c",
+        "connection_helper.h": "c",
+        "signal.h": "c",
+        "errno.h": "c",
+        "socks5.h": "c",
+        "unistd.h": "c",
+        "fcntl.h": "c"
+    }
+}
