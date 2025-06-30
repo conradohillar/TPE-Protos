@@ -11,15 +11,21 @@ void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, siz
             snprintf(response, response_size, "PONG\n");
             break;
         case CMD_ADD_USER:
-            printf("Usuario %s agregado con contraseña %s\n", parsed_cmd->arg1, parsed_cmd->arg2);
-            snprintf(response, response_size, "OK\n");
+            if(auth_add_user(parsed_cmd->arg1, parsed_cmd->arg2)){
+                snprintf(response, response_size, "OK\n");
+            } else {
+                snprintf(response, response_size, "ERROR: %s already exists\n", parsed_cmd->arg1);
+            }
             break;
         case CMD_REMOVE_USER:
-            printf("Usuario %s eliminado\n", parsed_cmd->arg1);
-            snprintf(response, response_size, "OK\n");
+            if(auth_remove_user(parsed_cmd->arg1)){
+                snprintf(response, response_size, "OK\n");
+            } else {
+                snprintf(response, response_size, "ERROR: %s does not exist\n", parsed_cmd->arg1);
+            }
             break;
         case CMD_LIST_USERS:
-            snprintf(response, response_size, "user1\nuser2\nuser3\nEND\n");
+            auth_list_users(response, response_size);
             break;
         case CMD_GET_METRICS:
             metrics_print(get_server_data()->metrics, response, response_size);
@@ -42,7 +48,7 @@ void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, siz
             snprintf(response, response_size, "BYE\n");
             break;
         case CMD_INVALID:
-            snprintf(response, response_size, "ERROR\n");
+            snprintf(response, response_size, "ERROR: invalid command\n");
             break;
         default:
             break;

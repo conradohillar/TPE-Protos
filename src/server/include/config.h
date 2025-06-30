@@ -3,6 +3,8 @@
 
 #include <access_register.h>
 #include <server_data.h>
+#include <auth.h>
+
 #include <stdio.h>
 #include <stddef.h>
 #include <string.h>

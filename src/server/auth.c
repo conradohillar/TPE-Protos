@@ -86,3 +86,21 @@ bool auth_check_credentials(const char *username, const char *password) {
   }
   return false;
 }
+
+size_t auth_list_users(char *response, size_t response_size) {
+  size_t written = 0;
+  for (int i = 0; i < HASHMAP_SIZE; i++) {
+    user_entry_t *curr = hashmap[i];
+    while (curr) {
+      int n = snprintf(response + written, response_size - written, "%s\n", curr->username);
+      if (n < 0 || (size_t)n >= response_size - written) return written;
+      written += n;
+      curr = curr->next;
+    }
+  }
+  if (written < response_size) {
+    snprintf(response + written, response_size - written, "END\n");
+    written += 4; // "END\n"
+  }
+  return written;
+}
