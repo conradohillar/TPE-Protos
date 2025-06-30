@@ -1,8 +1,10 @@
 #ifndef SELECTOR_H_W50GNLODsARolpHbsDsrvYvMsbT
 #define SELECTOR_H_W50GNLODsARolpHbsDsrvYvMsbT
 
+
 #include <sys/time.h>
 #include <stdbool.h>
+#include <time.h>
 
 /**
  * selector.c - un muliplexor de entrada salida

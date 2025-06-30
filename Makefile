@@ -1,50 +1,46 @@
-# Makefile para el proyecto SOCKSv5 Proxy
-# Compila el servidor y el cliente de administración
-# Uso: make [all|server|admin_client|clean]
-# El parámetro -p <puerto> se debe pasar al ejecutar los binarios, no en la compilación
+include ./Makefile.inc
 
-CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -g
-SRC_DIR = src
-OBJ_DIR = obj
-BIN_DIR = bin
 
-SRCS = $(wildcard $(SRC_DIR)/*.c)
-OBJS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
+SERVER_SOURCES=$(wildcard src/server/*.c)
+CLIENT_SOURCES=$(wildcard src/admin_client/*.c)
+SHARED_SOURCES=$(wildcard src/shared/*.c)
 
-SERVER_OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/auth.o $(OBJ_DIR)/config.o \
-	$(OBJ_DIR)/metrics.o $(OBJ_DIR)/logger.o $(OBJ_DIR)/buffer.o \
-	$(OBJ_DIR)/netutils.o $(OBJ_DIR)/parser.o $(OBJ_DIR)/parser_utils.o \
-	$(OBJ_DIR)/selector.o $(OBJ_DIR)/stm.o
 
-ADMIN_CLIENT_OBJS = $(OBJ_DIR)/admin_client.o $(OBJ_DIR)/netutils.o $(OBJ_DIR)/buffer.o
+OBJECTS_FOLDER=./obj
+OUTPUT_FOLDER=./bin
 
-SERVER_BIN = $(BIN_DIR)/server
-ADMIN_CLIENT_BIN = $(BIN_DIR)/admin_client
+SERVER_OBJECTS=$(SERVER_SOURCES:src/server/%.c=obj/server/%.o)
+CLIENT_OBJECTS=$(CLIENT_SOURCES:src/admin_client/%.c=obj/admin_client/%.o)
+SHARED_OBJECTS=$(SHARED_SOURCES:src/shared/%.c=obj/shared/%.o)
 
-.PHONY: all server admin_client clean dirs
 
-all: dirs $(SERVER_BIN) $(ADMIN_CLIENT_BIN)
+SERVER_OUTPUT_FILE=$(OUTPUT_FOLDER)/server
+CLIENT_OUTPUT_FILE=$(OUTPUT_FOLDER)/admin_client
 
-server: dirs $(SERVER_BIN)
+all: server client
 
-admin_client: dirs $(ADMIN_CLIENT_BIN)
+server: $(SERVER_OUTPUT_FILE)
+client: $(CLIENT_OUTPUT_FILE)
 
-dirs:
-	@mkdir -p $(OBJ_DIR) $(BIN_DIR)
+$(SERVER_OUTPUT_FILE): $(SERVER_OBJECTS) $(SHARED_OBJECTS)
+	mkdir -p $(OUTPUT_FOLDER)
+	$(COMPILER) $(LDFLAGS) $(SERVER_OBJECTS) $(SHARED_OBJECTS) -o $(SERVER_OUTPUT_FILE)
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+$(CLIENT_OUTPUT_FILE): $(CLIENT_OBJECTS) $(SHARED_OBJECTS)
+	mkdir -p $(OUTPUT_FOLDER)
+	$(COMPILER) $(LDFLAGS) $(CLIENT_OBJECTS) $(SHARED_OBJECTS) -o $(CLIENT_OUTPUT_FILE)
 
-$(SERVER_BIN): $(SERVER_OBJS)
-	$(CC) $(CFLAGS) $^ -o $@
 
-$(ADMIN_CLIENT_BIN): $(ADMIN_CLIENT_OBJS)
-	$(CC) $(CFLAGS) $^ -o $@
+obj/%.o: src/%.c
+	mkdir -p $(OBJECTS_FOLDER)/server
+	mkdir -p $(OBJECTS_FOLDER)/admin_client
+	mkdir -p $(OBJECTS_FOLDER)/shared
+	$(COMPILER) $(COMPILERFLAGS) -I./src/server/include -I./src/shared/include -I./src/admin_client/include -c $< -o $@
+
+
 
 clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR)
+	rm -rf $(OUTPUT_FOLDER)
+	rm -rf $(OBJECTS_FOLDER)
 
-# Ejemplo de ejecución:
-# ./bin/server -p 1080
-# ./bin/admin_client -p 9090
+.PHONY: all server client clean

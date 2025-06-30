@@ -1,3 +1,0 @@
-#include "logger.h"
-
-// ...implementación futura de logging...

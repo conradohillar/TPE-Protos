@@ -2,6 +2,9 @@
 #define NETUTILS_H_CTCyWGhkVt1pazNytqIRptmAi5U
 
 #include <netinet/in.h>
+#include <errno.h>
+#include <stdio.h>
+#include <arpa/inet.h>
 
 #include "buffer.h"
 

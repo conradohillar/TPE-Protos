@@ -1,4 +1,4 @@
-# Protocolo de Administración y Monitoreo para Proxy SOCKSv5
+# S5Admin - Protocolo de Administración y Monitoreo para Proxy SOCKSv5
 
 ## 1. Introducción
 Este documento describe el protocolo de texto utilizado para la administración y monitoreo en tiempo real del servidor proxy SOCKSv5. Permite a un cliente administrador conectarse al servidor y ejecutar comandos para consultar métricas, modificar la configuración y gestionar usuarios, sin necesidad de reiniciar el servidor.
@@ -32,9 +32,9 @@ Este documento describe el protocolo de texto utilizado para la administración 
 - `GET_METRICS`
   - Devuelve métricas actuales del servidor.
   - Respuesta ejemplo: `CONNECTIONS:5 HISTORICAL:20 BYTES:10240`
-- `GET_LOG`
-  - Devuelve los últimos eventos de acceso/errores.
-  - Respuesta: una línea por evento, luego `END`.
+- `GET_ACCESS_REGISTER`
+  - Devuelve las entradas del registro de accesos.
+  - Respuesta: una línea por entrada, indicando nombre de usuario, destino y tiempo de acceso. Luego, `END`.
 
 ### 3.3 Configuración Dinámica
 - `SET_TIMEOUT <segundos>`
@@ -58,6 +58,10 @@ Este documento describe el protocolo de texto utilizado para la administración 
 - `PING`
   - Prueba de conectividad.
   - Respuesta: `PONG`
+
+### 3.5 Cerrar conexión
+- `EXIT`
+  - Respuesta: `BYE`
 
 ## 4. Ejemplo de Sesión
 ```

@@ -1,3 +1,0 @@
-#include "config.h"
-
-// ...implementación futura de configuración...

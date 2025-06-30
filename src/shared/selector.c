@@ -10,7 +10,7 @@
 #include <stdlib.h> // malloc
 #include <string.h> // memset
 
-#include "selector.h"
+#include <selector.h>
 #include <fcntl.h>
 #include <stdint.h>
 #include <sys/select.h>
@@ -82,7 +82,7 @@ selector_status selector_init(const struct selector_init *c) {
   if (-1 == sigprocmask(SIG_BLOCK, &blockset, NULL)) {
     ret = SELECTOR_IO;
     goto finally;
-  }
+  } 
 
   // 1. Registramos una función que atenderá la señal de interrupción
   //    del selector.
