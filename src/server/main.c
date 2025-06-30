@@ -1,5 +1,10 @@
 #include <main.h>
 
+static server_data_t * _server_data = NULL;
+
+server_data_t *get_server_data() {
+  return _server_data;
+}
 
 static bool done = false;
 
@@ -75,11 +80,17 @@ int main(int argc, char *argv[]) {
   signal(SIGTERM, sigterm_handler);
   
   auth_init();
-
   for(int i = 0; i < args.users_count; i++) 
     auth_add_user(args.users[i].name, args.users[i].pass);
 
-  
+  _server_data = malloc(sizeof(server_data_t));
+  if (_server_data == NULL) {
+    perror("Failed to allocate memory for server data");
+    exit(EXIT_FAILURE);
+  }
+  _server_data->metrics = metrics_init();
+  _server_data->access_register = access_register_init();
+
   const char * error_msg = NULL;
   fd_selector fd_selector = NULL;
   selector_status ss = SELECTOR_SUCCESS;
@@ -139,6 +150,10 @@ int main(int argc, char *argv[]) {
   if(fd_selector != NULL) selector_destroy(fd_selector);
   
   selector_close();
+
+  free(_server_data->access_register);
+  free(_server_data->metrics);
+  free(_server_data);
 
   auth_destroy();
 

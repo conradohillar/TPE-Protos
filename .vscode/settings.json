@@ -18,6 +18,12 @@
         "errno.h": "c",
         "socks5.h": "c",
         "unistd.h": "c",
-        "fcntl.h": "c"
+        "fcntl.h": "c",
+        "cstdint": "c",
+        "string.h": "c",
+        "select.h": "c",
+        "stdint.h": "c",
+        "buffer": "c",
+        "metrics.h": "c"
     }
 }

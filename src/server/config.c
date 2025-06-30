@@ -1,6 +1,6 @@
 #include <config.h>
 
-void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, size_t response_size, access_register_t *access_register) {
+void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, size_t response_size) {
     //TODO: Implementar la lógica de cada comando
     switch (parsed_cmd->cmd) {
         case CMD_HELP:
@@ -22,10 +22,10 @@ void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, siz
             snprintf(response, response_size, "user1\nuser2\nuser3\nEND\n");
             break;
         case CMD_GET_METRICS:
-            snprintf(response, response_size, "Conexiones: 100, Bytes: 2048, Errores: 0\nOK\n");
+            metrics_print(get_server_data()->metrics, response, response_size);
             break;
         case CMD_GET_ACCESS_REGISTER:
-            access_register_print(access_register, response, response_size);
+            access_register_print(get_server_data()->access_register, response, response_size);
             break;
         case CMD_SET_TIMEOUT:
             printf("Timeout configurado a %s segundos (simulado)\n", parsed_cmd->arg1);
@@ -148,13 +148,13 @@ config_cmd_parsed_t *config_parse_command(const char *cmd) {
     return parsed;
 }
 
-int config_handler(const char *cmd, char *response, size_t response_size, access_register_t *access_register) {
+int config_handler(const char *cmd, char *response, size_t response_size) {
     config_cmd_parsed_t *parsed = config_parse_command(cmd);
     if (!parsed) {
         fprintf(stderr, "Error de parseo\n");
         return -1;
     }
-    config_process_command(parsed, response, response_size, access_register);
+    config_process_command(parsed, response, response_size);
     free(parsed);
     return strlen(response);
 }

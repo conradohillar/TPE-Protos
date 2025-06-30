@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 #include <access_register.h>
-
+#include <server_data.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <string.h>
@@ -51,7 +51,7 @@ typedef struct {
  * @param response_size El tamaño máximo del buffer de respuesta.
  * @return El tamaño de la respuesta escrita en el buffer, o -1 si hubo error de parseo
  */
-int config_handler(const char *cmd, char *response, size_t response_size, access_register_t *access_register);
+int config_handler(const char *cmd, char *response, size_t response_size);
 
 /**
  * Ejecuta la acción correspondiente al comando de configuración y devuelve la respuesta correspondiente.
@@ -60,7 +60,7 @@ int config_handler(const char *cmd, char *response, size_t response_size, access
  * @param response_size El tamaño máximo del buffer de respuesta.
  * @return 0 en caso de éxito, o un código de error negativo.
  */
-void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, size_t response_size, access_register_t *access_register);
+void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, size_t response_size);
 
 /**
  * Parsea un comando de configuración recibido del cliente administrador.

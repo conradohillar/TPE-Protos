@@ -17,6 +17,7 @@
 #include <arpa/inet.h>
 #include <socks5.h>
 #include <s5admin.h>
+#include <server_data.h>
 
 
 #define FD_STDIN 0

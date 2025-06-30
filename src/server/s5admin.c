@@ -14,9 +14,6 @@ typedef struct {
 static void admin_read(struct selector_key *key);
 static void admin_write(struct selector_key *key);
 
-
-static access_register_t *access_register = NULL;
-
 static const fd_handler admin_handler = {
     .handle_read = admin_read,
     .handle_write = admin_write,
@@ -24,18 +21,21 @@ static const fd_handler admin_handler = {
     .handle_block = NULL
 };
 
-
 // Handler para aceptar conexiones
 void s5admin_passive_accept(struct selector_key *key) {
     admin_conn_t *conn = calloc(1, sizeof(admin_conn_t));
+    if (conn == NULL) {
+        perror("Error al asignar memoria para la conexión admin");
+        return;
+    }
     int fd = passive_accept(key, conn, &admin_handler);
     if(fd < 0) {
         free(conn);
-        perror("Error al aceptar la conexion");
+        perror("ESTO FALLA?");
         return;
     }
     conn->fd = fd;
-    printf("Cliente admin conectado!\n");
+    printf("[Cliente admin conectado]\n");
 }
 
 static void admin_read(struct selector_key *key) {
@@ -53,7 +53,7 @@ static void admin_read(struct selector_key *key) {
     char *newline = strchr(conn->inbuf, '\n');
     if (newline) {
         *newline = '\0';
-        conn->outbuf_len = config_handler(conn->inbuf, conn->outbuf, sizeof(conn->outbuf), access_register);
+        conn->outbuf_len = config_handler(conn->inbuf, conn->outbuf, sizeof(conn->outbuf));
         conn->outbuf_sent = 0;
         selector_set_interest_key(key, OP_WRITE);
         // Mover datos restantes (si hay más de un comando en el buffer)

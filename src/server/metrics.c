@@ -1,4 +1,4 @@
-#include "metrics.h"
+#include <metrics.h>
 
 server_metrics_t *metrics_init() {
     server_metrics_t *metrics = calloc(1, sizeof(server_metrics_t));
@@ -31,4 +31,18 @@ void metrics_add_bytes(server_metrics_t *metrics, uint64_t bytes) {
 
 void metrics_inc_errors(server_metrics_t *metrics) {
     if (metrics) metrics->errors++;
+}
+
+void metrics_print(const server_metrics_t *metrics, char *buffer, size_t buffer_size) {
+    if (metrics && buffer) {
+        snprintf(buffer, buffer_size,
+                 "Total Connections: %lu\n"
+                 "Current Connections: %lu\n"
+                 "Bytes Transferred: %lu\n"
+                 "Errors: %lu\nEND\n",
+                 metrics->total_connections,
+                 metrics->current_connections,
+                 metrics->bytes_transferred,
+                 metrics->errors);
+    }
 }

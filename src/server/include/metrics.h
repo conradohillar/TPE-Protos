@@ -24,4 +24,6 @@ void metrics_dec_current_connections(server_metrics_t *metrics);
 void metrics_add_bytes(server_metrics_t *metrics, uint64_t bytes);
 void metrics_inc_errors(server_metrics_t *metrics);
 
+void metrics_print(const server_metrics_t *metrics, char *buffer, size_t buffer_size);
+
 #endif // METRICS_H
