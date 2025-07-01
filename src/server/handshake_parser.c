@@ -1,4 +1,4 @@
-#include "handshake_parser.h"
+#include <handshake_parser.h>
 
 static void handle_version(struct parser_event *ret, const uint8_t c) {
   ret->type = HANDSHAKE_VERSION;
@@ -16,7 +16,6 @@ static void handle_version_error(struct parser_event *ret, const uint8_t c) {
   ret->type = HANDSHAKE_ERROR;
   ret->n = 1;
   ret->data[0] = c;
-  ret->next =
 }
 
 static void do_nothing(struct parser_event *ret, const uint8_t c) { return; }
