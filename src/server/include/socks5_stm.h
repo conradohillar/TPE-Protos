@@ -1,8 +1,8 @@
 #ifndef SOCKS5_PARSER_H
 #define SOCKS5_PARSER_H
 
+#include "../include/stm.h"
 #include <stdint.h>
-#include <stm.h>
 /*
 Segun RFC 1928:
 Cuando el cliente se conecta al servidor, le envía un mensaje de identificación
@@ -45,7 +45,7 @@ la forma:
 | 1  |  1   | 1 to 255 |  1   | 1 to 255 |
 +----+------+----------+------+----------+
 
-Donde VER es la versión actual de la sunegociación (0x01), ULEN es la longitud
+Donde VER es la versión actual de la subnegociación (0x01), ULEN es la longitud
 del nombre de usuario, PLEN es la longitud de la contraseña, UNAME es el nombre
 de usuario y PASSWD es la contraseña.
 
@@ -130,6 +130,6 @@ typedef enum socks5_state {
   SOCKS5_CONNECTION_REQ_WRITE,
   SOCKS5_DONE,
   SOCKS5_ERROR,
-};
+} socks5_state;
 
 #endif

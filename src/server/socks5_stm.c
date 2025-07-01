@@ -1,4 +1,4 @@
-#include "socks5.h"
+#include <socks5_stm.h>
 #include <stddef.h>
 
 struct state_definition socks5_states[] = {
