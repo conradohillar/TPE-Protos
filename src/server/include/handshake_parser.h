@@ -1,7 +1,7 @@
 #ifndef HANDSHAKE_PARSER_H
 #define HANDSHAKE_PARSER_H
 
-#include "parser.h"
+#include <parser.h>
 #include <stddef.h>
 #include <stdint.h>
 

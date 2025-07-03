@@ -1,7 +1,7 @@
 include ./Makefile.inc
 
 
-SERVER_SOURCES=$(wildcard src/server/*.c)
+SERVER_SOURCES=$(wildcard src/server/**/*.c)
 CLIENT_SOURCES=$(wildcard src/admin_client/*.c)
 SHARED_SOURCES=$(wildcard src/shared/*.c)
 
@@ -32,9 +32,7 @@ $(CLIENT_OUTPUT_FILE): $(CLIENT_OBJECTS) $(SHARED_OBJECTS)
 
 
 obj/%.o: src/%.c
-	mkdir -p $(OBJECTS_FOLDER)/server
-	mkdir -p $(OBJECTS_FOLDER)/admin_client
-	mkdir -p $(OBJECTS_FOLDER)/shared
+	@mkdir -p $(dir $@)
 	$(COMPILER) $(COMPILERFLAGS) -I./src/server/include -I./src/shared/include -I./src/admin_client/include -c $< -o $@
 
 

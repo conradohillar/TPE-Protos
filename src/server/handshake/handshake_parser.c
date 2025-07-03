@@ -1,4 +1,4 @@
-#include "../include/handshake_parser.h"
+#include <handshake_parser.h>
 #include <stdio.h>
 #include <stdlib.h>
 static void version(struct parser_event *ret, const uint8_t c) {
@@ -54,9 +54,13 @@ static const struct parser_state_transition methods_transitions[] = {
     {.when = ANY, .dest = HANDSHAKE_METHODS, .act1 = methods},
 };
 
-static const struct parser_state_transition error_transitions[] = {};
+static const struct parser_state_transition error_transitions[] = {
+    {.when = ANY, .dest = HANDSHAKE_ERROR, .act1 = error},
+};
 
-static const struct parser_state_transition done_transitions[] = {};
+static const struct parser_state_transition done_transitions[] = {
+  {.when = ANY, .dest = HANDSHAKE_DONE, .act1 = done},
+};
 
 static const struct parser_state_transition *states[] = {
     [HANDSHAKE_VERSION] = version_transitions,

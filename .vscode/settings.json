@@ -29,6 +29,9 @@
     "handshake.h": "c",
     "parser.h": "c",
     "stm.h": "c",
-    "socks5_stm.h": "c"
+    "socks5_stm.h": "c",
+    "auth_table.h": "c",
+    "auth_parser.h": "c",
+    "conn_req.h": "c"
   }
 }

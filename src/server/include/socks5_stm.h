@@ -1,9 +1,10 @@
 #ifndef SOCKS5_PARSER_H
 #define SOCKS5_PARSER_H
 
-#include "../include/stm.h"
-#include "../include/handshake.h"
-#include "../include/auth_wrapper.h"
+#include <stm.h>
+#include <handshake.h>
+#include <auth.h>
+#include <conn_req.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -126,7 +127,7 @@ o  BND.PORT es el puerto de enlace del servidor en orden de octetos de red
 
 */
 
-// A continuación se define la máquina de estados
+// Estados de la stm para el protocolo SOCKS5
 
 typedef enum socks5_state {
   SOCKS5_HANDSHAKE_READ,
@@ -139,21 +140,7 @@ typedef enum socks5_state {
   SOCKS5_ERROR,
 } socks5_state;
 
-// --- Solicitud de conexión ---
-void connection_req_read(struct selector_key *key) {
-    // Leer del socket: VER, CMD, RSV, ATYP, DST.ADDR, DST.PORT
-    // Verificar VER == 0x05, CMD == 0x01 (CONNECT)
-    // Parsear dirección y puerto destino
-    // Intentar conectar al destino (no bloqueante)
-    // Guardar resultado y pasar a CONNECTION_REQ_WRITE
-}
-
-void connection_req_write(struct selector_key *key) {
-    // Escribir al socket: VER, REP, RSV, ATYP, BND.ADDR, BND.PORT
-    // REP: 0x00 éxito, otro valor según error
-    // Si éxito, pasar a DONE (relay de datos)
-    // Si error, pasar a ERROR
-}
+void socks5_on_arrival(unsigned int state, struct selector_key *key);
 
 // --- Estados finales ---
 void handle_done(struct selector_key *key) {

@@ -3,12 +3,13 @@
 
 #include <selector.h>
 #include <sys/socket.h>
-#include <handshake.h>
-//#include <auth_wrapper.h>
+#include <stm.h>
+#include <socks5_stm.h>
+#include <connection_helper.h>
+#include <buffer.h>
 
 #include <arpa/inet.h>
 #include <assert.h> // assert
-#include <connection_helper.h>
 #include <errno.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -20,38 +21,6 @@
 
 #define N(x) (sizeof(x) / sizeof((x)[0]))
 
-/** maquina de estados general */
-enum socks_v5state {
-  /**
-   * recibe el mensaje `hello` del cliente, y lo procesa
-   *
-   * Intereses:
-   *     - OP_READ sobre client_fd
-   *
-   * Transiciones:
-   *   - HELLO_READ  mientras el mensaje no esté completo
-   *   - HELLO_WRITE cuando está completo
-   *   - ERROR       ante cualquier error (IO/parseo)
-   */
-  HELLO_READ,
-
-  /**
-   * envía la respuesta del `hello' al cliente.
-   *
-   * Intereses:
-   *     - OP_WRITE sobre client_fd
-   *
-   * Transiciones:
-   *   - HELLO_WRITE  mientras queden bytes por enviar
-   *   - REQUEST_READ cuando se enviaron todos los bytes
-   *   - ERROR        ante cualquier error (IO/parseo)
-   */
-  HELLO_WRITE,
-  // estados terminales
-  DONE,
-  ERROR,
-};
-
 typedef struct {
    /** File descriptor del cliente */
     int client_fd;
@@ -59,19 +28,15 @@ typedef struct {
     int origin_fd;
 
     /** Máquina de estados principal */
-    struct state_machine stm;
+    struct state_machine *stm;
 
     handshake_parser *handshake_parser;
     auth_parser *auth_parser;
+    conn_req_parser *conn_req_parser;
 
     // Manejo de buffers de la conexión
-    uint8_t buf[SOCKS5_BUFF_MAX_LEN];
-    size_t len;
-    size_t parsed;
-    uint8_t reply[SOCKS5_BUFF_MAX_LEN];
-    size_t reply_len;
-    size_t reply_sent;
-    int status; // 0: esperando, 1: listo, -1: error
+    buffer *in_buff;
+    buffer *out_buff;
 
     /** Otros campos útiles */
     // dirección y puerto destino, métricas, etc.

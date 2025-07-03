@@ -4,7 +4,7 @@
 // Declaraciones para el entry point del servidor SOCKSv5
 // Inicialización, ciclo principal, manejo de argumentos, etc.
 #include <args.h>
-#include <auth.h>
+#include <auth_table.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <selector.h>  

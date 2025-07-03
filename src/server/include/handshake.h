@@ -1,10 +1,10 @@
 #ifndef HANDSHAKE_H
 #define HANDSHAKE_H
 
-#include "handshake_parser.h"
-#include "socks5_stm.h"
-#include "socks5.h"
-#include "selector.h" // <-- Agregado para struct selector_key
+#include <handshake_parser.h>
+#include <socks5_stm.h>
+#include <socks5.h>
+#include <selector.h> // <-- Agregado para struct selector_key
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
@@ -26,11 +26,11 @@ void handshake_parser_init(struct selector_key *key);
 // Guardar método elegido en el estado de la conexión
 // Si no soporta, preparar respuesta con método 0xFF y pasar a HANDSHAKE_WRITE
 // Si soporta, preparar respuesta con método 0x02 y pasar a HANDSHAKE_WRITE
-void handshake_read(struct selector_key *key);
+unsigned int handshake_read(struct selector_key *key);
 
 // Escribir al socket: VER, METHOD (0x02 o 0xFF)
 // Si METHOD == 0xFF, cerrar conexión (pasar a ERROR)
 // Si METHOD == 0x02, pasar a AUTH_READ
-void handshake_write(struct selector_key *key);
+unsigned int handshake_write(struct selector_key *key);
 
 #endif
