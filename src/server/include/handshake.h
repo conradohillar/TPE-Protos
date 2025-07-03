@@ -1,36 +1,36 @@
 #ifndef HANDSHAKE_H
 #define HANDSHAKE_H
 
-#include "parser.h"
-#include <stddef.h>
+#include "handshake_parser.h"
+#include "socks5_stm.h"
+#include "socks5.h"
+#include "selector.h" // <-- Agregado para struct selector_key
+#include <unistd.h>
+#include <string.h>
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
+#include <stddef.h>
 
-#define SOCKS5_VERSION 0x05
-#define SOCKS5_AUTH_METHOD_NO_AUTH 0x00
-#define SOCKS5_AUTH_METHOD_GSSAPI 0x01
-#define SOCKS5_AUTH_METHOD_USER_PASS 0x02
-#define SOCKS5_AUTH_METHOD_NO_ACCEPTABLE 0xFF
 
-typedef enum handshake_state {
-  HANDSHAKE_VERSION,
-  HANDSHAKE_NMETHODS,
-  HANDSHAKE_METHODS,
-  HANDSHAKE_DONE,
-  HANDSHAKE_ERROR
-} handshake_state;
+// --- Handshake - WRAPPER FUNCTIONS ---
 
-typedef struct handshake_parser {
-  struct parser *parser;
-  uint8_t nmethods;
-  uint8_t method_count;
-} handshake_parser;
+// Inicializar buffers/parsers para handshake
+// Ej: resetear índices, limpiar buffers, etc.
+void handshake_parser_init(struct selector_key *key);
 
-handshake_parser *handshake_parser_init(void);
+// Leer del socket: VER, NMETHODS, METHODS[]
+// Verificar que VER == 0x05
+// Buscar si METHODS incluye 0x02 (username/password)
+// Guardar método elegido en el estado de la conexión
+// Si no soporta, preparar respuesta con método 0xFF y pasar a HANDSHAKE_WRITE
+// Si soporta, preparar respuesta con método 0x02 y pasar a HANDSHAKE_WRITE
+void handshake_read(struct selector_key *key);
 
-handshake_state handshake_parser_feed(handshake_parser *p, uint8_t byte);
-
-void handshake_parser_close(handshake_parser *p);
-
-int handshake_process(handshake_parser *p);
+// Escribir al socket: VER, METHOD (0x02 o 0xFF)
+// Si METHOD == 0xFF, cerrar conexión (pasar a ERROR)
+// Si METHOD == 0x02, pasar a AUTH_READ
+void handshake_write(struct selector_key *key);
 
 #endif

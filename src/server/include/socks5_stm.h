@@ -2,7 +2,14 @@
 #define SOCKS5_PARSER_H
 
 #include "../include/stm.h"
+#include "../include/handshake.h"
+#include "../include/auth_wrapper.h"
 #include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <errno.h>
 /*
 Segun RFC 1928:
 Cuando el cliente se conecta al servidor, le envía un mensaje de identificación
@@ -131,5 +138,31 @@ typedef enum socks5_state {
   SOCKS5_DONE,
   SOCKS5_ERROR,
 } socks5_state;
+
+// --- Solicitud de conexión ---
+void connection_req_read(struct selector_key *key) {
+    // Leer del socket: VER, CMD, RSV, ATYP, DST.ADDR, DST.PORT
+    // Verificar VER == 0x05, CMD == 0x01 (CONNECT)
+    // Parsear dirección y puerto destino
+    // Intentar conectar al destino (no bloqueante)
+    // Guardar resultado y pasar a CONNECTION_REQ_WRITE
+}
+
+void connection_req_write(struct selector_key *key) {
+    // Escribir al socket: VER, REP, RSV, ATYP, BND.ADDR, BND.PORT
+    // REP: 0x00 éxito, otro valor según error
+    // Si éxito, pasar a DONE (relay de datos)
+    // Si error, pasar a ERROR
+}
+
+// --- Estados finales ---
+void handle_done(struct selector_key *key) {
+    // Preparar la conexión para relay de datos (cliente <-> destino)
+    // O limpiar recursos si corresponde
+}
+
+void handle_error(struct selector_key *key) {
+    // Cerrar sockets, liberar memoria, etc.
+}
 
 #endif

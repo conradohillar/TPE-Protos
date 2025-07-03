@@ -1,5 +1,4 @@
 #include <socks5_stm.h>
-#include <stddef.h>
 
 struct state_definition socks5_states[] = {
     {
@@ -69,5 +68,5 @@ struct state_definition socks5_states[] = {
 
 struct state_machine socks5_stm = {
     .states = socks5_states,
-    .num_states = sizeof(socks5_states) / sizeof(socks5_states[0]),
+    .max_state = sizeof(socks5_states) / sizeof(socks5_states[0]),
 };

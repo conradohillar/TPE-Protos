@@ -27,6 +27,8 @@
     "metrics.h": "c",
     "handshake_parser.h": "c",
     "handshake.h": "c",
-    "parser.h": "c"
+    "parser.h": "c",
+    "stm.h": "c",
+    "socks5_stm.h": "c"
   }
 }
