@@ -1,7 +1,4 @@
 #include <auth.h>
-#include <socks5.h>
-#include <socks5_stm.h>
-#include <stdint.h>
 
 void auth_on_arrival(struct selector_key *key) {
     socks5_conn_t *conn = key->data;

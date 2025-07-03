@@ -36,6 +36,7 @@
     "conn_req_parser.h": "c",
     "stdbool.h": "c",
     "inet.h": "c",
-    "socks5_struct.h": "c"
+    "socks5_struct.h": "c",
+    "assert.h": "c"
   }
 }

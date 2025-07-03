@@ -1,7 +1,12 @@
 #ifndef AUTH_H
 #define AUTH_H
 
+
+#include <auth_table.h>
 #include <selector.h>
+#include <socks5.h>
+#include <socks5_stm.h>
+#include <stdint.h>
 
 // --- Autenticación ---
 

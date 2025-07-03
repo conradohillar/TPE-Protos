@@ -6,6 +6,9 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define MAX_USERNAME_LEN 256
 #define MAX_PASSWORD_LEN 256
