@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 // Inicializa el buffer y offsets para la etapa de request
-void connection_req_init(struct selector_key *key) {
+void connection_req_on_arrival(struct selector_key *key) {
     socks5_conn_t *conn = key->data;
     conn->conn_req_parser = conn_req_parser_create();
 }

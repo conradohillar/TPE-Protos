@@ -60,9 +60,9 @@ int receive_response(int sockfd, buffer *b, char *out, size_t outlen) {
 }
 
 void admin_client_loop(int sockfd) {
-    char cmd[MAX_CMD_LEN];
-    char resp[MAX_RESPONSE_LEN];
-    uint8_t bufdata[MAX_RESPONSE_LEN + 1];
+    char cmd[500];
+    char resp[500];
+    uint8_t bufdata[500 + 1];
     buffer b;
     buffer_init(&b, sizeof(bufdata), bufdata);
     while (1) {
@@ -92,8 +92,8 @@ void admin_client_loop(int sockfd) {
 }
 
 int main(int argc, char *argv[]) {
-    const char *host = DEFAULT_SERVER_HOST;
-    int port = DEFAULT_SERVER_PORT;
+    const char *host = 5555;
+    int port = 5555;
     for (int i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "-p") == 0 && i+1 < argc) port = atoi(argv[++i]);
         else if (strcmp(argv[i], "-h") == 0 && i+1 < argc) host = argv[++i];

@@ -35,7 +35,6 @@ static void done(struct parser_event *ret, const uint8_t c) {
   ret->data[0] = c;
 }
 
-static void do_nothing(struct parser_event *ret, const uint8_t c) {}
 
 static const struct parser_state_transition version_transitions[] = {
     {.when = SOCKS5_VERSION, .dest = HANDSHAKE_NMETHODS, .act1 = version},
@@ -124,16 +123,3 @@ handshake_state handshake_parser_feed(handshake_parser *p, uint8_t byte) {
 
 void handshake_parser_close(handshake_parser *p) { parser_destroy(p->parser); }
 
-int main(void) {
-  handshake_parser *p = handshake_parser_init();
-  if (p == NULL) {
-    return 1;
-  }
-  handshake_parser_feed(p, 0x05);
-  handshake_parser_feed(p, 0x02);
-  handshake_parser_feed(p, 0x00);
-  printf("STATE: %d\n", handshake_parser_feed(p, 0x01));
-
-  handshake_parser_close(p);
-  return 0;
-}
