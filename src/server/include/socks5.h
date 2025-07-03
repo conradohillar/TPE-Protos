@@ -35,8 +35,8 @@ typedef struct {
     conn_req_parser *conn_req_parser;
 
     // Manejo de buffers de la conexión
-    buffer *in_buff;
-    buffer *out_buff;
+    buffer in_buff;
+    buffer out_buff;
 
     /** Otros campos útiles */
     // dirección y puerto destino, métricas, etc.
