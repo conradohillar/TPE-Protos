@@ -32,6 +32,10 @@
     "socks5_stm.h": "c",
     "auth_table.h": "c",
     "auth_parser.h": "c",
-    "conn_req.h": "c"
+    "conn_req.h": "c",
+    "conn_req_parser.h": "c",
+    "stdbool.h": "c",
+    "inet.h": "c",
+    "socks5_struct.h": "c"
   }
 }

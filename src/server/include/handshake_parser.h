@@ -4,6 +4,8 @@
 #include <parser.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define SOCKS5_VERSION 0x05
 #define SOCKS5_AUTH_METHOD_NO_AUTH 0x00
@@ -25,7 +27,7 @@ typedef struct handshake_parser {
   uint8_t method_count;
 } handshake_parser;
 
-handshake_parser *handshake_parser_create(void);
+handshake_parser *handshake_parser_init();
 
 handshake_state handshake_parser_feed(handshake_parser *p, uint8_t byte);
 

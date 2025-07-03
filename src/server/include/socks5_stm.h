@@ -1,16 +1,6 @@
 #ifndef SOCKS5_PARSER_H
 #define SOCKS5_PARSER_H
 
-#include <stm.h>
-#include <handshake.h>
-#include <auth.h>
-#include <conn_req.h>
-#include <stdint.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
 /*
 Segun RFC 1928:
 Cuando el cliente se conecta al servidor, le envía un mensaje de identificación
@@ -130,26 +120,11 @@ o  BND.PORT es el puerto de enlace del servidor en orden de octetos de red
 // Estados de la stm para el protocolo SOCKS5
 
 typedef enum socks5_state {
-  SOCKS5_HANDSHAKE_READ,
-  SOCKS5_HANDSHAKE_WRITE,
-  SOCKS5_AUTH_READ,
-  SOCKS5_AUTH_WRITE,
-  SOCKS5_CONNECTION_REQ_READ,
-  SOCKS5_CONNECTION_REQ_WRITE,
+  SOCKS5_HANDSHAKE,
+  SOCKS5_AUTH,
+  SOCKS5_CONNECTION_REQ,
   SOCKS5_DONE,
   SOCKS5_ERROR,
 } socks5_state;
-
-void socks5_on_arrival(unsigned int state, struct selector_key *key);
-
-// --- Estados finales ---
-void handle_done(struct selector_key *key) {
-    // Preparar la conexión para relay de datos (cliente <-> destino)
-    // O limpiar recursos si corresponde
-}
-
-void handle_error(struct selector_key *key) {
-    // Cerrar sockets, liberar memoria, etc.
-}
 
 #endif

@@ -2,10 +2,9 @@
 #define SOCKS5NIO_H
 
 #include <selector.h>
-#include <sys/socket.h>
-#include <stm.h>
-#include <socks5_stm.h>
-#include <connection_helper.h>
+#include <handshake_parser.h>
+#include <auth_parser.h>
+#include <conn_req_parser.h>
 #include <buffer.h>
 
 #include <arpa/inet.h>
@@ -22,7 +21,7 @@
 #define N(x) (sizeof(x) / sizeof((x)[0]))
 
 typedef struct {
-   /** File descriptor del cliente */
+    /** File descriptor del cliente */
     int client_fd;
     /** File descriptor del origen (servidor destino) */
     int origin_fd;
@@ -41,9 +40,6 @@ typedef struct {
     /** Otros campos útiles */
     // dirección y puerto destino, métricas, etc.
 } socks5_conn_t;
-
-/** obtiene el struct (socks5 *) desde la llave de selección  */
-#define ATTACHMENT(key) ((socks5_conn_t *)(key)->data)
 
 void socksv5_passive_accept(struct selector_key *key);
 

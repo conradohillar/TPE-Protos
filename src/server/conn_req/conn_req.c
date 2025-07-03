@@ -1,58 +1,51 @@
 #include <conn_req.h>
 #include <socks5.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
-#include <arpa/inet.h>
-#include <stdio.h>
+#include <socks5_stm.h>
+#include <stdint.h>
 
 // Inicializa el buffer y offsets para la etapa de request
 void connection_req_init(struct selector_key *key) {
-    socks5_conn_t *conn = ATTACHMENT(key);
-    if(conn->conn_req_parser) conn_req_parser_close(conn->conn_req_parser);
+    socks5_conn_t *conn = key->data;
     conn->conn_req_parser = conn_req_parser_create();
-    conn->len = 0;
-    conn->parsed = 0;
-    conn->reply_len = 0;
-    conn->reply_sent = 0;
 }
 
 // Lee y parsea el mensaje de request SOCKS5
 unsigned int connection_req_read(struct selector_key *key) {
-    socks5_conn_t *conn = ATTACHMENT(key);
-    ssize_t n = read(conn->client_fd, conn->buf + conn->len, SOCKS5_BUFF_MAX_LEN - conn->len);
-    if (n < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            return SOCKS5_CONNECTION_REQ_READ;
-        } else {
+    socks5_conn_t *conn = key->data;
+    while (buffer_can_read(&conn->in_buff)) {
+        size_t avail;
+        uint8_t *read_ptr = buffer_read_ptr(&conn->in_buff, &avail);
+        conn_req_parser_state state = conn_req_parser_feed(conn->conn_req_parser, *read_ptr);
+        buffer_read_adv(&conn->in_buff, 1);
+        if (state == CONN_REQ_PARSER_DONE) {
+            // RESOLVER LA SOLICITUD
+            conn->out_buff.data[0] = 0x05; // VER
+            conn->out_buff.data[1] = 0x00; // REP: succeeded
+            conn->out_buff.data[2] = 0x00; // RSV
+            conn->out_buff.data[3] = 0x01; // ATYP IPv4
+            memset(conn->out_buff.data+4, 0, 6); // BND.ADDR + BND.PORT (0.0.0.0:0)
+            buffer_write_adv(&conn->out_buff, 10);
+            selector_set_interest_key(key, OP_WRITE);
+            buffer_reset(&conn->in_buff);
+            return SOCKS5_DONE;
+
+        } else if (state == CONN_REQ_PARSER_ERROR) {
+            conn->out_buff.data[0] = 0x05;
+            conn->out_buff.data[1] = 0x01; // REP: general failure
+            conn->out_buff.data[2] = 0x00;
+            conn->out_buff.data[3] = 0x01;
+            memset(conn->out_buff.data+4, 0, 6);
+            buffer_write_adv(&conn->out_buff, 10);
+            selector_set_interest_key(key, OP_WRITE);
+            buffer_reset(&conn->in_buff);
             return SOCKS5_ERROR;
         }
     }
-    if (n == 0) {
-        return SOCKS5_ERROR;
-    }
-    conn->len += n;
-    while (conn->parsed < conn->len) {
-        conn_req_parser_state state = conn_req_parser_feed(conn->conn_req_parser, conn->buf[conn->parsed]);
-        conn->parsed++;
-        if (state == CONN_REQ_PARSER_DONE) {
-            // RESOLVER LA SOLICITUD
-            conn->reply[0] = 0x05; // VER
-            conn->reply[1] = 0x00; // REP: succeeded
-            conn->reply[2] = 0x00; // RSV
-            conn->reply[3] = 0x01; // ATYP IPv4
-            memset(conn->reply+4, 0, 6); // BND.ADDR + BND.PORT (0.0.0.0:0)
-            conn->reply_len = 10;
-            return SOCKS5_CONNECTION_REQ_WRITE;
-        } else if (state == CONN_REQ_PARSER_ERROR) {
-            conn->reply[0] = 0x05;
-            conn->reply[1] = 0x01; // REP: general failure
-            conn->reply[2] = 0x00;
-            conn->reply[3] = 0x01;
-            memset(conn->reply+4, 0, 6);
-            conn->reply_len = 10;
-            return SOCKS5_CONNECTION_REQ_WRITE;
-        }
-    }
-    return SOCKS5_CONNECTION_REQ_READ;
+    return SOCKS5_CONNECTION_REQ;
+}
+
+void connection_req_on_departure(struct selector_key *key) {
+    socks5_conn_t *conn = key->data;
+    conn_req_parser_close(conn->conn_req_parser);
+    conn->conn_req_parser = NULL;
 }

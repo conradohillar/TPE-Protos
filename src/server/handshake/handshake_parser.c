@@ -1,6 +1,5 @@
 #include <handshake_parser.h>
-#include <stdio.h>
-#include <stdlib.h>
+
 static void version(struct parser_event *ret, const uint8_t c) {
   printf("STATE: HANDSHAKE_VERSION, reading byte: 0x%x\n", c);
   ret->type = HANDSHAKE_VERSION;
@@ -86,7 +85,7 @@ static const struct parser_definition handshake_parser_definition = {
     .start_state = HANDSHAKE_VERSION,
 };
 
-handshake_parser *handshake_parser_create() {
+handshake_parser *handshake_parser_init() {
   handshake_parser *p = malloc(sizeof(handshake_parser));
   if (p == NULL) {
     perror("malloc");
@@ -126,7 +125,7 @@ handshake_state handshake_parser_feed(handshake_parser *p, uint8_t byte) {
 void handshake_parser_close(handshake_parser *p) { parser_destroy(p->parser); }
 
 int main(void) {
-  handshake_parser *p = handshake_parser_create();
+  handshake_parser *p = handshake_parser_init();
   if (p == NULL) {
     return 1;
   }
