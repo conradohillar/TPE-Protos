@@ -138,24 +138,22 @@ auth_state auth_parser_feed(auth_parser *p, const uint8_t byte) {
     p->username_len = e->data[0];
     break;
   case AUTH_USERNAME:
-
-    if (p->username_count >= p->username_len - 1) {
-      printf("Username count: %d, username len: %d\n, reading letter: %c\n",
-             p->username_count, p->username_len, e->data[0]);
+    p->username[p->username_count++] = e->data[0];
+    if (p->username_count >= p->username_len) {
       parser_set(p->parser, AUTH_PASSWORD_LEN);
       return AUTH_PASSWORD_LEN;
     }
-    p->username[p->username_count++] = e->data[0];
     break;
   case AUTH_PASSWORD_LEN:
     p->password_len = e->data[0];
     break;
   case AUTH_PASSWORD:
-    if (p->password_count >= p->password_len - 1) {
+    p->password[p->password_count++] = e->data[0];
+    if (p->password_count >= p->password_len) {
       parser_set(p->parser, AUTH_DONE);
       return AUTH_DONE;
     }
-    p->password[p->password_count++] = e->data[0];
+
     break;
   default:
     break;
@@ -169,6 +167,7 @@ void auth_parser_close(auth_parser *p) {
 }
 
 int main(void) {
+  // TESTING AUTH PARSER
   auth_parser *p = auth_parser_init();
   auth_state state;
   uint8_t mock_buffer[] = {0x01, 0x04, 'u', 's', 'e', 'r',
@@ -179,11 +178,6 @@ int main(void) {
   }
   printf("Username: %s\n", p->username);
   printf("Password: %s\n", p->password);
-
-  for (size_t i = 0; i < p->username_count; i++) {
-    printf("Username[%zu]: %d\n", i, p->username[i]);
-  }
-  printf("p: %d\n", 'p');
   auth_parser_close(p);
   return 0;
 }
