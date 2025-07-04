@@ -2,6 +2,7 @@
 #include "../include/handshake.h"
 #include <stdio.h>
 #include <stdlib.h>
+
 static void version(struct parser_event *ret, const uint8_t c) {
   printf("STATE: HANDSHAKE_VERSION, reading byte: 0x%x\n", c);
   ret->type = HANDSHAKE_VERSION;
@@ -23,13 +24,6 @@ static void methods(struct parser_event *ret, const uint8_t c) {
   ret->data[0] = c;
 }
 
-static void error(struct parser_event *ret, const uint8_t c) {
-  printf("STATE: HANDSHAKE_ERROR, reading byte: 0x%x\n", c);
-  ret->type = HANDSHAKE_ERROR;
-  ret->n = 1;
-  ret->data[0] = c;
-}
-
 static void done(struct parser_event *ret, const uint8_t c) {
   printf("STATE: HANDSHAKE_DONE, reading byte: 0x%x\n", c);
   ret->type = HANDSHAKE_DONE;
@@ -37,7 +31,12 @@ static void done(struct parser_event *ret, const uint8_t c) {
   ret->data[0] = c;
 }
 
-static void do_nothing(struct parser_event *ret, const uint8_t c) {}
+static void error(struct parser_event *ret, const uint8_t c) {
+  printf("STATE: HANDSHAKE_ERROR, reading byte: 0x%x\n", c);
+  ret->type = HANDSHAKE_ERROR;
+  ret->n = 1;
+  ret->data[0] = c;
+}
 
 static const struct parser_state_transition version_transitions[] = {
     {.when = SOCKS5_VERSION, .dest = HANDSHAKE_NMETHODS, .act1 = version},
@@ -66,8 +65,6 @@ static const struct parser_state_transition *states[] = {
     [HANDSHAKE_ERROR] = error_transitions,
     [HANDSHAKE_DONE] = done_transitions,
 };
-
-#define N(x) (sizeof(x) / sizeof((x)[0]))
 
 static const size_t states_n[] = {
     [HANDSHAKE_VERSION] = N(version_transitions),

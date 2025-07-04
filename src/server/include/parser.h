@@ -13,6 +13,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define N(x) (sizeof(x) / sizeof((x)[0]))
 /**
  * Evento que retorna el parser.
  * Cada tipo de evento tendrá sus reglas en relación a data.
