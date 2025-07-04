@@ -5,8 +5,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <config.h>
-#include "../../shared/include/netutils.h"
+#include <netutils.h>
+#include <stdlib.h>
 
 #define DEFAULT_SERVER_HOST DEFAULT_CONFIG_HOST
 #define DEFAULT_SERVER_PORT DEFAULT_CONFIG_PORT

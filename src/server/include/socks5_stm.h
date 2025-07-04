@@ -1,8 +1,6 @@
 #ifndef SOCKS5_PARSER_H
 #define SOCKS5_PARSER_H
 
-#include "../include/stm.h"
-#include <stdint.h>
 /*
 Segun RFC 1928:
 Cuando el cliente se conecta al servidor, le envía un mensaje de identificación
@@ -119,15 +117,12 @@ o  BND.PORT es el puerto de enlace del servidor en orden de octetos de red
 
 */
 
-// A continuación se define la máquina de estados
+// Estados de la stm para el protocolo SOCKS5
 
 typedef enum socks5_state {
-  SOCKS5_HANDSHAKE_READ,
-  SOCKS5_HANDSHAKE_WRITE,
-  SOCKS5_AUTH_READ,
-  SOCKS5_AUTH_WRITE,
-  SOCKS5_CONNECTION_REQ_READ,
-  SOCKS5_CONNECTION_REQ_WRITE,
+  SOCKS5_HANDSHAKE,
+  SOCKS5_AUTH,
+  SOCKS5_CONNECTION_REQ,
   SOCKS5_DONE,
   SOCKS5_ERROR,
 } socks5_state;

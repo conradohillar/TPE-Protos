@@ -38,6 +38,13 @@ static void error(struct parser_event *ret, const uint8_t c) {
   ret->data[0] = c;
 }
 
+static void error(struct parser_event *ret, const uint8_t c) {
+  printf("STATE: HANDSHAKE_ERROR, reading byte: 0x%x\n", c);
+  ret->type = HANDSHAKE_ERROR;
+  ret->n = 1;
+  ret->data[0] = c;
+}
+
 static const struct parser_state_transition version_transitions[] = {
     {.when = SOCKS5_VERSION, .dest = HANDSHAKE_NMETHODS, .act1 = version},
     {.when = ANY, .dest = HANDSHAKE_ERROR, .act1 = error},
@@ -54,9 +61,13 @@ static const struct parser_state_transition methods_transitions[] = {
     {.when = ANY, .dest = HANDSHAKE_METHODS, .act1 = methods},
 };
 
-static const struct parser_state_transition error_transitions[] = {};
+static const struct parser_state_transition error_transitions[] = {
+    {.when = ANY, .dest = HANDSHAKE_ERROR, .act1 = error},
+};
 
-static const struct parser_state_transition done_transitions[] = {};
+static const struct parser_state_transition done_transitions[] = {
+    {.when = ANY, .dest = HANDSHAKE_DONE, .act1 = done},
+};
 
 static const struct parser_state_transition *states[] = {
     [HANDSHAKE_VERSION] = version_transitions,
@@ -118,17 +129,3 @@ handshake_state handshake_parser_feed(handshake_parser *p, uint8_t byte) {
 }
 
 void handshake_parser_close(handshake_parser *p) { parser_destroy(p->parser); }
-
-int main(void) {
-  handshake_parser *p = handshake_parser_init();
-  if (p == NULL) {
-    return 1;
-  }
-  handshake_parser_feed(p, 0x05);
-  handshake_parser_feed(p, 0x02);
-  handshake_parser_feed(p, 0x00);
-  printf("STATE: %d\n", handshake_parser_feed(p, 0x01));
-
-  handshake_parser_close(p);
-  return 0;
-}

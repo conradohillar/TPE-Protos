@@ -28,6 +28,15 @@
     "handshake_parser.h": "c",
     "handshake.h": "c",
     "parser.h": "c",
-    "auth_parser.h": "c"
+    "stm.h": "c",
+    "socks5_stm.h": "c",
+    "auth_table.h": "c",
+    "auth_parser.h": "c",
+    "conn_req.h": "c",
+    "conn_req_parser.h": "c",
+    "stdbool.h": "c",
+    "inet.h": "c",
+    "socks5_struct.h": "c",
+    "assert.h": "c"
   }
 }

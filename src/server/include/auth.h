@@ -1,21 +1,27 @@
 #ifndef AUTH_H
 #define AUTH_H
 
-// Gestión de usuarios y autenticación usuario/contraseña (RFC1929)
-// Funciones para validar usuarios, agregar/eliminar usuarios, etc.
 
-#include <stdbool.h>
-#include <stddef.h>
+#include <auth_table.h>
+#include <selector.h>
+#include <socks5.h>
+#include <socks5_stm.h>
+#include <stdint.h>
+#include <defines.h>
 
-#define MAX_USERNAME_LEN 256
-#define MAX_PASSWORD_LEN 256
+// --- Autenticación ---
 
-void auth_init();
-void auth_destroy();
+// Inicializa el parser de autenticación y los campos necesarios en la conexión
+void auth_on_arrival(unsigned state, struct selector_key *key);
 
-bool auth_add_user(const char *username, const char *password);
-bool auth_remove_user(const char *username);
-bool auth_check_credentials(const char *username, const char *password);
-size_t auth_list_users(char *response, size_t response_size);
+// Leer del socket: VER, ULEN, UNAME, PLEN, PASSWD
+// Verificar VER == 0x01
+// Extraer usuario y contraseña
+// Validar credenciales (llamar a tu función de auth)
+// Guardar resultado (éxito/fallo) y pasar a AUTH_WRITE
+unsigned int auth_read(struct selector_key *key);
 
-#endif 
+// Cerrar el parser de autenticación y limpiar recursos
+void auth_on_departure(unsigned state, struct selector_key *key);
+
+#endif

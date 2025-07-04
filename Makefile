@@ -1,46 +1,44 @@
 include ./Makefile.inc
 
+SRC_DIRS := src/server src/admin_client src/shared
+OBJ_DIR := obj
+BIN_DIR := bin
 
-SERVER_SOURCES=$(wildcard src/server/*.c)
-CLIENT_SOURCES=$(wildcard src/admin_client/*.c)
-SHARED_SOURCES=$(wildcard src/shared/*.c)
+# Recursively find all .c files in each source directory
+SERVER_SOURCES := $(shell find src/server -name '*.c')
+CLIENT_SOURCES := $(shell find src/admin_client -name '*.c')
+SHARED_SOURCES := $(shell find src/shared -name '*.c')
 
+# All sources and objects
+SOURCES := $(SERVER_SOURCES) $(CLIENT_SOURCES) $(SHARED_SOURCES)
+OBJECTS := $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SOURCES))
 
-OBJECTS_FOLDER=./obj
-OUTPUT_FOLDER=./bin
+SERVER_OBJECTS := $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SERVER_SOURCES)) $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SHARED_SOURCES))
+CLIENT_OBJECTS := $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(CLIENT_SOURCES)) $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SHARED_SOURCES))
 
-SERVER_OBJECTS=$(SERVER_SOURCES:src/server/%.c=obj/server/%.o)
-CLIENT_OBJECTS=$(CLIENT_SOURCES:src/admin_client/%.c=obj/admin_client/%.o)
-SHARED_OBJECTS=$(SHARED_SOURCES:src/shared/%.c=obj/shared/%.o)
-
-
-SERVER_OUTPUT_FILE=$(OUTPUT_FOLDER)/server
-CLIENT_OUTPUT_FILE=$(OUTPUT_FOLDER)/admin_client
+SERVER_OUTPUT_FILE := $(BIN_DIR)/server
+CLIENT_OUTPUT_FILE := $(BIN_DIR)/admin_client
 
 all: server client
 
 server: $(SERVER_OUTPUT_FILE)
 client: $(CLIENT_OUTPUT_FILE)
 
-$(SERVER_OUTPUT_FILE): $(SERVER_OBJECTS) $(SHARED_OBJECTS)
-	mkdir -p $(OUTPUT_FOLDER)
-	$(COMPILER) $(LDFLAGS) $(SERVER_OBJECTS) $(SHARED_OBJECTS) -o $(SERVER_OUTPUT_FILE)
+$(SERVER_OUTPUT_FILE): $(SERVER_OBJECTS)
+	mkdir -p $(BIN_DIR)
+	$(COMPILER) $(LDFLAGS) $(SERVER_OBJECTS) -o $@
 
-$(CLIENT_OUTPUT_FILE): $(CLIENT_OBJECTS) $(SHARED_OBJECTS)
-	mkdir -p $(OUTPUT_FOLDER)
-	$(COMPILER) $(LDFLAGS) $(CLIENT_OBJECTS) $(SHARED_OBJECTS) -o $(CLIENT_OUTPUT_FILE)
+$(CLIENT_OUTPUT_FILE): $(CLIENT_OBJECTS)
+	mkdir -p $(BIN_DIR)
+	$(COMPILER) $(LDFLAGS) $(CLIENT_OBJECTS) -o $@
 
-
-obj/%.o: src/%.c
-	mkdir -p $(OBJECTS_FOLDER)/server
-	mkdir -p $(OBJECTS_FOLDER)/admin_client
-	mkdir -p $(OBJECTS_FOLDER)/shared
-	$(COMPILER) $(COMPILERFLAGS) -I./src/server/include -I./src/shared/include -I./src/admin_client/include -c $< -o $@
-
-
+# Pattern rule for all object files
+$(OBJ_DIR)/%.o: src/%.c
+	mkdir -p $(dir $@)
+	$(COMPILER) $(COMPILERFLAGS) -I./src/$(firstword $(subst /, ,$(dir $*)))/include -I./src/shared/include -c $< -o $@
 
 clean:
-	rm -rf $(OUTPUT_FOLDER)
-	rm -rf $(OBJECTS_FOLDER)
+	rm -rf $(BIN_DIR)
+	rm -rf $(OBJ_DIR)
 
 .PHONY: all server client clean

@@ -3,6 +3,12 @@
 #define MAX_USERNAME_LEN 255
 #define MAX_PASSWORD_LEN 255
 
+#ifndef AUTH_PARSER_H
+#define AUTH_PARSER_H
+
+#include <auth_table.h>
+#include <stdint.h>
+
 typedef enum auth_state {
   AUTH_VERSION,
   AUTH_USERNAME_LEN,
@@ -28,3 +34,17 @@ auth_parser *auth_parser_init(void);
 auth_state auth_parser_feed(auth_parser *p, uint8_t byte);
 
 void auth_parser_close(auth_parser *p);
+
+typedef struct {
+  auth_state state;
+  size_t username_len;
+  size_t password_len;
+  char username[MAX_USERNAME_LEN + 1];
+  char password[MAX_PASSWORD_LEN + 1];
+} auth_parser;
+
+auth_parser *auth_parser_init();
+void auth_parser_close(auth_parser *p);
+auth_state auth_parser_feed(auth_parser *p, uint8_t byte);
+
+#endif // AUTH_PARSER_H

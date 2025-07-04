@@ -1,34 +1,23 @@
 #ifndef HANDSHAKE_H
 #define HANDSHAKE_H
 
-#include "parser.h"
-#include <stddef.h>
-#include <stdint.h>
+#include <selector.h>
 
-#define SOCKS5_VERSION 0x05
-#define SOCKS5_AUTH_METHOD_NO_AUTH 0x00
-#define SOCKS5_AUTH_METHOD_GSSAPI 0x01
-#define SOCKS5_AUTH_METHOD_USER_PASS 0x02
-#define SOCKS5_AUTH_METHOD_NO_ACCEPTABLE 0xFF
+// --- Handshake - WRAPPER FUNCTIONS ---
 
-typedef enum handshake_state {
-  HANDSHAKE_VERSION,
-  HANDSHAKE_NMETHODS,
-  HANDSHAKE_METHODS,
-  HANDSHAKE_DONE,
-  HANDSHAKE_ERROR
-} handshake_state;
+// Inicializar buffers/parsers para handshake
+// Ej: resetear índices, limpiar buffers, etc.
+void handshake_on_arrival(unsigned state, struct selector_key *key);
 
-typedef struct handshake_parser {
-  struct parser *parser;
-  uint8_t nmethods;
-  uint8_t method_count;
-} handshake_parser;
+// Leer del socket: VER, NMETHODS, METHODS[]
+// Verificar que VER == 0x05
+// Buscar si METHODS incluye 0x02 (username/password)
+// Guardar método elegido en el estado de la conexión
+// Si no soporta, preparar respuesta con método 0xFF y pasar a HANDSHAKE_WRITE
+// Si soporta, preparar respuesta con método 0x02 y pasar a HANDSHAKE_WRITE
+unsigned int handshake_read(struct selector_key *key);
 
-handshake_parser *handshake_parser_init(void);
-
-handshake_state handshake_parser_feed(handshake_parser *p, uint8_t byte);
-
-void handshake_parser_close(handshake_parser *p);
+// Cerrar el parser de handshake y limpiar recursos
+void handshake_on_departure(unsigned state, struct selector_key *key);
 
 #endif

@@ -1,7 +1,5 @@
-#include "auth.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <auth_table.h>
+
 
 #define HASHMAP_SIZE 1031
 
