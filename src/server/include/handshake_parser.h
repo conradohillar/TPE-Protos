@@ -7,11 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define SOCKS5_VERSION 0x05
-#define SOCKS5_AUTH_METHOD_NO_AUTH 0x00
-#define SOCKS5_AUTH_METHOD_GSSAPI 0x01
-#define SOCKS5_AUTH_METHOD_USER_PASS 0x02
-#define SOCKS5_AUTH_METHOD_NO_ACCEPTABLE 0xFF
 
 typedef enum handshake_state {
   HANDSHAKE_VERSION,

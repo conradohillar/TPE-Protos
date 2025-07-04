@@ -6,8 +6,8 @@
 
 // Preparar la conexión para relay de datos (cliente <-> destino)
 // O limpiar recursos si corresponde
-static void handle_done(struct selector_key *key);
-static void handle_error(struct selector_key *key);
+static void handle_done(unsigned state, struct selector_key *key);
+static void handle_error(unsigned state, struct selector_key *key);
 
 
 struct state_definition socks5_states[] = {
@@ -63,10 +63,10 @@ struct state_machine socks5_stm = {
 
 
 // --- Estados finales ---
-static void handle_done(struct selector_key *key) {
+static void handle_done(unsigned state, struct selector_key *key) {
     return;
 }
 
-static void handle_error(struct selector_key *key) {
+static void handle_error(unsigned state, struct selector_key *key) {
     return;
 }

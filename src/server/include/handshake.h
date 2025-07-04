@@ -7,7 +7,7 @@
 
 // Inicializar buffers/parsers para handshake
 // Ej: resetear índices, limpiar buffers, etc.
-void handshake_on_arrival(struct selector_key *key);
+void handshake_on_arrival(unsigned state, struct selector_key *key);
 
 // Leer del socket: VER, NMETHODS, METHODS[]
 // Verificar que VER == 0x05
@@ -18,6 +18,6 @@ void handshake_on_arrival(struct selector_key *key);
 unsigned int handshake_read(struct selector_key *key);
 
 // Cerrar el parser de handshake y limpiar recursos
-void handshake_on_departure(struct selector_key *key);
+void handshake_on_departure(unsigned state, struct selector_key *key);
 
 #endif

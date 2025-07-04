@@ -66,7 +66,7 @@ static void socksv5_read(struct selector_key *key) {
         buffer_write_adv(&conn->in_buff, n_read);
         stm_handler_read(conn->stm, key);
         //VER CON EZE, aca creo que tengo que ver que retorno y en funcion de eso setear el interes del fd
-
+        
     } else if (n_read == 0) {
         selector_unregister_fd(key->s, key->fd);    // ACA RECIBIMOS EOF, CREO QUE DEBERIAMOS LIBERAR LOS RECURSOS
     } else {
@@ -93,8 +93,9 @@ static void socksv5_write(struct selector_key *key) {
     if (n_written > 0) {
         buffer_read_adv(&conn->out_buff, n_written);
         if (!buffer_can_read(&conn->out_buff)) {
-            selector_set_interest_key(key, OP_READ); // Si no hay mas para darle al cliente supongo que esta bien decir que ahora queremos leer
-        }
+            selector_set_interest_key(key, OP_READ); // Si no hay mas para darle al cliente supongo que esta bien decir que ahora queremos leer 
+            buffer_reset(&conn->out_buff); // Reseteamos el buffer de salida
+          }
     } else if (n_written < 0) {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
             

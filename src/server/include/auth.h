@@ -11,7 +11,7 @@
 // --- Autenticación ---
 
 // Inicializa el parser de autenticación y los campos necesarios en la conexión
-void auth_on_arrival(struct selector_key *key);
+void auth_on_arrival(unsigned state, struct selector_key *key);
 
 // Leer del socket: VER, ULEN, UNAME, PLEN, PASSWD
 // Verificar VER == 0x01
@@ -21,6 +21,6 @@ void auth_on_arrival(struct selector_key *key);
 unsigned int auth_read(struct selector_key *key);
 
 // Cerrar el parser de autenticación y limpiar recursos
-void auth_on_departure(struct selector_key *key);
+void auth_on_departure(unsigned state, struct selector_key *key);
 
 #endif
