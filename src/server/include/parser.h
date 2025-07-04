@@ -72,6 +72,9 @@ void parser_destroy(struct parser *p);
 /** permite resetear el parser al estado inicial */
 void parser_reset(struct parser *p);
 
+/** permite setear el parser a un estado especifico */
+void parser_set(struct parser *p, unsigned state);
+
 /**
  * el usuario alimenta el parser con un caracter, y el parser retorna un evento
  * de parsing. Los eventos son reusado entre llamadas por lo que si se desea

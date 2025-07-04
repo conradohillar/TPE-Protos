@@ -90,8 +90,6 @@ static const struct parser_state_transition error_transitions[] = {
     {.when = ANY, .dest = AUTH_ERROR, .act1 = error},
 };
 
-static const struct parser_state_transition *states[] = {};
-
 static const struct parser_state_transition *states[] = {
     [AUTH_VERSION] = version_transitions,
     [AUTH_USERNAME_LEN] = username_len_transitions,
@@ -140,31 +138,52 @@ auth_state auth_parser_feed(auth_parser *p, const uint8_t byte) {
     p->username_len = e->data[0];
     break;
   case AUTH_USERNAME:
-    if (p->username_count >= p->username_len) {
-      // Ver como arreglar esto
-      p->parser->state = AUTH_PASSWORD_LEN;
-      break;
+
+    if (p->username_count >= p->username_len - 1) {
+      printf("Username count: %d, username len: %d\n, reading letter: %c\n",
+             p->username_count, p->username_len, e->data[0]);
+      parser_set(p->parser, AUTH_PASSWORD_LEN);
+      return AUTH_PASSWORD_LEN;
     }
-    p->username_buf[p->username_count] = e->data[0];
-    p->username_count++;
+    p->username[p->username_count++] = e->data[0];
     break;
   case AUTH_PASSWORD_LEN:
     p->password_len = e->data[0];
     break;
   case AUTH_PASSWORD:
-    if (p->password_count >= p->password_len) {
-      // Ver como arreglar esto
-      p->parser->state = AUTH_DONE;
-      break;
+    if (p->password_count >= p->password_len - 1) {
+      parser_set(p->parser, AUTH_DONE);
+      return AUTH_DONE;
     }
-    p->password_buf[p->password_count] = e->data[0];
-    p->password_count++;
+    p->password[p->password_count++] = e->data[0];
     break;
   default:
     break;
   }
+  return e->type;
 }
+
 void auth_parser_close(auth_parser *p) {
   parser_destroy(p->parser);
   free(p);
+}
+
+int main(void) {
+  auth_parser *p = auth_parser_init();
+  auth_state state;
+  uint8_t mock_buffer[] = {0x01, 0x04, 'u', 's', 'e', 'r',
+                           0x04, 'p',  'a', 's', 's'};
+  auth_parser_feed(p, mock_buffer[0]);
+  for (size_t i = 1; state != AUTH_DONE; i++) {
+    state = auth_parser_feed(p, mock_buffer[i]);
+  }
+  printf("Username: %s\n", p->username);
+  printf("Password: %s\n", p->password);
+
+  for (size_t i = 0; i < p->username_count; i++) {
+    printf("Username[%zu]: %d\n", i, p->username[i]);
+  }
+  printf("p: %d\n", 'p');
+  auth_parser_close(p);
+  return 0;
 }

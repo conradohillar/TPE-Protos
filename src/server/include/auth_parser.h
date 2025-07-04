@@ -6,7 +6,7 @@
 #ifndef AUTH_PARSER_H
 #define AUTH_PARSER_H
 
-#include <auth_table.h>
+// #include <auth_table.h>
 #include <stdint.h>
 
 typedef enum auth_state {
@@ -23,10 +23,10 @@ typedef struct auth_parser {
   struct parser *parser;
   uint8_t username_len;
   uint8_t username_count;
-  uint8_t username_buf[MAX_USERNAME_LEN];
+  uint8_t username[MAX_USERNAME_LEN];
   uint8_t password_len;
   uint8_t password_count;
-  uint8_t password_buf[MAX_PASSWORD_LEN];
+  uint8_t password[MAX_PASSWORD_LEN];
 } auth_parser;
 
 auth_parser *auth_parser_init(void);
@@ -34,14 +34,6 @@ auth_parser *auth_parser_init(void);
 auth_state auth_parser_feed(auth_parser *p, uint8_t byte);
 
 void auth_parser_close(auth_parser *p);
-
-typedef struct {
-  auth_state state;
-  size_t username_len;
-  size_t password_len;
-  char username[MAX_USERNAME_LEN + 1];
-  char password[MAX_PASSWORD_LEN + 1];
-} auth_parser;
 
 auth_parser *auth_parser_init();
 void auth_parser_close(auth_parser *p);
