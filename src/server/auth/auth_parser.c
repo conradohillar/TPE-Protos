@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define SOCKS5_AUTH_VERSION_VALUE 0x01
-
 static void version(struct parser_event *ret, const uint8_t c) {
   printf("STATE: AUTH_VERSION, reading byte: 0x%x\n", c);
   ret->type = AUTH_VERSION;
@@ -132,7 +130,6 @@ auth_parser *auth_parser_init(void) {
 
 auth_state auth_parser_feed(auth_parser *p, const uint8_t byte) {
   const struct parser_event *e = parser_feed(p->parser, byte);
-
   switch (e->type) {
   case AUTH_USERNAME_LEN:
     p->username_len = e->data[0];
@@ -153,7 +150,6 @@ auth_state auth_parser_feed(auth_parser *p, const uint8_t byte) {
       parser_set(p->parser, AUTH_DONE);
       return AUTH_DONE;
     }
-
     break;
   default:
     break;
@@ -170,14 +166,16 @@ int main(void) {
   // TESTING AUTH PARSER
   auth_parser *p = auth_parser_init();
   auth_state state;
-  uint8_t mock_buffer[] = {0x01, 0x04, 'u', 's', 'e', 'r',
+  uint8_t mock_buffer[] = {0x07, 0x04, 'u', 's', 'e', 'r',
                            0x04, 'p',  'a', 's', 's'};
   auth_parser_feed(p, mock_buffer[0]);
-  for (size_t i = 1; state != AUTH_DONE; i++) {
+  for (size_t i = 1; state != AUTH_DONE && state != AUTH_ERROR; i++) {
     state = auth_parser_feed(p, mock_buffer[i]);
   }
-  printf("Username: %s\n", p->username);
-  printf("Password: %s\n", p->password);
+  if (state != AUTH_ERROR) {
+    printf("Username: %s\n", p->username);
+    printf("Password: %s\n", p->password);
+  }
   auth_parser_close(p);
   return 0;
 }
