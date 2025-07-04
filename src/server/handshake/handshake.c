@@ -2,6 +2,7 @@
 #include <socks5.h>
 #include <socks5_stm.h>
 #include <stdint.h>
+#include <defines.h>
 
 void handshake_on_arrival(unsigned state, struct selector_key *key) {
     socks5_conn_t *conn = key->data;

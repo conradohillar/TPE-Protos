@@ -7,6 +7,7 @@
 #include <socks5.h>
 #include <socks5_stm.h>
 #include <stdint.h>
+#include <defines.h>
 
 // --- Autenticación ---
 

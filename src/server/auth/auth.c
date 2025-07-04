@@ -26,7 +26,7 @@ unsigned int auth_read(struct selector_key *key) {
             return SOCKS5_CONNECTION_REQ;
 
         } else if (state == AUTH_PARSER_ERROR) {
-            buffer_wirte(&conn->out_buff, SOCKS5_VERSION);
+            buffer_write(&conn->out_buff, SOCKS5_VERSION);
             buffer_write(&conn->out_buff, AUTH_ERROR);
             selector_set_interest_key(key, OP_WRITE);
             buffer_reset(&conn->in_buff);
