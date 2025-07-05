@@ -19,22 +19,9 @@ int connect_to_admin_server(const char *host, int port) {
     return sockfd;
 }
 
-int receive_response(int sockfd, char *out, size_t outlen) {
-    int outpos = 0;
-    while (outpos < outlen - 1) {
-        char c;
-        ssize_t n = read(sockfd, &c, 1);
-        if (n <= 0) break;
-        out[outpos++] = c;
-        if (c == '\n') break;
-    }
-    out[outpos] = '\0';
-    return outpos;
-}
-
 void admin_client_loop(int sockfd) {
-    char cmd[500];
-    char resp[500];
+    char cmd[MAX_CMD_LEN];
+    char resp[MAX_RESPONSE_LEN];
     while (1) {
         printf(">: ");
         if (!fgets(cmd, sizeof(cmd), stdin)) 
@@ -46,12 +33,13 @@ void admin_client_loop(int sockfd) {
         }
         int connection_closed = 0;
         do {
-            int n_read = receive_response(sockfd, resp, sizeof(resp));
+            int n_read = read(sockfd, resp, sizeof(resp));
             if (n_read <= 0) {
                 printf("\n[Conexión cerrada por el servidor]\n");
                 connection_closed = 1;
                 break;
             }
+            resp[n_read] = '\0';
             printf("%s", resp);
             if (strstr(resp, "END") || strstr(resp, "OK") || strstr(resp, "ERROR") || strstr(resp, "PONG")) break;
             else if(strstr(resp, "BYE")) { return; }
