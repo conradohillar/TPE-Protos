@@ -37,6 +37,8 @@
     "stdbool.h": "c",
     "inet.h": "c",
     "socks5_struct.h": "c",
-    "assert.h": "c"
+    "assert.h": "c",
+    "s5admin.h": "c",
+    "defines.h": "c"
   }
 }

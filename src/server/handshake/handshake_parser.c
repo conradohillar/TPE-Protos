@@ -38,13 +38,6 @@ static void error(struct parser_event *ret, const uint8_t c) {
   ret->data[0] = c;
 }
 
-static void error(struct parser_event *ret, const uint8_t c) {
-  printf("STATE: HANDSHAKE_ERROR, reading byte: 0x%x\n", c);
-  ret->type = HANDSHAKE_ERROR;
-  ret->n = 1;
-  ret->data[0] = c;
-}
-
 static const struct parser_state_transition version_transitions[] = {
     {.when = SOCKS5_VERSION, .dest = HANDSHAKE_NMETHODS, .act1 = version},
     {.when = ANY, .dest = HANDSHAKE_ERROR, .act1 = error},

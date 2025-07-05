@@ -15,7 +15,7 @@
 #define MAX_RESPONSE_LEN 1024 * 100
 
 #define DEFAULT_CONFIG_HOST "127.0.0.1"
-#define DEFAULT_CONFIG_PORT 9090
+#define DEFAULT_CONFIG_PORT 8080
 
 // Enum de comandos posibles
 typedef enum {

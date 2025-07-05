@@ -107,7 +107,7 @@ static void socksv5_write(struct selector_key *key) {
 
 static void socksv5_block(struct selector_key *key) {
   socks5_conn_t *conn = key->data;
-  socks5_state state = stm_handler_block(conn->stm, key);
+  stm_handler_block(conn->stm, key);
 }
 
 static void socksv5_close(struct selector_key *key) {
@@ -117,5 +117,5 @@ static void socksv5_close(struct selector_key *key) {
 
 static void socksv5_done(struct selector_key *key) {
   socks5_conn_t *conn = key->data;
-  
+  // stm_handler_done(conn->stm, key);
 }

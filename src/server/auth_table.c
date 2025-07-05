@@ -1,4 +1,5 @@
 #include <auth_table.h>
+#include <defines.h>
 
 
 #define HASHMAP_SIZE 1031

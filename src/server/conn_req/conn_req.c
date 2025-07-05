@@ -3,11 +3,12 @@
 #include <socks5_stm.h>
 #include <stdint.h>
 #include <defines.h>
+#include <conn_req_parser.h>
 
 // Inicializa el buffer y offsets para la etapa de request
 void connection_req_on_arrival(unsigned state, struct selector_key *key) {
     socks5_conn_t *conn = key->data;
-    conn->conn_req_parser = conn_req_parser_create();
+    conn->conn_req_parser = conn_req_parser_init();
 }
 
 // Lee y parsea el mensaje de request SOCKS5
@@ -17,7 +18,7 @@ unsigned int connection_req_read(struct selector_key *key) {
         
         conn_req_parser_state state = conn_req_parser_feed(conn->conn_req_parser, buffer_read(&conn->in_buff));
 
-        if (state == CONN_REQ_PARSER_DONE) {
+        if (state == CONN_REQ_DONE) {
             // RESOLVER LA SOLICITUD
             buffer_write(&conn->out_buff, SOCKS5_VERSION); 
             buffer_write(&conn->out_buff, SOCKS5_SUCCESS); 
@@ -30,7 +31,7 @@ unsigned int connection_req_read(struct selector_key *key) {
             buffer_reset(&conn->in_buff);
             return SOCKS5_DONE;
 
-        } else if (state == CONN_REQ_PARSER_ERROR) {
+        } else if (state == CONN_REQ_ERROR) {
              buffer_write(&conn->out_buff, SOCKS5_VERSION); 
             buffer_write(&conn->out_buff, SOCKS5_GENERAL_FAILURE); 
             buffer_write(&conn->out_buff, 0x00); 

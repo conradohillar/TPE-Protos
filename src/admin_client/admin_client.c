@@ -19,65 +19,34 @@ int connect_to_admin_server(const char *host, int port) {
     return sockfd;
 }
 
-int send_command(int sockfd, const char *cmd) {
-    size_t len = strlen(cmd);
-    uint8_t data[1024];
-    if (len + 2 > sizeof(data)) return -1;
-
-    memcpy(data, cmd, len);
-    data[len] = '\n';
-    data[len+1] = 0; // null-terminator for safety
-    
-    buffer *b = (buffer *)malloc(sizeof(buffer));
-    if (!b) return -1; // error allocating buffer
-    buffer_init(b, len+1, data); // no null terminator in buffer
-    b->write = b->data + len + 1; // incluye el '\n'
-    int res = sock_blocking_write(sockfd, b);
-    free(b);
-    return res;
-}
-
-int receive_response(int sockfd, buffer *b, char *out, size_t outlen) {
-    size_t outpos = 0;
+int receive_response(int sockfd, char *out, size_t outlen) {
+    int outpos = 0;
     while (outpos < outlen - 1) {
-        // Si hay datos en el buffer, leerlos
-        size_t nbyte;
-        uint8_t *ptr = buffer_read_ptr(b, &nbyte);
-        if (nbyte > 0) {
-            out[outpos] = *ptr;
-            buffer_read_adv(b, 1);
-            if (out[outpos++] == '\n') break;
-            continue;
-        }
-        // Si no hay datos, leer del socket
-        uint8_t c;
+        char c;
         ssize_t n = read(sockfd, &c, 1);
         if (n <= 0) break;
-        buffer_write(b, c);
+        out[outpos++] = c;
+        if (c == '\n') break;
     }
     out[outpos] = '\0';
-    return (int)outpos;
+    return outpos;
 }
 
 void admin_client_loop(int sockfd) {
     char cmd[500];
     char resp[500];
-    uint8_t bufdata[500 + 1];
-    buffer b;
-    buffer_init(&b, sizeof(bufdata), bufdata);
     while (1) {
         printf(">: ");
         if (!fgets(cmd, sizeof(cmd), stdin)) break;
         size_t len = strlen(cmd);
         if (len > 0 && cmd[len-1] == '\n') cmd[len-1] = '\0';
-        if (send_command(sockfd, cmd) != 0) {
+        if (write(sockfd, cmd, len) <= 0) {
             printf("Error enviando comando\n");
             break;
         }
-        // Recibir y mostrar respuesta (puede ser multilínea)
         int connection_closed = 0;
         do {
-            int n = receive_response(sockfd, &b, resp, sizeof(resp));
+            int n = receive_response(sockfd, resp, sizeof(resp));
             if (n <= 0) {
                 printf("\n[Conexión cerrada por el servidor]\n");
                 connection_closed = 1;
@@ -92,8 +61,8 @@ void admin_client_loop(int sockfd) {
 }
 
 int main(int argc, char *argv[]) {
-    const char *host = 5555;
-    int port = 5555;
+    const char *host = DEFAULT_SERVER_HOST;
+    int port = DEFAULT_SERVER_PORT;
     for (int i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "-p") == 0 && i+1 < argc) port = atoi(argv[++i]);
         else if (strcmp(argv[i], "-h") == 0 && i+1 < argc) host = argv[++i];

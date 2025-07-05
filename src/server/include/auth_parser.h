@@ -1,15 +1,8 @@
-#include <stdint.h>
-
-#define MAX_USERNAME_LEN 255
-#define MAX_PASSWORD_LEN 255
-
-#define SOCKS5_AUTH_VERSION_VALUE 0x01
-
 #ifndef AUTH_PARSER_H
 #define AUTH_PARSER_H
 
-// #include <auth_table.h>
 #include <stdint.h>
+#include <defines.h>
 
 typedef enum auth_state {
   AUTH_VERSION,

@@ -162,20 +162,20 @@ void auth_parser_close(auth_parser *p) {
   free(p);
 }
 
-int main(void) {
-  // TESTING AUTH PARSER
-  auth_parser *p = auth_parser_init();
-  auth_state state;
-  uint8_t mock_buffer[] = {0x07, 0x04, 'u', 's', 'e', 'r',
-                           0x04, 'p',  'a', 's', 's'};
-  auth_parser_feed(p, mock_buffer[0]);
-  for (size_t i = 1; state != AUTH_DONE && state != AUTH_ERROR; i++) {
-    state = auth_parser_feed(p, mock_buffer[i]);
-  }
-  if (state != AUTH_ERROR) {
-    printf("Username: %s\n", p->username);
-    printf("Password: %s\n", p->password);
-  }
-  auth_parser_close(p);
-  return 0;
-}
+// int main(void) {
+//   // TESTING AUTH PARSER
+//   auth_parser *p = auth_parser_init();
+//   auth_state state = 0;
+//   uint8_t mock_buffer[] = {0x07, 0x04, 'u', 's', 'e', 'r',
+//                            0x04, 'p',  'a', 's', 's'};
+//   auth_parser_feed(p, mock_buffer[0]);
+//   for (size_t i = 1; state != AUTH_DONE && state != AUTH_ERROR; i++) {
+//     state = auth_parser_feed(p, mock_buffer[i]);
+//   }
+//   if (state != AUTH_ERROR) {
+//     printf("Username: %s\n", p->username);
+//     printf("Password: %s\n", p->password);
+//   }
+//   auth_parser_close(p);
+//   return 0;
+// }

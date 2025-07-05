@@ -16,11 +16,11 @@ unsigned int auth_read(struct selector_key *key) {
     if (state == AUTH_DONE) {
       buffer_write(&conn->out_buff, SOCKS5_VERSION);
 
-      if (auth_check_credentials(conn->auth_parser->username,
-                                 conn->auth_parser->password)) {
-        buffer_write(&conn->out_buff, AUTH_OK);
+      if (auth_check_credentials((const char*)conn->auth_parser->username,
+                                 (const char*)conn->auth_parser->password)) {
+        buffer_write(&conn->out_buff, SOCKS5_AUTH_OK);
       } else {
-        buffer_write(&conn->out_buff, AUTH_ERROR);
+        buffer_write(&conn->out_buff, SOCKS5_AUTH_ERROR);
       }
 
       selector_set_interest_key(key, OP_WRITE);

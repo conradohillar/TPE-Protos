@@ -31,7 +31,6 @@ void s5admin_passive_accept(struct selector_key *key) {
     int fd = passive_accept(key, conn, &admin_handler);
     if(fd < 0) {
         free(conn);
-        perror("ESTO FALLA?");
         return;
     }
     conn->fd = fd;

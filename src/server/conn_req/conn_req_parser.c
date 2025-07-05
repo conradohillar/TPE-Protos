@@ -282,29 +282,29 @@ conn_req_parser_state conn_req_parser_feed(conn_req_parser *p, uint8_t byte) {
 
 void conn_req_parser_close(conn_req_parser *p) { parser_destroy(p->parser); }
 
-int main(void) {
-  // TESTING CONNECTION REQUEST PARSER
-  conn_req_parser *p = conn_req_parser_init();
-  if (p == NULL) {
-    perror("conn_req_parser_init");
-    return 1;
-  }
-  uint8_t mock_buffer[] = {0x05, 0x01, 0x00, 0x03, 14,  'w', 'w', 'w', '.', 'g',
-                           'o',  'o',  'g',  'l',  'e', '.', 'c', 'o', 'm'};
+// int main(void) {
+//   // TESTING CONNECTION REQUEST PARSER
+//   conn_req_parser *p = conn_req_parser_init();
+//   if (p == NULL) {
+//     perror("conn_req_parser_init");
+//     return 1;
+//   }
+//   uint8_t mock_buffer[] = {0x05, 0x01, 0x00, 0x03, 14,  'w', 'w', 'w', '.', 'g',
+//                            'o',  'o',  'g',  'l',  'e', '.', 'c', 'o', 'm'};
 
-  for (size_t i = 0; i < sizeof(mock_buffer); i++) {
-    conn_req_parser_feed(p, mock_buffer[i]);
-  }
+//   for (size_t i = 0; i < sizeof(mock_buffer); i++) {
+//     conn_req_parser_feed(p, mock_buffer[i]);
+//   }
 
-  printf("cmd: %d\n", p->cmd);
-  printf("atyp: %d\n", p->atyp);
-  printf("dst_addr_len: %d\n", p->dst_addr_len);
-  printf("dst_addr: ");
-  for (size_t i = 0; i < p->dst_addr_len; i++) {
-    printf("%c", p->dst_addr[i]);
-  }
-  printf("\n");
-  printf("dst_port: %d\n", p->dst_port);
+//   printf("cmd: %d\n", p->cmd);
+//   printf("atyp: %d\n", p->atyp);
+//   printf("dst_addr_len: %d\n", p->dst_addr_len);
+//   printf("dst_addr: ");
+//   for (size_t i = 0; i < p->dst_addr_len; i++) {
+//     printf("%c", p->dst_addr[i]);
+//   }
+//   printf("\n");
+//   printf("dst_port: %d\n", p->dst_port);
 
-  conn_req_parser_close(p);
-}
+//   conn_req_parser_close(p);
+// }
