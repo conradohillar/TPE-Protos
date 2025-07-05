@@ -1,8 +1,8 @@
 #include <socks5_stm.h>
-#include <stm.h>
 #include <handshake.h>
 #include <auth.h>
 #include <conn_req.h>
+#include <stm.h>
 
 // Preparar la conexión para relay de datos (cliente <-> destino)
 // O limpiar recursos si corresponde
@@ -53,14 +53,18 @@ struct state_definition socks5_states[] = {
     }};
 
 
-struct state_machine socks5_stm = {
-    .states = socks5_states,
-    .max_state = sizeof(socks5_states) / sizeof(socks5_states[0]),
-    .initial = SOCKS5_HANDSHAKE,
-    .current = NULL
-};
-
-
+struct state_machine *socks5_stm_init() {
+    struct state_machine *stm = malloc(sizeof(struct state_machine));
+    if (stm == NULL) {
+        perror("malloc");
+        return NULL;
+    }
+    stm->states = socks5_states;
+    stm->max_state = sizeof(socks5_states) / sizeof(socks5_states[0]);
+    stm->initial = SOCKS5_HANDSHAKE;
+    stm->current = NULL;
+    return stm;
+}
 
 // --- Estados finales ---
 static void handle_done(unsigned state, struct selector_key *key) {

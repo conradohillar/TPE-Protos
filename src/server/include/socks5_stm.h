@@ -1,6 +1,7 @@
 #ifndef SOCKS5_PARSER_H
 #define SOCKS5_PARSER_H
 
+#include <stm.h>
 /*
 Segun RFC 1928:
 Cuando el cliente se conecta al servidor, le envía un mensaje de identificación
@@ -126,5 +127,7 @@ typedef enum socks5_state {
   SOCKS5_DONE,
   SOCKS5_ERROR,
 } socks5_state;
+
+struct state_machine *socks5_stm_init();
 
 #endif

@@ -9,6 +9,8 @@
 #include <socks5_stm.h>
 #include <connection_helper.h>
 #include <stm.h>
+#include <metrics.h>
+#include <main.h>
 
 #include <arpa/inet.h>
 #include <assert.h> // assert
@@ -19,7 +21,6 @@
 #include <string.h> // memset
 #include <unistd.h> // close
 #include <sys/socket.h>
-
 
 #define SOCKS5_BUFF_MAX_LEN 512
 

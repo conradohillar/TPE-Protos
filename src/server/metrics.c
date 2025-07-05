@@ -1,48 +1,48 @@
 #include <metrics.h>
 
-server_metrics_t *metrics_init() {
-    server_metrics_t *metrics = calloc(1, sizeof(server_metrics_t));
-    if (!metrics) {
-        fprintf(stderr, "Failed to allocate memory for server metrics");
-        exit(EXIT_FAILURE);
+server_metrics_t *metrics_init(void) {
+    server_metrics_t *server_metrics = malloc(sizeof(server_metrics_t));
+    if (server_metrics == NULL) {
+        perror("malloc");
+        return NULL;
     }
-    metrics->total_connections = 0;
-    metrics->current_connections = 0;
-    metrics->bytes_transferred = 0;
-    metrics->errors = 0;
-    return metrics;
+    server_metrics->total_connections = 0;
+    server_metrics->current_connections = 0;
+    server_metrics->bytes_transferred = 0;
+    server_metrics->errors = 0;
+    return server_metrics;
 }
 
-void metrics_inc_total_connections(server_metrics_t *metrics) {
-    if (metrics) metrics->total_connections++;
+void metrics_inc_total_conn(server_metrics_t *server_metrics) {
+    server_metrics->total_connections++;
 }
 
-void metrics_inc_current_connections(server_metrics_t *metrics) {
-    if (metrics) metrics->current_connections++;
+void metrics_inc_curr_conn(server_metrics_t *server_metrics) {
+    server_metrics->current_connections++;
 }
 
-void metrics_dec_current_connections(server_metrics_t *metrics) {
-    if (metrics && metrics->current_connections > 0) metrics->current_connections--;
+void metrics_dec_curr_conn(server_metrics_t *server_metrics) {
+    if (server_metrics->current_connections > 0) server_metrics->current_connections--;
 }
 
-void metrics_add_bytes(server_metrics_t *metrics, uint64_t bytes) {
-    if (metrics) metrics->bytes_transferred += bytes;
+void metrics_add_bytes(server_metrics_t *server_metrics, uint64_t bytes) {
+    server_metrics->bytes_transferred += bytes;
 }
 
-void metrics_inc_errors(server_metrics_t *metrics) {
-    if (metrics) metrics->errors++;
+void metrics_inc_errors(server_metrics_t *server_metrics) {
+    server_metrics->errors++;
 }
 
-void metrics_print(const server_metrics_t *metrics, char *buffer, size_t buffer_size) {
-    if (metrics && buffer) {
+void metrics_print(server_metrics_t *server_metrics, char *buffer, size_t buffer_size) {
+    if (buffer) {
         snprintf(buffer, buffer_size,
                  "Total Connections: %lu\n"
                  "Current Connections: %lu\n"
                  "Bytes Transferred: %lu\n"
                  "Errors: %lu\nEND\n",
-                 metrics->total_connections,
-                 metrics->current_connections,
-                 metrics->bytes_transferred,
-                 metrics->errors);
+                 server_metrics->total_connections,
+                 server_metrics->current_connections,
+                 server_metrics->bytes_transferred,
+                 server_metrics->errors);
     }
 }
