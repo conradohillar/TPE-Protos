@@ -37,17 +37,17 @@ void admin_client_loop(int sockfd) {
     char resp[500];
     while (1) {
         printf(">: ");
-        if (!fgets(cmd, sizeof(cmd), stdin)) break;
-        size_t len = strlen(cmd);
-        if (len > 0 && cmd[len-1] == '\n') cmd[len-1] = '\0';
-        if (write(sockfd, cmd, len) <= 0) {
+        if (!fgets(cmd, sizeof(cmd), stdin)) 
+            break;
+        int n_write = write(sockfd, cmd, strlen(cmd));
+        if (n_write <= 0) {
             printf("Error enviando comando\n");
             break;
         }
         int connection_closed = 0;
         do {
-            int n = receive_response(sockfd, resp, sizeof(resp));
-            if (n <= 0) {
+            int n_read = receive_response(sockfd, resp, sizeof(resp));
+            if (n_read <= 0) {
                 printf("\n[Conexión cerrada por el servidor]\n");
                 connection_closed = 1;
                 break;
