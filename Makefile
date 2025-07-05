@@ -35,7 +35,7 @@ $(CLIENT_OUTPUT_FILE): $(CLIENT_OBJECTS)
 # Pattern rule for all object files
 $(OBJ_DIR)/%.o: src/%.c
 	mkdir -p $(dir $@)
-	$(COMPILER) $(COMPILERFLAGS) -I./src/$(firstword $(subst /, ,$(dir $*)))/include -I./src/shared/include -c $< -o $@
+	$(COMPILER) $(COMPILERFLAGS) -I./src/shared/include -I./src/$(firstword $(subst /, ,$(dir $*)))/include  -c $< -o $@
 
 clean:
 	rm -rf $(BIN_DIR)

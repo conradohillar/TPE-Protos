@@ -16,40 +16,29 @@ struct state_definition socks5_states[] = {
         .on_arrival = handshake_on_arrival,
         .on_departure = handshake_on_departure,
         .on_read_ready = handshake_read,
-        .on_write_ready = NULL,
-        .on_block_ready = NULL,
     },
     {
         .state = SOCKS5_AUTH,
         .on_arrival = auth_on_arrival,
         .on_departure = auth_on_departure,
-        .on_read_ready = auth_read,
-        .on_write_ready = NULL,
-        .on_block_ready = NULL,
+        .on_read_ready = auth_read
     },
     {
         .state = SOCKS5_CONNECTION_REQ,
         .on_arrival = connection_req_on_arrival,
         .on_departure = connection_req_on_departure,
-        .on_read_ready = connection_req_read,
-        .on_write_ready = NULL,
-        .on_block_ready = NULL,
+        .on_read_ready = connection_req_read
+    },
+    {
+        .state = SOCKS5_COPY,
     },
     {
         .state = SOCKS5_DONE,
-        .on_arrival = handle_done,
-        .on_departure = NULL,
-        .on_read_ready = NULL,
-        .on_write_ready = NULL,
-        .on_block_ready = NULL,
+        .on_arrival = handle_done
     },
     {
         .state = SOCKS5_ERROR,
-        .on_arrival = handle_error,
-        .on_departure = NULL,
-        .on_read_ready = NULL,
-        .on_write_ready = NULL,
-        .on_block_ready = NULL,
+        .on_arrival = handle_error
     }};
 
 

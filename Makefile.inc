@@ -1,3 +1,3 @@
 COMPILER=gcc
-COMPILERFLAGS=-Wall -pedantic -g -lrt -pthread -Wno-pointer-airth -std=c11
+COMPILERFLAGS=-Wall -Wextra -pedantic -std=c11 -g3 -pthread -D_POSIX_C_SOURCE=200112L -Wno-unused-parameter
 LDFLAGS=

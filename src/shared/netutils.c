@@ -1,4 +1,5 @@
-#include "include/netutils.h"
+#include <netutils.h>
+
 
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 
@@ -46,6 +47,7 @@ sockaddr_to_human(char *buff, const size_t buffsize,
     return buff;
 }
 
+
 int
 sock_blocking_write(const int fd, buffer *b) {
         int  ret = 0;
@@ -89,4 +91,49 @@ sock_blocking_copy(const int source, const int dest) {
     error:
 
     return ret;
+}
+
+int set_non_blocking_fd(const int fd) {
+  int ret = 0;
+  int flags = fcntl(fd, F_GETFD, 0);
+  if (flags == -1) {
+    ret = -1;
+  } else {
+    if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+      ret = -1;
+    }
+  }
+  return ret;
+}
+
+
+int connect_to_host(const char *dst_addr, const uint16_t dst_port) {
+    struct addrinfo hints = {
+        .ai_family = AF_UNSPEC,
+        .ai_socktype = SOCK_STREAM
+    };
+    struct addrinfo *res;
+
+    char port_str[6];
+    snprintf(port_str, sizeof(port_str), "%u", dst_port);
+
+    if (getaddrinfo(dst_addr, port_str, &hints, &res) != 0) {
+        return -1; 
+    }
+
+    for (struct addrinfo *rp = res; rp != NULL; rp = rp->ai_next) {
+        int sock = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (sock < 0) continue;
+
+        if (connect(sock, rp->ai_addr, rp->ai_addrlen) == 0) {
+            set_non_blocking_fd(sock);  
+            freeaddrinfo(res);
+            return sock;
+        }
+
+        close(sock);
+    }
+
+    freeaddrinfo(res);
+    return -1;
 }

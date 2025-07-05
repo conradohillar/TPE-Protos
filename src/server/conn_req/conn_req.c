@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <defines.h>
 #include <conn_req_parser.h>
+#include <netutils.h>
 
 // Inicializa el buffer y offsets para la etapa de request
 void connection_req_on_arrival(unsigned state, struct selector_key *key) {
@@ -19,7 +20,15 @@ unsigned int connection_req_read(struct selector_key *key) {
         conn_req_parser_state state = conn_req_parser_feed(conn->conn_req_parser, buffer_read(&conn->in_buff));
 
         if (state == CONN_REQ_DONE) {
-            // RESOLVER LA SOLICITUD
+
+            conn->origin_fd = connect_to_host(conn->conn_req_parser->dst_addr, conn->conn_req_parser->dst_port);
+
+            if (conn->origin_fd < 0) {
+                // Error al conectar al destino
+                perror("error connecting to destination");
+                return SOCKS5_ERROR;
+            }//aca podriamos manejar mas errores esto es algo basico
+
             buffer_write(&conn->out_buff, SOCKS5_VERSION); 
             buffer_write(&conn->out_buff, SOCKS5_SUCCESS); 
             buffer_write(&conn->out_buff, 0x00); // RSV
@@ -32,6 +41,8 @@ unsigned int connection_req_read(struct selector_key *key) {
             return SOCKS5_DONE;
 
         } else if (state == CONN_REQ_ERROR) {
+
+            //aca falta hacer todo el manejo de errores
              buffer_write(&conn->out_buff, SOCKS5_VERSION); 
             buffer_write(&conn->out_buff, SOCKS5_GENERAL_FAILURE); 
             buffer_write(&conn->out_buff, 0x00); 

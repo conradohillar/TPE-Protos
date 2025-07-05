@@ -1,7 +1,7 @@
 /**
  * selector.c - un muliplexor de entrada salida
  */
-#define _POSIX_C_SOURCE 200809L
+
 
 #include <assert.h> // :)
 #include <errno.h>  // :)
@@ -19,12 +19,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <errno.h>   // Error management
-#include <pthread.h> // Para pthread_kill y matar procesos
-#include <signal.h> // Para sigaction, sigemptyset, sigaddset, SIG_BLOCK (senales)
-#include <string.h>     // strerror con logs
-#include <sys/select.h> // Si pinta multiplexado
-#include <unistd.h>     // Funciones POSIX
+#include <errno.h>   
+#include <pthread.h> 
+#include <signal.h> 
+#include <string.h>     
+#include <sys/select.h> 
+#include <unistd.h>  
 
 #define N(x) (sizeof(x) / sizeof((x)[0]))
 
@@ -559,15 +559,4 @@ finally:
   return ret;
 }
 
-int selector_fd_set_nio(const int fd) {
-  int ret = 0;
-  int flags = fcntl(fd, F_GETFD, 0);
-  if (flags == -1) {
-    ret = -1;
-  } else {
-    if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
-      ret = -1;
-    }
-  }
-  return ret;
-}
+

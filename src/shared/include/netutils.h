@@ -1,12 +1,17 @@
 #ifndef NETUTILS_H_CTCyWGhkVt1pazNytqIRptmAi5U
 #define NETUTILS_H_CTCyWGhkVt1pazNytqIRptmAi5U
 
-#include <netinet/in.h>
+#include <stddef.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <stdbool.h>
+#include <buffer.h>
 #include <errno.h>
 #include <stdio.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
 
-#include "buffer.h"
 
 #define SOCKADDR_TO_HUMAN_MIN (INET6_ADDRSTRLEN + 5 + 1)
 /**
@@ -42,5 +47,9 @@ sock_blocking_write(const int fd, buffer *b);
  */
 int
 sock_blocking_copy(const int source, const int dest);
+
+int set_non_blocking_fd(const int fd);
+
+int connect_to_host(const char * dst_addr, const uint16_t dst_port);
 
 #endif

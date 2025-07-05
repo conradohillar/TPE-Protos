@@ -39,6 +39,9 @@
     "socks5_struct.h": "c",
     "assert.h": "c",
     "s5admin.h": "c",
-    "defines.h": "c"
+    "defines.h": "c",
+    "in.h": "c",
+    "netdb.h": "c",
+    "types.h": "c"
   }
 }

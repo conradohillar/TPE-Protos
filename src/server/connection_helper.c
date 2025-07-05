@@ -8,7 +8,7 @@ int passive_accept(struct selector_key *key, void * data, const fd_handler * cal
     const int client = accept(key->fd, (struct sockaddr*)&client_addr, &client_addr_len);
     if(client == -1) goto fail;
 
-    if(selector_fd_set_nio(client) == -1) goto fail;
+    if(set_non_blocking_fd(client) == -1) goto fail;
     
     if(selector_register(key->s, client, callback_functions, OP_READ, data) != SELECTOR_SUCCESS) goto fail;
     

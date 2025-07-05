@@ -50,7 +50,7 @@ int create_and_register_passive_socket(fd_selector * selector, char * address, u
   }
 
 
-  *ss = selector_fd_set_nio(fd);
+  *ss = set_non_blocking_fd(fd);
   if(*ss != SELECTOR_SUCCESS) {
     *error_msg = "Error setting server socket to non-blocking";
     goto error;
@@ -115,14 +115,10 @@ int main(int argc, char *argv[]) {
 
   const struct fd_handler socksv5 = {
     .handle_read       = socksv5_passive_accept,
-    .handle_write      = NULL,
-    .handle_close      = NULL, 
   };
 
   const struct fd_handler conf_protocol = {
-    .handle_read       = s5admin_passive_accept,  
-    .handle_write      = NULL,
-    .handle_close      = NULL, 
+    .handle_read       = s5admin_passive_accept
   };
 
   if(create_and_register_passive_socket(&fd_selector, args.socks_addr, args.socks_port, &socksv5, &ss, &error_msg, SOCKS5) == -1) goto error;
