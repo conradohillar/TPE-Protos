@@ -107,7 +107,7 @@ int set_non_blocking_fd(const int fd) {
 }
 
 
-int connect_to_host(const char *dst_addr, const uint16_t dst_port) {
+int connect_to_host(const uint8_t *dst_addr, const uint16_t dst_port) {
     struct addrinfo hints = {
         .ai_family = AF_UNSPEC,
         .ai_socktype = SOCK_STREAM

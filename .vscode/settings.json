@@ -42,6 +42,7 @@
     "defines.h": "c",
     "in.h": "c",
     "netdb.h": "c",
-    "types.h": "c"
+    "types.h": "c",
+    "socks5_copy.h": "c"
   }
 }

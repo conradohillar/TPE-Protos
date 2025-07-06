@@ -3,6 +3,7 @@
 #include <auth.h>
 #include <conn_req.h>
 #include <stm.h>
+#include <socks5_copy.h>
 
 // Preparar la conexión para relay de datos (cliente <-> destino)
 // O limpiar recursos si corresponde
@@ -31,7 +32,11 @@ struct state_definition socks5_states[] = {
     },
     {
         .state = SOCKS5_COPY,
-    },
+        .on_arrival     = copy_on_arrival,
+        .on_read_ready  = copy_read,         // Aca leemos del buffer interno y reenviamos al destino
+        .on_write_ready = copy_write          // Aca leemos del buffer interno y enviamos al cliente
+        }, 
+
     {
         .state = SOCKS5_DONE,
         .on_arrival = handle_done

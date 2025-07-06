@@ -1,0 +1,10 @@
+#include <selector.h>
+#include <socks5.h>
+
+void copy_on_arrival(unsigned state, struct selector_key *key);
+
+
+unsigned int copy_read(struct selector_key *key);
+
+
+unsigned int copy_write(struct selector_key *key);

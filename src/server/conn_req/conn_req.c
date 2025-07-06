@@ -22,6 +22,8 @@ unsigned int connection_req_read(struct selector_key *key) {
         if (state == CONN_REQ_DONE) {
 
             conn->origin_fd = connect_to_host(conn->conn_req_parser->dst_addr, conn->conn_req_parser->dst_port);
+            
+            
 
             if (conn->origin_fd < 0) {
                 // Error al conectar al destino
@@ -38,7 +40,7 @@ unsigned int connection_req_read(struct selector_key *key) {
             //memset(conn->out_buff.data+4, 0, 6); // BND.ADDR + BND.PORT (0.0.0.0:0)
             selector_set_interest_key(key, OP_WRITE);
             buffer_reset(&conn->in_buff);
-            return SOCKS5_DONE;
+            return SOCKS5_COPY;
 
         } else if (state == CONN_REQ_ERROR) {
 
