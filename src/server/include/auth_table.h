@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <logger.h>
 #include <string.h>
 
 void auth_init();

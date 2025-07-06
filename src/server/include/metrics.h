@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <logger.h>
 
 typedef struct {
     uint64_t total_connections;

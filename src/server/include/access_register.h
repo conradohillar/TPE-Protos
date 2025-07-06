@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <logger.h>
 
 #define USERNAME_MAX_LEN 64
 #define DEST_MAX_LEN 256

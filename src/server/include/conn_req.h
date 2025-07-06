@@ -2,6 +2,7 @@
 #define CONN_REQ_H
 
 #include <selector.h>
+#include <logger.h>
 
 // --- Solicitud de conexión ---
 

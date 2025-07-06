@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <string.h>
+#include <logger.h>
 #include <stdlib.h>
 
 #define ARGS_LEN 256

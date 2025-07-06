@@ -3,12 +3,14 @@
 access_register_t *access_register_init() {
     access_register_t *reg = malloc(sizeof(access_register_t));
     if (!reg) {
+        log_error("Error initializing access register");
         fprintf(stderr, "Error inicializando registro de acceso\n");
         return NULL;
     }
     reg->head = 0;
     reg->tail = 0;
     reg->count = 0;
+    log_info("Access register initialized");
     return reg;
 }
 
@@ -26,6 +28,7 @@ void access_register_add_entry(access_register_t *reg, const char *username, con
     } else {
         reg->head = (reg->head + 1) % REGISTER_MAX_ENTRIES; // sobrescribe el más antiguo
     }
+    log_debug("Access entry added: user=%s, destination=%s", username, destination);
 }
 
 size_t access_register_print(const access_register_t *reg, char *response, size_t response_size) {

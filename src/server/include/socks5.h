@@ -8,6 +8,7 @@
 #include <buffer.h>
 #include <socks5_stm.h>
 #include <connection_helper.h>
+#include <logger.h>
 #include <stm.h>
 #include <metrics.h>
 #include <main.h>
@@ -42,6 +43,9 @@ typedef struct {
     // Manejo de buffers de la conexión
     buffer in_buff;
     buffer out_buff;
+
+    char in_buff_data[SOCKS5_BUFF_MAX_LEN];
+    char out_buff_data[SOCKS5_BUFF_MAX_LEN];
 
     /** Otros campos útiles */
     // dirección y puerto destino, métricas, etc.

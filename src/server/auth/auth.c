@@ -2,6 +2,7 @@
 
 void auth_on_arrival(unsigned state, struct selector_key *key) {
   socks5_conn_t *conn = key->data;
+  log_debug("Starting authentication for fd %d", key->fd);
   conn->auth_parser = auth_parser_init();
 }
 
@@ -9,17 +10,17 @@ void auth_on_arrival(unsigned state, struct selector_key *key) {
 unsigned int auth_read(struct selector_key *key) {
   socks5_conn_t *conn = key->data;
   while (buffer_can_read(&conn->in_buff)) {
-
-    auth_state state =
-        auth_parser_feed(conn->auth_parser, buffer_read(&conn->in_buff));
+    
+    auth_state state = auth_parser_feed(conn->auth_parser, buffer_read(&conn->in_buff));
 
     if (state == AUTH_DONE) {
-      buffer_write(&conn->out_buff, SOCKS5_VERSION);
+      buffer_write(&conn->out_buff, SOCKS5_SUBNEGOTIATION_VERSION);
 
-      if (auth_check_credentials((const char*)conn->auth_parser->username,
-                                 (const char*)conn->auth_parser->password)) {
+      if (auth_check_credentials((const char*)conn->auth_parser->username, (const char*)conn->auth_parser->password)) {
+        log_info("Authentication successful for user: %s on fd %d", conn->auth_parser->username, key->fd);
         buffer_write(&conn->out_buff, SOCKS5_AUTH_OK);
       } else {
+        log_warning("Authentication failed for user: %s on fd %d", conn->auth_parser->username, key->fd);
         buffer_write(&conn->out_buff, SOCKS5_AUTH_ERROR);
       }
 
@@ -28,6 +29,7 @@ unsigned int auth_read(struct selector_key *key) {
       return SOCKS5_CONNECTION_REQ;
 
     } else if (state == AUTH_ERROR) {
+      log_error("Authentication error for fd %d", key->fd);
       buffer_write(&conn->out_buff, SOCKS5_VERSION);
       buffer_write(&conn->out_buff, AUTH_ERROR);
       selector_set_interest_key(key, OP_WRITE);
@@ -40,6 +42,7 @@ unsigned int auth_read(struct selector_key *key) {
 
 void auth_on_departure(unsigned state, struct selector_key *key) {
   socks5_conn_t *conn = key->data;
+  log_debug("Authentication phase complete for fd %d", key->fd);
   auth_parser_close(conn->auth_parser);
   conn->auth_parser = NULL;
 }

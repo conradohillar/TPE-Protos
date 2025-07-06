@@ -2,6 +2,7 @@
 #define HANDSHAKE_H
 
 #include <selector.h>
+#include <logger.h>
 
 // --- Handshake - WRAPPER FUNCTIONS ---
 

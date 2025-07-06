@@ -8,6 +8,7 @@
 #include <socks5_stm.h>
 #include <stdint.h>
 #include <defines.h>
+#include <logger.h>
 
 // --- Autenticación ---
 

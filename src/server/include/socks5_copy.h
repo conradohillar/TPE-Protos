@@ -1,5 +1,6 @@
 #include <selector.h>
 #include <socks5.h>
+#include <logger.h>
 
 void copy_on_arrival(unsigned state, struct selector_key *key);
 

@@ -8,6 +8,7 @@
 #include <selector.h>
 #include <config.h>
 #include <connection_helper.h>
+#include <logger.h>
 
 
 void s5admin_passive_accept(struct selector_key *key);

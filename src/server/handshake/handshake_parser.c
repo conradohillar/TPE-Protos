@@ -2,37 +2,38 @@
 #include "../include/handshake.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <logger.h>
 
 static void version(struct parser_event *ret, const uint8_t c) {
-  printf("STATE: HANDSHAKE_VERSION, reading byte: 0x%x\n", c);
+  log_debug("STATE: HANDSHAKE_VERSION, reading byte: 0x%x", c);
   ret->type = HANDSHAKE_VERSION;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void nmethods(struct parser_event *ret, const uint8_t c) {
-  printf("STATE: HANDSHAKE_NMETHODS, reading byte: 0x%x\n", c);
+  log_debug("STATE: HANDSHAKE_NMETHODS, reading byte: 0x%x", c);
   ret->type = HANDSHAKE_NMETHODS;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void methods(struct parser_event *ret, const uint8_t c) {
-  printf("STATE: HANDSHAKE_METHODS, reading byte: 0x%x\n", c);
+  log_debug("STATE: HANDSHAKE_METHODS, reading byte: 0x%x", c);
   ret->type = HANDSHAKE_METHODS;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void done(struct parser_event *ret, const uint8_t c) {
-  printf("STATE: HANDSHAKE_DONE, reading byte: 0x%x\n", c);
+  log_debug("STATE: HANDSHAKE_DONE, reading byte: 0x%x", c);
   ret->type = HANDSHAKE_DONE;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void error(struct parser_event *ret, const uint8_t c) {
-  printf("STATE: HANDSHAKE_ERROR, reading byte: 0x%x\n", c);
+  log_debug("STATE: HANDSHAKE_ERROR, reading byte: 0x%x", c);
   ret->type = HANDSHAKE_ERROR;
   ret->n = 1;
   ret->data[0] = c;

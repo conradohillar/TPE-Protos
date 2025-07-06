@@ -18,6 +18,7 @@
 #include <socks5.h>
 #include <s5admin.h>
 #include <server_data.h>
+#include <logger.h>
 
 
 #define FD_STDIN 0

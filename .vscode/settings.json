@@ -43,6 +43,7 @@
     "in.h": "c",
     "netdb.h": "c",
     "types.h": "c",
-    "socks5_copy.h": "c"
+    "socks5_copy.h": "c",
+    "logger.h": "c"
   }
 }

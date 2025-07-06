@@ -2,55 +2,69 @@
 
 void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, size_t response_size) {
     //TODO: Implementar la lógica de cada comando
+    log_debug("Processing admin command: %d", parsed_cmd->cmd);
     switch (parsed_cmd->cmd) {
         case CMD_HELP:
+            log_debug("Help command executed");
             snprintf(response, response_size,
                 "ADD_USER <usuario> <password>\nREMOVE_USER <usuario>\nLIST_USERS\nGET_METRICS\nGET_ACCESS_REGISTER\nSET_TIMEOUT <segundos>\nSET_BUFF <bytes>\nGET_CONFIG\nHELP\nPING\nEXIT\nEND\n");
             break;
         case CMD_PING:
+            log_debug("Ping command executed");
             snprintf(response, response_size, "PONG\n");
             break;
         case CMD_ADD_USER:
             if(auth_add_user(parsed_cmd->arg1, parsed_cmd->arg2)){
+                log_info("User added successfully: %s", parsed_cmd->arg1);
                 snprintf(response, response_size, "OK\n");
             } else {
+                log_warning("Failed to add user (already exists): %s", parsed_cmd->arg1);
                 snprintf(response, response_size, "ERROR: %s already exists\n", parsed_cmd->arg1);
             }
             break;
         case CMD_REMOVE_USER:
             if(auth_remove_user(parsed_cmd->arg1)){
+                log_info("User removed successfully: %s", parsed_cmd->arg1);
                 snprintf(response, response_size, "OK\n");
             } else {
+                log_warning("Failed to remove user (does not exist): %s", parsed_cmd->arg1);
                 snprintf(response, response_size, "ERROR: %s does not exist\n", parsed_cmd->arg1);
             }
             break;
         case CMD_LIST_USERS:
+            log_debug("List users command executed");
             auth_list_users(response, response_size);
             break;
         case CMD_GET_METRICS:
+            log_debug("Get metrics command executed");
             metrics_print(get_server_data()->metrics, response, response_size);
             break;
         case CMD_GET_ACCESS_REGISTER:
+            log_debug("Get access register command executed");
             access_register_print(get_server_data()->access_register, response, response_size);
             break;
         case CMD_SET_TIMEOUT:
-            printf("Timeout configurado a %s segundos (simulado)\n", parsed_cmd->arg1);
+            log_info("Timeout configured to %s seconds (simulated)", parsed_cmd->arg1);
             snprintf(response, response_size, "OK\n");
             break;
         case CMD_SET_BUFF:
-            printf("Tamaño de buffer configurado a %s bytes (simulado)\n", parsed_cmd->arg1);
+            log_info("Buffer size configured to %s bytes (simulated)", parsed_cmd->arg1);
             snprintf(response, response_size, "OK\n");
             break;
         case CMD_GET_CONFIG:
+            log_debug("Get config command executed");
             snprintf(response, response_size, "Configuración actual: timeout=30, buffer_size=1024\nOK\n");
             break;
         case CMD_EXIT:
+            log_debug("Exit command executed");
             snprintf(response, response_size, "BYE\n");
             break;
         case CMD_INVALID:
+            log_warning("Invalid command received");
             snprintf(response, response_size, "ERROR: invalid command\n");
             break;
         default:
+            log_error("Unknown command type: %d", parsed_cmd->cmd);
             break;
     }
 }
