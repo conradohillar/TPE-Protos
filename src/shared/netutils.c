@@ -123,7 +123,7 @@ int connect_to_host(const char *dst_addr, uint16_t dst_port) {
         log_error("Failed to resolve hostname: %s", dst_addr);
         return -1; 
     }
-
+    //TODO Falta liberar todos los structs
     log_debug("Hostname resolved, trying to connect");
     for (struct addrinfo *rp = res; rp != NULL; rp = rp->ai_next) {
         int sock = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);

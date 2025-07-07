@@ -37,8 +37,7 @@ struct state_definition socks5_states[] = {
         .on_arrival     = copy_on_arrival,
         .on_read_ready  = copy_read,         // Aca leemos del buffer interno y reenviamos al destino
         .on_write_ready = copy_write          // Aca leemos del buffer interno y enviamos al cliente
-        }, 
-
+    }, 
     {
         .state = SOCKS5_DONE,
         .on_arrival = handle_done

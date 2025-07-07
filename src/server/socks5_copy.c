@@ -20,54 +20,9 @@ void copy_on_arrival(unsigned state, struct selector_key *key) {
     }
 }
 
+//el fd quiere escribir algo por eso el socket se "levanta" con interes de lectura
 unsigned int copy_read(struct selector_key *key) {
-    socks5_conn_t *conn = key->data;
-
-    buffer *buff = NULL;
-    int src_fd, dst_fd;
-    bool from_client = (key->fd == conn->client_fd);
-
-    if (from_client) {
-        buff = &conn->in_buff;
-        src_fd = conn->client_fd;
-        dst_fd = conn->origin_fd;
-    } else {
-        buff = &conn->out_buff;
-        src_fd = conn->origin_fd;
-        dst_fd = conn->client_fd;
-    }
-
-    size_t max_write;
-    uint8_t *write_ptr = buffer_write_ptr(buff, &max_write);
-
-    ssize_t nread = recv(src_fd, write_ptr, max_write, MSG_DONTWAIT);
-
-    if (nread == 0) {
-        log_info("Connection closed by peer on fd %d", src_fd);
-        return SOCKS5_DONE;
-    } else if (nread < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            return SOCKS5_COPY;
-        } else {
-            log_error("Error reading from fd %d: %s", src_fd, strerror(errno));
-            return SOCKS5_ERROR;
-        }
-    }
-
-    log_debug("Copied %zd bytes from fd %d to buffer", nread, src_fd);
-    buffer_write_adv(buff, nread);
-
-    if (selector_set_interest(key->s, dst_fd, OP_WRITE) != SELECTOR_SUCCESS) {
-        return SOCKS5_ERROR;
-    }
-
-    if (buffer_can_write(buff)) {
-        selector_set_interest(key->s, src_fd, OP_READ);
-    } else {
-        selector_set_interest(key->s, src_fd, OP_NOOP);
-    }
-
-    return SOCKS5_COPY;
+    //PONER EL FD DESTINO CON INTERES DE ESCRITURA
 }
 
 unsigned int copy_write(struct selector_key *key) {
@@ -107,9 +62,9 @@ unsigned int copy_write(struct selector_key *key) {
 }
 
 void copy_read_handler(struct selector_key *key) {
-    copy_read(key);
+    //LEER DEL FD DESTINO Y PONERLO EN EL BUFFER DE OUT SETEA EL FD DEL CLIENTE EN OP_WRITE
 }
 
 void copy_write_handler(struct selector_key *key) {
-    copy_write(key);
+    //ENVIA LO QUE HABIA EN IN A FD_DEST Y SETEA ESE FD EN OP_READ
 }
