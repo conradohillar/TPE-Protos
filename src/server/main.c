@@ -97,7 +97,6 @@ int main(int argc, char *argv[]) {
   _server_data = malloc(sizeof(server_data_t));
   if (_server_data == NULL) {
     LOG_MSG(ERROR, "Failed to allocate memory for server data");
-    perror("Failed to allocate memory for server data");
     exit(EXIT_FAILURE);
   }
   LOG_MSG(DEBUG, "Server data allocated successfully");
@@ -168,7 +167,6 @@ error:
     ret = 2;
   } else if (error_msg) {
     LOG(ERROR, "%s", error_msg);
-    perror(error_msg);
     ret = 1;
   }
 

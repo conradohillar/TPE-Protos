@@ -1,8 +1,7 @@
 #include "../include/conn_req_parser.h"
 #include "../include/defines.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include <logger.h>
+#include <stdlib.h>
 
 static void version(struct parser_event *ret, const uint8_t c) {
   LOG(DEBUG, "STATE: CONN_REQ_VERSION, reading byte: 0x%x", c);
@@ -229,7 +228,7 @@ static const struct parser_definition conn_req_parser_definition = {
 conn_req_parser *conn_req_parser_init(void) {
   conn_req_parser *p = malloc(sizeof(conn_req_parser));
   if (p == NULL) {
-    perror("malloc");
+    LOG_MSG(ERROR, "Failed to allocate memory for conn_req_parser");
     return NULL;
   }
   p->parser = parser_init(parser_no_classes(), &conn_req_parser_definition);
@@ -290,10 +289,10 @@ void conn_req_parser_close(conn_req_parser *p) { parser_destroy(p->parser); }
 //   // TESTING CONNECTION REQUEST PARSER
 //   conn_req_parser *p = conn_req_parser_init();
 //   if (p == NULL) {
-//     perror("conn_req_parser_init");
 //     return 1;
 //   }
-//   uint8_t mock_buffer[] = {0x05, 0x01, 0x00, 0x03, 14,  'w', 'w', 'w', '.', 'g',
+//   uint8_t mock_buffer[] = {0x05, 0x01, 0x00, 0x03, 14,  'w', 'w', 'w', '.',
+//   'g',
 //                            'o',  'o',  'g',  'l',  'e', '.', 'c', 'o', 'm'};
 
 //   for (size_t i = 0; i < sizeof(mock_buffer); i++) {

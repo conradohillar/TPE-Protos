@@ -1,9 +1,9 @@
 #include "../include/auth_parser.h"
 #include "../include/parser.h"
+#include <logger.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <logger.h>
 
 static void version(struct parser_event *ret, const uint8_t c) {
   LOG(DEBUG, "STATE: AUTH_VERSION, reading byte: 0x%x", c);
@@ -119,7 +119,6 @@ auth_parser *auth_parser_init(void) {
   auth_parser *p = malloc(sizeof(auth_parser));
   if (p == NULL) {
     LOG_MSG(ERROR, "Failed to allocate memory for auth parser");
-    perror("malloc");
     return NULL;
   }
   p->parser = parser_init(parser_no_classes(), &auth_parser_definition);
