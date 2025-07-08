@@ -9,7 +9,7 @@
 // Inicializa el buffer y offsets para la etapa de request
 void connection_req_on_arrival(unsigned state, struct selector_key *key) {
     socks5_conn_t *conn = key->data;
-    LOG_DEBUG("Starting connection request phase for fd %d", key->fd);
+    LOG(DEBUG, "Starting connection request phase for fd %d", key->fd);
     conn->conn_req_parser = conn_req_parser_init();
 }
 
@@ -20,22 +20,22 @@ unsigned int connection_req_read(struct selector_key *key) {
         
         conn_req_parser_state state = conn_req_parser_feed(conn->conn_req_parser, buffer_read(&conn->in_buff));
 
-        LOG_INFO("Processing connection request for fd %d, state: %d", key->fd, state);
+        LOG(INFO, "Processing connection request for fd %d, state: %d", key->fd, state);
         if (state == CONN_REQ_DONE) {
-            LOG_INFO("Connection request received for fd %d, connecting to destination", key->fd);
-            LOG_INFO("Destination address: %s, port: %d", conn->conn_req_parser->dst_addr, conn->conn_req_parser->dst_port);
+            LOG(INFO, "Connection request received for fd %d, connecting to destination", key->fd);
+            LOG(INFO, "Destination address: %s, port: %d", conn->conn_req_parser->dst_addr, conn->conn_req_parser->dst_port);
             
             //esto lo tenemos que hacer en otro thread pero primero quiero ver que funque asi
             conn->origin_fd = connect_to_host(conn->conn_req_parser->dst_addr, conn->conn_req_parser->dst_port);
     
             if (conn->origin_fd < 0) {
                 // Error al conectar al destino
-                LOG_ERROR("Error connecting to destination for fd %d", key->fd);
+                LOG(ERROR, "Error connecting to destination for fd %d", key->fd);
                 perror("error connecting to destination");
                 return SOCKS5_ERROR;
             }//aca podriamos manejar mas errores esto es algo basico
 
-            LOG_INFO("Successfully connected to destination for fd %d, origin_fd: %d", key->fd, conn->origin_fd);
+            LOG(INFO, "Successfully connected to destination for fd %d, origin_fd: %d", key->fd, conn->origin_fd);
             buffer_write(&conn->out_buff, SOCKS5_VERSION); 
             buffer_write(&conn->out_buff, SOCKS5_SUCCESS); 
             buffer_write(&conn->out_buff, SOCKS5_CONN_REQ_RSV); // RSV
@@ -54,7 +54,7 @@ unsigned int connection_req_read(struct selector_key *key) {
             return SOCKS5_COPY;
 
         } else if (state == CONN_REQ_ERROR) {
-            LOG_ERROR("Connection request error for fd %d", key->fd);
+            LOG(ERROR, "Connection request error for fd %d", key->fd);
             //aca falta hacer todo el manejo de errores
              buffer_write(&conn->out_buff, SOCKS5_VERSION); 
             buffer_write(&conn->out_buff, SOCKS5_GENERAL_FAILURE); 
@@ -71,7 +71,7 @@ unsigned int connection_req_read(struct selector_key *key) {
 
 void connection_req_on_departure(unsigned state, struct selector_key *key) {
     socks5_conn_t *conn = key->data;
-    LOG_DEBUG("Connection request phase complete for fd %d", key->fd);
+    LOG(DEBUG, "Connection request phase complete for fd %d", key->fd);
     conn_req_parser_close(conn->conn_req_parser);
     conn->conn_req_parser = NULL;
 }

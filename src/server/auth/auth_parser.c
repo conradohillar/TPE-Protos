@@ -6,49 +6,49 @@
 #include <logger.h>
 
 static void version(struct parser_event *ret, const uint8_t c) {
-  LOG_DEBUG("STATE: AUTH_VERSION, reading byte: 0x%x", c);
+  LOG(DEBUG, "STATE: AUTH_VERSION, reading byte: 0x%x", c);
   ret->type = AUTH_VERSION;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void username_len(struct parser_event *ret, const uint8_t c) {
-  LOG_DEBUG("STATE: AUTH_USERNAME_LEN, reading byte: 0x%x", c);
+  LOG(DEBUG, "STATE: AUTH_USERNAME_LEN, reading byte: 0x%x", c);
   ret->type = AUTH_USERNAME_LEN;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void username(struct parser_event *ret, const uint8_t c) {
-  LOG_DEBUG("STATE: AUTH_USERNAME, reading byte: 0x%x", c);
+  LOG(DEBUG, "STATE: AUTH_USERNAME, reading byte: 0x%x", c);
   ret->type = AUTH_USERNAME;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void password_len(struct parser_event *ret, const uint8_t c) {
-  LOG_DEBUG("STATE: AUTH_PASSWORD_LEN, reading byte: 0x%x", c);
+  LOG(DEBUG, "STATE: AUTH_PASSWORD_LEN, reading byte: 0x%x", c);
   ret->type = AUTH_PASSWORD_LEN;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void password(struct parser_event *ret, const uint8_t c) {
-  LOG_DEBUG("STATE: AUTH_PASSWORD, reading byte: 0x%x", c);
+  LOG(DEBUG, "STATE: AUTH_PASSWORD, reading byte: 0x%x", c);
   ret->type = AUTH_PASSWORD;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void done(struct parser_event *ret, const uint8_t c) {
-  LOG_DEBUG("STATE: AUTH_DONE, reading byte: 0x%x", c);
+  LOG(DEBUG, "STATE: AUTH_DONE, reading byte: 0x%x", c);
   ret->type = AUTH_DONE;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void error(struct parser_event *ret, const uint8_t c) {
-  LOG_DEBUG("STATE: AUTH_ERROR, reading byte: 0x%x", c);
+  LOG(DEBUG, "STATE: AUTH_ERROR, reading byte: 0x%x", c);
   ret->type = AUTH_ERROR;
   ret->n = 1;
   ret->data[0] = c;
@@ -118,7 +118,7 @@ static const struct parser_definition auth_parser_definition = {
 auth_parser *auth_parser_init(void) {
   auth_parser *p = malloc(sizeof(auth_parser));
   if (p == NULL) {
-    LOG_ERROR("Failed to allocate memory for auth parser");
+    LOG_MSG(ERROR, "Failed to allocate memory for auth parser");
     perror("malloc");
     return NULL;
   }
@@ -127,7 +127,7 @@ auth_parser *auth_parser_init(void) {
   p->password_len = 0;
   p->username_count = 0;
   p->password_count = 0;
-  LOG_DEBUG("Auth parser initialized successfully");
+  LOG_MSG(DEBUG, "Auth parser initialized successfully");
   return p;
 }
 
@@ -161,7 +161,7 @@ auth_state auth_parser_feed(auth_parser *p, const uint8_t byte) {
 }
 
 void auth_parser_close(auth_parser *p) {
-  LOG_DEBUG("Closing auth parser");
+  LOG_MSG(DEBUG, "Closing auth parser");
   parser_destroy(p->parser);
   free(p);
 }

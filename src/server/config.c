@@ -2,69 +2,69 @@
 
 void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, size_t response_size) {
     //TODO: Implementar la lógica de cada comando
-    LOG_DEBUG("Processing admin command: %d", parsed_cmd->cmd);
+    LOG(DEBUG, "Processing admin command: %d", parsed_cmd->cmd);
     switch (parsed_cmd->cmd) {
         case CMD_HELP:
-            LOG_DEBUG("Help command executed");
+            LOG_MSG(DEBUG, "Help command executed");
             snprintf(response, response_size,
                 "ADD_USER <usuario> <password>\nREMOVE_USER <usuario>\nLIST_USERS\nGET_METRICS\nGET_ACCESS_REGISTER\nSET_TIMEOUT <segundos>\nSET_BUFF <bytes>\nGET_CONFIG\nHELP\nPING\nEXIT\nEND\n");
             break;
         case CMD_PING:
-            LOG_DEBUG("Ping command executed");
+            LOG_MSG(DEBUG, "Ping command executed");
             snprintf(response, response_size, "PONG\n");
             break;
         case CMD_ADD_USER:
             if(auth_add_user(parsed_cmd->arg1, parsed_cmd->arg2)){
-                LOG_INFO("User added successfully: %s", parsed_cmd->arg1);
+                LOG(INFO, "User added successfully: %s", parsed_cmd->arg1);
                 snprintf(response, response_size, "OK\n");
             } else {
-                log_warning("Failed to add user (already exists): %s", parsed_cmd->arg1);
+                LOG(WARNING, "Failed to add user (already exists): %s", parsed_cmd->arg1);
                 snprintf(response, response_size, "ERROR: %s already exists\n", parsed_cmd->arg1);
             }
             break;
         case CMD_REMOVE_USER:
             if(auth_remove_user(parsed_cmd->arg1)){
-                LOG_INFO("User removed successfully: %s", parsed_cmd->arg1);
+                LOG(INFO, "User removed successfully: %s", parsed_cmd->arg1);
                 snprintf(response, response_size, "OK\n");
             } else {
-                log_warning("Failed to remove user (does not exist): %s", parsed_cmd->arg1);
+                LOG(WARNING, "Failed to remove user (does not exist): %s", parsed_cmd->arg1);
                 snprintf(response, response_size, "ERROR: %s does not exist\n", parsed_cmd->arg1);
             }
             break;
         case CMD_LIST_USERS:
-            LOG_DEBUG("List users command executed");
+            LOG_MSG(DEBUG, "List users command executed");
             auth_list_users(response, response_size);
             break;
         case CMD_GET_METRICS:
-            LOG_DEBUG("Get metrics command executed");
+            LOG_MSG(DEBUG, "Get metrics command executed");
             metrics_print(get_server_data()->metrics, response, response_size);
             break;
         case CMD_GET_ACCESS_REGISTER:
-            LOG_DEBUG("Get access register command executed");
+            LOG_MSG(DEBUG, "Get access register command executed");
             access_register_print(get_server_data()->access_register, response, response_size);
             break;
         case CMD_SET_TIMEOUT:
-            LOG_INFO("Timeout configured to %s seconds (simulated)", parsed_cmd->arg1);
+            LOG(INFO, "Timeout configured to %s seconds (simulated)", parsed_cmd->arg1);
             snprintf(response, response_size, "OK\n");
             break;
         case CMD_SET_BUFF:
-            LOG_INFO("Buffer size configured to %s bytes (simulated)", parsed_cmd->arg1);
+            LOG(INFO, "Buffer size configured to %s bytes (simulated)", parsed_cmd->arg1);
             snprintf(response, response_size, "OK\n");
             break;
         case CMD_GET_CONFIG:
-            LOG_DEBUG("Get config command executed");
+            LOG_MSG(DEBUG, "Get config command executed");
             snprintf(response, response_size, "Configuración actual: timeout=30, buffer_size=1024\nOK\n");
             break;
         case CMD_EXIT:
-            LOG_DEBUG("Exit command executed");
+            LOG_MSG(DEBUG, "Exit command executed");
             snprintf(response, response_size, "BYE\n");
             break;
         case CMD_INVALID:
-            log_warning("Invalid command received");
+            LOG_MSG(WARNING, "Invalid command received");
             snprintf(response, response_size, "ERROR: invalid command\n");
             break;
         default:
-            LOG_ERROR("Unknown command type: %d", parsed_cmd->cmd);
+            LOG(ERROR, "Unknown command type: %d", parsed_cmd->cmd);
             break;
     }
 }

@@ -9,7 +9,7 @@ server_data_t *get_server_data() {
 static bool done = false;
 
 static void sigterm_handler(int signum) {
-  LOG_INFO("Received signal %d", signum);
+  LOG(INFO, "Received signal %d", signum);
   done = true;
 }
 
@@ -31,23 +31,23 @@ int create_and_register_passive_socket(fd_selector * selector, char * address, u
 
   const int fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if(fd < 0) {
-    LOG_ERROR("Error creating socket");
+    LOG_MSG(ERROR, "Error creating socket");
     *error_msg = "Error creating socket";
     goto error;
   }
 
-  LOG_INFO("Server listening on TCP port %d - Protocol: %s", port, protocol);
+  LOG(INFO, "Server listening on TCP port %d - Protocol: %s", port, protocol);
 
   setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
 
   if(bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    LOG_ERROR("Error binding socket");
+    LOG_MSG(ERROR, "Error binding socket");
     *error_msg = "Error binding socket";
     goto error;
   }
 
   if(listen(fd, MAX_PENDING_CONNECTIONS) < 0) {
-    LOG_ERROR("Error listening on socket");
+    LOG_MSG(ERROR, "Error listening on socket");
     *error_msg = "Error listening on socket";
     goto error;
   }
@@ -55,7 +55,7 @@ int create_and_register_passive_socket(fd_selector * selector, char * address, u
 
   *ss = set_non_blocking_fd(fd);
   if(*ss != SELECTOR_SUCCESS) {
-    LOG_ERROR("Error setting server socket to non-blocking");
+    LOG_MSG(ERROR, "Error setting server socket to non-blocking");
     *error_msg = "Error setting server socket to non-blocking";
     goto error;
   }
@@ -63,7 +63,7 @@ int create_and_register_passive_socket(fd_selector * selector, char * address, u
 
   *ss = selector_register(*selector, fd, callback_functions, OP_READ, NULL);
   if(*ss != SELECTOR_SUCCESS) {
-    LOG_ERROR("Error registering server socket with selector");
+    LOG_MSG(ERROR, "Error registering server socket with selector");
     *error_msg = "Error registering server socket with selector";
     goto error;
   }
@@ -76,7 +76,7 @@ int create_and_register_passive_socket(fd_selector * selector, char * address, u
 }
 
 int main(int argc, char *argv[]) {
-  LOG_INFO("Starting SOCKS5 server");
+  LOG_MSG(INFO, "Starting SOCKS5 server");
   close(FD_STDIN);
 
   server_args args = { 0 };
@@ -85,20 +85,20 @@ int main(int argc, char *argv[]) {
   signal(SIGINT, sigterm_handler);
   signal(SIGTERM, sigterm_handler);
   
-  LOG_INFO("Initializing authentication system");
+  LOG_MSG(INFO, "Initializing authentication system");
   auth_init();
   for(int i = 0; i < args.users_count; i++) {
-    LOG_DEBUG("Adding user: %s", args.users[i].name);
+    LOG(DEBUG, "Adding user: %s", args.users[i].name);
     auth_add_user(args.users[i].name, args.users[i].pass);
   }
 
   _server_data = malloc(sizeof(server_data_t));
   if (_server_data == NULL) {
-    LOG_ERROR("Failed to allocate memory for server data");
+    LOG_MSG(ERROR, "Failed to allocate memory for server data");
     perror("Failed to allocate memory for server data");
     exit(EXIT_FAILURE);
   }
-  LOG_DEBUG("Server data allocated successfully");
+  LOG_MSG(DEBUG, "Server data allocated successfully");
   _server_data->metrics = metrics_init();
   _server_data->access_register = access_register_init();
 
@@ -113,21 +113,21 @@ int main(int argc, char *argv[]) {
 
   ss = selector_init(&config);
   if(ss != SELECTOR_SUCCESS) {
-    LOG_ERROR("Error initializing selector");
+    LOG_MSG(ERROR, "Error initializing selector");
     error_msg = "Error initializing selector";
     goto error;
   }
 
-  LOG_DEBUG("Selector initialized successfully");
+  LOG_MSG(DEBUG, "Selector initialized successfully");
 
   fd_selector = selector_new(INITIAL_QUANTITY_FDS);
   if(fd_selector == NULL) {
-    LOG_ERROR("Error creating selector");
+    LOG_MSG(ERROR, "Error creating selector");
     error_msg = "Error creating selector";
     goto error;
   }
 
-  LOG_DEBUG("Selector created successfully");
+  LOG_MSG(DEBUG, "Selector created successfully");
 
   const struct fd_handler socksv5 = {
     .handle_read       = socksv5_passive_accept,
@@ -140,11 +140,11 @@ int main(int argc, char *argv[]) {
   if(create_and_register_passive_socket(&fd_selector, args.socks_addr, args.socks_port, &socksv5, &ss, &error_msg, SOCKS5) == -1) goto error;
   if(create_and_register_passive_socket(&fd_selector, args.mng_addr, args.mng_port, &conf_protocol, &ss, &error_msg, CONF_PROTOCOL) == -1) goto error;
 
-  LOG_INFO("Server started successfully, entering main loop");
+  LOG_MSG(INFO, "Server started successfully, entering main loop");
   while(!done) {
     ss = selector_select(fd_selector);
     if(ss != SELECTOR_SUCCESS) {
-      LOG_ERROR("Error during selector select");
+      LOG_MSG(ERROR, "Error during selector select");
       error_msg = "Error during selector select";
       goto error;
     }
@@ -155,16 +155,16 @@ int main(int argc, char *argv[]) {
 
   error:
   if(ss != SELECTOR_SUCCESS) {
-    LOG_ERROR("%s: %s", (error_msg == NULL) ? "": error_msg, ss == SELECTOR_IO ? strerror(errno) : selector_error(ss));
+    LOG(ERROR, "%s: %s", (error_msg == NULL) ? "": error_msg, ss == SELECTOR_IO ? strerror(errno) : selector_error(ss));
     fprintf(stderr, "%s: %s\n", (error_msg == NULL) ? "": error_msg, ss == SELECTOR_IO ? strerror(errno) : selector_error(ss));
     ret = 2;
   } else if(error_msg) {
-    LOG_ERROR("%s", error_msg);
+    LOG(ERROR, "%s", error_msg);
     perror(error_msg);
     ret = 1;
   }
   
-  LOG_INFO("Shutting down server");
+  LOG_MSG(INFO, "Shutting down server");
   if(fd_selector != NULL) selector_destroy(fd_selector);
   
   selector_close();
@@ -175,6 +175,6 @@ int main(int argc, char *argv[]) {
 
   auth_destroy();
 
-  LOG_INFO("Server shutdown complete");
+  LOG_MSG(INFO, "Server shutdown complete");
   return ret;
 }
