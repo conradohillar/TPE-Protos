@@ -269,6 +269,7 @@ conn_req_parser_state conn_req_parser_feed(conn_req_parser *p, uint8_t byte) {
   case CONN_REQ_DST_ADDR:
     p->dst_addr[p->dst_addr_count++] = e->data[0];
     if (p->dst_addr_count >= p->dst_addr_len) {
+      p->dst_addr[p->dst_addr_count] = '\0';
       parser_set(p->parser, CONN_REQ_DST_PORT_BYTE1);
       return CONN_REQ_DST_PORT_BYTE1;
     }

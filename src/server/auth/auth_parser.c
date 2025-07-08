@@ -141,6 +141,7 @@ auth_state auth_parser_feed(auth_parser *p, const uint8_t byte) {
     p->username[p->username_count++] = e->data[0];
     if (p->username_count >= p->username_len) {
       parser_set(p->parser, AUTH_PASSWORD_LEN);
+      p->username[p->username_count] = '\0';
       return AUTH_PASSWORD_LEN;
     }
     break;
@@ -150,6 +151,7 @@ auth_state auth_parser_feed(auth_parser *p, const uint8_t byte) {
   case AUTH_PASSWORD:
     p->password[p->password_count++] = e->data[0];
     if (p->password_count >= p->password_len) {
+      p->password[p->password_count] = '\0';
       parser_set(p->parser, AUTH_DONE);
       return AUTH_DONE;
     }
