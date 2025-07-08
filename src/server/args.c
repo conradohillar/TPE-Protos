@@ -25,7 +25,7 @@ static unsigned short port(const char *s) {
 static void user(char *s, struct users *user) {
   char *p = strchr(s, ':');
   if (p == NULL) {
-    LOG(ERROR, "Password not found");
+    LOG_MSG(ERROR, "Password not found");
     exit(1);
   } else {
     *p = 0;
@@ -120,7 +120,7 @@ void parse_args(const int argc, char **argv, struct server_args *args) {
     }
   }
   if (optind < argc) {
-    LOG(ERROR, "Argument not accepted: ");
+    LOG_MSG(ERROR, "Argument not accepted: ");
     while (optind < argc) {
       LOG(ERROR, "%s ", argv[optind++]);
     }
