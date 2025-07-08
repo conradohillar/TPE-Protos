@@ -26,6 +26,8 @@
 #include <sys/select.h> 
 #include <unistd.h>  
 
+#include <logger.h>
+
 #define N(x) (sizeof(x) / sizeof((x)[0]))
 
 #define ERROR_DEFAULT_MSG "something failed"
@@ -414,6 +416,7 @@ selector_status selector_set_interest(fd_selector s, int fd, fd_interest i) {
   }
   item->interest = i;
   items_update_fdset_for_fd(s, item);
+  log_debug("Set interest for fd %d to %d", fd, i);
 finally:
   return ret;
 }

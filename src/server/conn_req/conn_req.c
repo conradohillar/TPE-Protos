@@ -41,8 +41,14 @@ unsigned int connection_req_read(struct selector_key *key) {
             buffer_write(&conn->out_buff, SOCKS5_CONN_REQ_RSV); // RSV
             buffer_write(&conn->out_buff, ATYP_IPV4); //ESTO LO DEBERIAMOS TENER GUARDADO
 
-          
-            //memset(conn->out_buff.data+4, 0, 6); // BND.ADDR + BND.PORT (0.0.0.0:0)
+            //pongo una ip a mano para probar
+            buffer_write(&conn->out_buff, 0x7F); // IP
+            buffer_write(&conn->out_buff, 0x00); // IP
+            buffer_write(&conn->out_buff, 0x00); // IP
+            buffer_write(&conn->out_buff, 0x01); // IP
+            buffer_write(&conn->out_buff, (conn->conn_req_parser->dst_port >> 8) & 0xFF); 
+            buffer_write(&conn->out_buff, conn->conn_req_parser->dst_port & 0xFF); 
+            
             selector_set_interest_key(key, OP_WRITE);
             buffer_reset(&conn->in_buff);
             return SOCKS5_COPY;

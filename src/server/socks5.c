@@ -109,7 +109,10 @@ static void socksv5_write(struct selector_key *key) {
         if (!buffer_can_read(&conn->out_buff)) {
             selector_set_interest_key(key, OP_READ); // Si no hay mas para darle al cliente supongo que esta bien decir que ahora queremos leer 
             buffer_reset(&conn->out_buff); // Reseteamos el buffer de salida
-          }
+        }
+        if (buffer_can_write(&conn->in_buff)) {
+            selector_set_interest_key(key, OP_READ); // Si hay espacio en el buffer de entrada
+        }
     } else if (n_written < 0) {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
             log_error("Error writing to fd %d: %s", key->fd, strerror(errno));
