@@ -107,7 +107,7 @@ int set_non_blocking_fd(const int fd) {
 }
 
 
-int connect_to_host(const char *dst_addr, uint16_t dst_port) {
+int connect_to_host(const uint8_t *dst_addr, const uint16_t dst_port) {
     LOG(DEBUG, "Attempting to connect to host: %s:%u", dst_addr, dst_port);
     
     struct addrinfo hints = {
@@ -119,7 +119,7 @@ int connect_to_host(const char *dst_addr, uint16_t dst_port) {
     char port_str[6];
     snprintf(port_str, sizeof(port_str), "%u", dst_port);
 
-    if (getaddrinfo(dst_addr, port_str, &hints, &res) != 0) {
+    if (getaddrinfo((char*)dst_addr, port_str, &hints, &res) != 0) {
         LOG(ERROR, "Failed to resolve hostname: %s", dst_addr);
         return -1; 
     }

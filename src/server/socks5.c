@@ -40,8 +40,8 @@ void socksv5_passive_accept(struct selector_key *key) {
     return;
   }
   conn->client_fd = fd;
-  buffer_init(&conn->in_buff, conn->in_buff_data, conn->in_buff_data);
-  buffer_init(&conn->out_buff, conn->out_buff_data, conn->out_buff_data);
+  buffer_init(&conn->in_buff, SOCKS5_BUFF_MAX_LEN, conn->in_buff_data);
+  buffer_init(&conn->out_buff, SOCKS5_BUFF_MAX_LEN, conn->out_buff_data);
   conn->stm = socks5_stm_init();
 
   LOG(INFO, "New SOCKSv5 connection accepted on fd %d", fd);

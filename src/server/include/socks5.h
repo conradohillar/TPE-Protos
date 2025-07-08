@@ -44,11 +44,9 @@ typedef struct {
     buffer in_buff;
     buffer out_buff;
 
-    char in_buff_data[SOCKS5_BUFF_MAX_LEN];
-    char out_buff_data[SOCKS5_BUFF_MAX_LEN];
+    uint8_t in_buff_data[SOCKS5_BUFF_MAX_LEN];
+    uint8_t out_buff_data[SOCKS5_BUFF_MAX_LEN];
 
-    /** Otros campos útiles */
-    // dirección y puerto destino, métricas, etc.
 } socks5_conn_t;
 
 void socksv5_passive_accept(struct selector_key *key);
