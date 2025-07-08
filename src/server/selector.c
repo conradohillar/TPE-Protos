@@ -2,7 +2,6 @@
  * selector.c - un muliplexor de entrada salida
  */
 
-
 #include <assert.h> // :)
 #include <errno.h>  // :)
 #include <pthread.h>
@@ -10,8 +9,8 @@
 #include <stdlib.h> // malloc
 #include <string.h> // memset
 
-#include <selector.h>
 #include <fcntl.h>
+#include <selector.h>
 #include <stdint.h>
 #include <sys/select.h>
 #include <sys/signal.h>
@@ -19,12 +18,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <errno.h>   
-#include <pthread.h> 
-#include <signal.h> 
-#include <string.h>     
-#include <sys/select.h> 
-#include <unistd.h>  
+#include <errno.h>
+#include <pthread.h>
+#include <signal.h>
+#include <string.h>
+#include <sys/select.h>
+#include <unistd.h>
 
 #include <logger.h>
 
@@ -84,7 +83,7 @@ selector_status selector_init(const struct selector_init *c) {
   if (-1 == sigprocmask(SIG_BLOCK, &blockset, NULL)) {
     ret = SELECTOR_IO;
     goto finally;
-  } 
+  }
 
   // 1. Registramos una función que atenderá la señal de interrupción
   //    del selector.
@@ -542,7 +541,7 @@ selector_status selector_select(fd_selector s) {
       for (int i = 0; i < s->max_fd; i++) {
         if (FD_ISSET(i, &s->master_r) || FD_ISSET(i, &s->master_w)) {
           if (-1 == fcntl(i, F_GETFD, 0)) {
-            fprintf(stderr, "Bad descriptor detected: %d\n", i);
+            LOG(ERROR, "Bad descriptor detected: %d", i);
           }
         }
       }
@@ -561,5 +560,3 @@ selector_status selector_select(fd_selector s) {
 finally:
   return ret;
 }
-
-
