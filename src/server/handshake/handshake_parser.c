@@ -122,4 +122,8 @@ handshake_state handshake_parser_feed(handshake_parser *p, uint8_t byte) {
   return e->type;
 }
 
-void handshake_parser_close(handshake_parser *p) { parser_destroy(p->parser); }
+void handshake_parser_close(handshake_parser *p) {
+  LOG_MSG(DEBUG, "Closing handshake parser");
+  parser_destroy(p->parser);
+  free(p);
+}

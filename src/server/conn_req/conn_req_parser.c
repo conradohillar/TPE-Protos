@@ -284,7 +284,11 @@ conn_req_parser_state conn_req_parser_feed(conn_req_parser *p, uint8_t byte) {
   return e->type;
 }
 
-void conn_req_parser_close(conn_req_parser *p) { parser_destroy(p->parser); }
+void conn_req_parser_close(conn_req_parser *p) {
+  LOG_MSG(DEBUG, "Closing connection request parser");
+  parser_destroy(p->parser);
+  free(p); 
+}
 
 // int main(void) {
 //   // TESTING CONNECTION REQUEST PARSER
