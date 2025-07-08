@@ -5,70 +5,70 @@
 #include <logger.h>
 
 static void version(struct parser_event *ret, const uint8_t c) {
-  log_debug("STATE: CONN_REQ_VERSION, reading byte: 0x%x", c);
+  LOG_DEBUG("STATE: CONN_REQ_VERSION, reading byte: 0x%x", c);
   ret->type = CONN_REQ_VERSION;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void cmd(struct parser_event *ret, const uint8_t c) {
-  log_debug("STATE: CONN_REQ_CMD, reading byte: 0x%x", c);
+  LOG_DEBUG("STATE: CONN_REQ_CMD, reading byte: 0x%x", c);
   ret->type = CONN_REQ_CMD;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void rsv(struct parser_event *ret, const uint8_t c) {
-  log_debug("STATE: CONN_REQ_RSV, reading byte: 0x%x", c);
+  LOG_DEBUG("STATE: CONN_REQ_RSV, reading byte: 0x%x", c);
   ret->type = CONN_REQ_RSV;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void atyp(struct parser_event *ret, const uint8_t c) {
-  log_debug("STATE: CONN_REQ_ATYP, reading byte: 0x%x", c);
+  LOG_DEBUG("STATE: CONN_REQ_ATYP, reading byte: 0x%x", c);
   ret->type = CONN_REQ_ATYP;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void dom_len(struct parser_event *ret, const uint8_t c) {
-  log_debug("STATE: CONN_REQ_DOM_LEN, reading byte: 0x%x", c);
+  LOG_DEBUG("STATE: CONN_REQ_DOM_LEN, reading byte: 0x%x", c);
   ret->type = CONN_REQ_DOM_LEN;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void dst_addr(struct parser_event *ret, const uint8_t c) {
-  log_debug("STATE: CONN_REQ_DST_ADDR, reading byte: 0x%x", c);
+  LOG_DEBUG("STATE: CONN_REQ_DST_ADDR, reading byte: 0x%x", c);
   ret->type = CONN_REQ_DST_ADDR;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void dst_port_byte1(struct parser_event *ret, const uint8_t c) {
-  log_debug("STATE: CONN_REQ_DST_PORT_BYTE1, reading byte: 0x%x", c);
+  LOG_DEBUG("STATE: CONN_REQ_DST_PORT_BYTE1, reading byte: 0x%x", c);
   ret->type = CONN_REQ_DST_PORT_BYTE1;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void dst_port_byte2(struct parser_event *ret, const uint8_t c) {
-  log_debug("STATE: CONN_REQ_DST_PORT_BYTE2, reading byte: 0x%x\n", c);
+  LOG_DEBUG("STATE: CONN_REQ_DST_PORT_BYTE2, reading byte: 0x%x\n", c);
   ret->type = CONN_REQ_DST_PORT_BYTE2;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void done(struct parser_event *ret, const uint8_t c) {
-  log_debug("STATE: CONN_REQ_DONE, reading byte: 0x%x", c);
+  LOG_DEBUG("STATE: CONN_REQ_DONE, reading byte: 0x%x", c);
   ret->type = CONN_REQ_DONE;
   ret->n = 1;
   ret->data[0] = c;
 }
 
 static void error(struct parser_event *ret, const uint8_t c) {
-  log_debug("STATE: CONN_REQ_ERROR, reading byte: 0x%x", c);
+  LOG_DEBUG("STATE: CONN_REQ_ERROR, reading byte: 0x%x", c);
   ret->type = CONN_REQ_ERROR;
   ret->n = 1;
   ret->data[0] = c;

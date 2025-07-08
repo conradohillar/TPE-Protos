@@ -416,7 +416,7 @@ selector_status selector_set_interest(fd_selector s, int fd, fd_interest i) {
   }
   item->interest = i;
   items_update_fdset_for_fd(s, item);
-  log_debug("Set interest for fd %d to %d", fd, i);
+  LOG_DEBUG("Set interest for fd %d to %d", fd, i);
 finally:
   return ret;
 }

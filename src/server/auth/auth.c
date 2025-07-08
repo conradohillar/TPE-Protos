@@ -2,7 +2,7 @@
 
 void auth_on_arrival(unsigned state, struct selector_key *key) {
   socks5_conn_t *conn = key->data;
-  log_debug("Starting authentication for fd %d", key->fd);
+  LOG_DEBUG("Starting authentication for fd %d", key->fd);
   conn->auth_parser = auth_parser_init();
 }
 
@@ -17,7 +17,7 @@ unsigned int auth_read(struct selector_key *key) {
       buffer_write(&conn->out_buff, SOCKS5_SUBNEGOTIATION_VERSION);
 
       if (auth_check_credentials((const char*)conn->auth_parser->username, (const char*)conn->auth_parser->password)) {
-        log_info("Authentication successful for user: %s on fd %d", conn->auth_parser->username, key->fd);
+        LOG_INFO("Authentication successful for user: %s on fd %d", conn->auth_parser->username, key->fd);
         buffer_write(&conn->out_buff, SOCKS5_AUTH_OK);
       } else {
         log_warning("Authentication failed for user: %s on fd %d", conn->auth_parser->username, key->fd);
@@ -29,7 +29,7 @@ unsigned int auth_read(struct selector_key *key) {
       return SOCKS5_CONNECTION_REQ;
 
     } else if (state == AUTH_ERROR) {
-      log_error("Authentication error for fd %d", key->fd);
+      LOG_ERROR("Authentication error for fd %d", key->fd);
       buffer_write(&conn->out_buff, SOCKS5_VERSION);
       buffer_write(&conn->out_buff, AUTH_ERROR);
       selector_set_interest_key(key, OP_WRITE);
@@ -42,7 +42,7 @@ unsigned int auth_read(struct selector_key *key) {
 
 void auth_on_departure(unsigned state, struct selector_key *key) {
   socks5_conn_t *conn = key->data;
-  log_debug("Authentication phase complete for fd %d", key->fd);
+  LOG_DEBUG("Authentication phase complete for fd %d", key->fd);
   auth_parser_close(conn->auth_parser);
   conn->auth_parser = NULL;
 }

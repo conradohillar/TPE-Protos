@@ -6,7 +6,7 @@
 
 void handshake_on_arrival(unsigned state, struct selector_key *key) {
     socks5_conn_t *conn = key->data;
-    log_debug("Starting handshake for fd %d", key->fd);
+    LOG_DEBUG("Starting handshake for fd %d", key->fd);
     conn->handshake_parser = handshake_parser_init();
 }
 
@@ -17,7 +17,7 @@ unsigned int handshake_read(struct selector_key *key) {
         handshake_state state = handshake_parser_feed(conn->handshake_parser, buffer_read(&conn->in_buff));
         
         if (state == HANDSHAKE_DONE) {
-            log_info("Handshake successful for fd %d", key->fd);
+            LOG_INFO("Handshake successful for fd %d", key->fd);
             buffer_write(&conn->out_buff, SOCKS5_VERSION);
             buffer_write(&conn->out_buff, SOCKS5_AUTH_METHOD_USER_PASS);
             selector_set_interest_key(key, OP_WRITE);
@@ -25,7 +25,7 @@ unsigned int handshake_read(struct selector_key *key) {
             return SOCKS5_AUTH;
 
         } else if (state == HANDSHAKE_ERROR) {
-            log_error("Handshake error for fd %d", key->fd);
+            LOG_ERROR("Handshake error for fd %d", key->fd);
             buffer_write(&conn->out_buff, SOCKS5_VERSION);
             buffer_write(&conn->out_buff, 0xFF); 
             selector_set_interest_key(key, OP_WRITE);
@@ -38,7 +38,7 @@ unsigned int handshake_read(struct selector_key *key) {
 
 void handshake_on_departure(unsigned state, struct selector_key *key) {
     socks5_conn_t *conn = key->data;
-    log_debug("Handshake phase complete for fd %d", key->fd);
+    LOG_DEBUG("Handshake phase complete for fd %d", key->fd);
     handshake_parser_close(conn->handshake_parser);
     conn->handshake_parser = NULL;
 }

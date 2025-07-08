@@ -50,7 +50,7 @@ struct state_definition socks5_states[] = {
 struct state_machine *socks5_stm_init() {
     struct state_machine *stm = malloc(sizeof(struct state_machine));
     if (stm == NULL) {
-        log_error("Failed to allocate memory for SOCKS5 state machine");
+        LOG_ERROR("Failed to allocate memory for SOCKS5 state machine");
         perror("malloc");
         return NULL;
     }
@@ -58,36 +58,36 @@ struct state_machine *socks5_stm_init() {
     stm->max_state = sizeof(socks5_states) / sizeof(socks5_states[0]);
     stm->initial = SOCKS5_HANDSHAKE;
     stm->current = NULL;
-    log_debug("SOCKS5 state machine initialized with %d states", stm->max_state);
+    LOG_DEBUG("SOCKS5 state machine initialized with %d states", stm->max_state);
     return stm;
 }
 
 // --- Estados finales ---
 static void handle_done(unsigned state, struct selector_key *key) {
-    log_info("SOCKS5 connection completed successfully for fd %d", key->fd);
+    LOG_INFO("SOCKS5 connection completed successfully for fd %d", key->fd);
     // Clean up resources if needed
     socks5_conn_t *conn = key->data;
     if (conn) {
         if (conn->origin_fd > 0) {
-            log_debug("Closing origin connection fd %d", conn->origin_fd);
+            LOG_DEBUG("Closing origin connection fd %d", conn->origin_fd);
             close(conn->origin_fd);
         }
-        log_debug("Cleaning up connection resources for fd %d", key->fd);
+        LOG_DEBUG("Cleaning up connection resources for fd %d", key->fd);
         // Additional cleanup can be added here
     }
     return;
 }
 
 static void handle_error(unsigned state, struct selector_key *key) {
-    log_error("SOCKS5 connection ended with error for fd %d", key->fd);
+    LOG_ERROR("SOCKS5 connection ended with error for fd %d", key->fd);
     // Clean up resources on error
     socks5_conn_t *conn = key->data;
     if (conn) {
         if (conn->origin_fd > 0) {
-            log_debug("Closing origin connection fd %d due to error", conn->origin_fd);
+            LOG_DEBUG("Closing origin connection fd %d due to error", conn->origin_fd);
             close(conn->origin_fd);
         }
-        log_debug("Cleaning up connection resources for fd %d due to error", key->fd);
+        LOG_DEBUG("Cleaning up connection resources for fd %d due to error", key->fd);
         // Additional cleanup can be added here
     }
     return;

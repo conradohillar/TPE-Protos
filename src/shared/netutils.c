@@ -108,7 +108,7 @@ int set_non_blocking_fd(const int fd) {
 
 
 int connect_to_host(const char *dst_addr, uint16_t dst_port) {
-    log_debug("Attempting to connect to host: %s:%u", dst_addr, dst_port);
+    LOG_DEBUG("Attempting to connect to host: %s:%u", dst_addr, dst_port);
     
     struct addrinfo hints = {
         .ai_family = AF_UNSPEC,
@@ -120,30 +120,30 @@ int connect_to_host(const char *dst_addr, uint16_t dst_port) {
     snprintf(port_str, sizeof(port_str), "%u", dst_port);
 
     if (getaddrinfo(dst_addr, port_str, &hints, &res) != 0) {
-        log_error("Failed to resolve hostname: %s", dst_addr);
+        LOG_ERROR("Failed to resolve hostname: %s", dst_addr);
         return -1; 
     }
     //TODO Falta liberar todos los structs
-    log_debug("Hostname resolved, trying to connect");
+    LOG_DEBUG("Hostname resolved, trying to connect");
     for (struct addrinfo *rp = res; rp != NULL; rp = rp->ai_next) {
         int sock = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if (sock < 0) {
-            log_debug("Failed to create socket, trying next address");
+            LOG_DEBUG("Failed to create socket, trying next address");
             continue;
         }
 
         if (connect(sock, rp->ai_addr, rp->ai_addrlen) == 0) {
-            log_info("Successfully connected to %s:%u on socket %d", dst_addr, dst_port, sock);
+            LOG_INFO("Successfully connected to %s:%u on socket %d", dst_addr, dst_port, sock);
             set_non_blocking_fd(sock);  
             freeaddrinfo(res);
             return sock;
         }
 
-        log_debug("Connection failed, trying next address");
+        LOG_DEBUG("Connection failed, trying next address");
         close(sock);
     }
 
-    log_error("Failed to connect to any address for %s:%u", dst_addr, dst_port);
+    LOG_ERROR("Failed to connect to any address for %s:%u", dst_addr, dst_port);
     freeaddrinfo(res);
     return -1;
 }
