@@ -76,6 +76,7 @@ int create_and_register_passive_socket(fd_selector * selector, char * address, u
 }
 
 int main(int argc, char *argv[]) {
+  init_logging(NULL);
   LOG_MSG(INFO, "Starting SOCKS5 server");
   close(FD_STDIN);
 
@@ -176,5 +177,6 @@ int main(int argc, char *argv[]) {
   auth_destroy();
 
   LOG_MSG(INFO, "Server shutdown complete");
+  close_logging();
   return ret;
 }

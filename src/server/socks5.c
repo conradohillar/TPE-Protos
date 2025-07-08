@@ -12,7 +12,6 @@ static void socksv5_read(struct selector_key *key);
 static void socksv5_write(struct selector_key *key);
 static void socksv5_block(struct selector_key *key);
 static void socksv5_close(struct selector_key *key);
-static void socksv5_done(struct selector_key *key);
 
 static const struct fd_handler socks5_handler = {
     .handle_read = socksv5_read,
@@ -140,9 +139,4 @@ static void socksv5_close(struct selector_key *key) {
   LOG(INFO, "Closing SOCKS5 connection on fd %d", key->fd);
   stm_handler_close(conn->stm, key);
   metrics_dec_curr_conn(get_server_data()->metrics);
-}
-
-static void socksv5_done(struct selector_key *key) {
-  socks5_conn_t *conn = key->data;
-  // stm_handler_done(conn->stm, key);
 }
