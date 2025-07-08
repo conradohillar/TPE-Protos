@@ -1,8 +1,8 @@
 #include "../include/handshake_parser.h"
 #include "../include/handshake.h"
+#include <logger.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <logger.h>
 
 static void version(struct parser_event *ret, const uint8_t c) {
   LOG(DEBUG, "STATE: HANDSHAKE_VERSION, reading byte: 0x%x", c);
@@ -88,7 +88,7 @@ static const struct parser_definition handshake_parser_definition = {
 handshake_parser *handshake_parser_init() {
   handshake_parser *p = malloc(sizeof(handshake_parser));
   if (p == NULL) {
-    perror("malloc");
+    LOG_MSG(ERROR, "Failed to allocate memory for handshake parser");
     return NULL;
   }
 
