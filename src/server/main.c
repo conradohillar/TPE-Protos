@@ -157,8 +157,6 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (error_msg == NULL)
-    error_msg = "closing";
   int ret = 0;
 
 error:

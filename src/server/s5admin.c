@@ -3,11 +3,11 @@
 // // Estructura para manejar el estado de cada conexión admin
 typedef struct {
   int fd;
-  char inbuf[MAX_CMD_LEN];
-  size_t inbuf_len;
-  char outbuf[MAX_RESPONSE_LEN];
-  size_t outbuf_len;
-  size_t outbuf_sent;
+  buffer in_buff;
+  buffer out_buff;
+  uint8_t in_data[MAX_CMD_LEN];
+  uint8_t out_data[MAX_RESPONSE_LEN];
+
 } admin_conn_t;
 
 static void admin_read(struct selector_key *key);
@@ -32,55 +32,86 @@ void s5admin_passive_accept(struct selector_key *key) {
   }
   conn->fd = fd;
   LOG(INFO, "Admin client connected on fd %d", fd);
+
+  buffer_init(&conn->in_buff, MAX_CMD_LEN, conn->in_data);
+  buffer_init(&conn->out_buff, MAX_RESPONSE_LEN, conn->out_data);
 }
 
 static void admin_read(struct selector_key *key) {
   admin_conn_t *conn = key->data;
-  ssize_t n = read(conn->fd, conn->inbuf + conn->inbuf_len, sizeof(conn->inbuf) - conn->inbuf_len - 1);
-  if (n <= 0) {
+
+  if (!buffer_can_write(&conn->in_buff)) { // Buffer de entrada lleno
+    LOG(WARNING, "Input buffer full for fd %d", key->fd);
+    // NO DEBERÍA PASAR
+    return;
+  }
+
+  size_t n;
+  uint8_t *write_ptr = buffer_write_ptr(&conn->in_buff, &n);
+
+  ssize_t n_read = recv(key->fd, write_ptr, n, MSG_DONTWAIT);
+  if (n_read <= 0) {
     LOG(INFO, "Admin connection closed on fd %d", conn->fd);
     selector_unregister_fd(key->s, conn->fd);
     close(conn->fd);
     free(conn);
     return;
   }
-  LOG(DEBUG, "Read %zd bytes from admin connection fd %d", n, conn->fd);
-  conn->inbuf_len += n;
-  conn->inbuf[conn->inbuf_len] = '\0';
+  LOG(DEBUG, "Read %zd bytes from admin connection fd %d", n_read, conn->fd);
+  buffer_write_adv(&conn->in_buff, n_read);
 
-  char *newline = strchr(conn->inbuf, '\n');
+  size_t n_parse;
+  const char * parse_ptr = (const char *)buffer_read_ptr(&conn->in_buff, &n_parse);
+  char *newline = strchr(parse_ptr, '\n');
   if (newline) {
     *newline = '\0';
-    LOG(DEBUG, "Processing admin command: %s", conn->inbuf);
-    conn->outbuf_len =
-        config_handler(conn->inbuf, conn->outbuf, sizeof(conn->outbuf));
-    conn->outbuf_sent = 0;
-    selector_set_interest_key(key, OP_WRITE);
-    // Mover datos restantes (si hay más de un comando en el buffer)
-    size_t rem = conn->inbuf_len - (newline - conn->inbuf + 1);
-    memmove(conn->inbuf, newline + 1, rem);
-    conn->inbuf_len = rem;
-  }
-}
-
-static void admin_write(struct selector_key *key) {
-  admin_conn_t *conn = key->data;
-  while (conn->outbuf_sent < conn->outbuf_len) {
-    ssize_t n = write(conn->fd, conn->outbuf + conn->outbuf_sent,
-                      conn->outbuf_len - conn->outbuf_sent);
-    if (n < 0) {
-      if (errno == EAGAIN || errno == EWOULDBLOCK)
-        return;
-      LOG(ERROR, "Error writing to admin connection fd %d: %s", conn->fd,
-          strerror(errno));
+    LOG(DEBUG, "Processing admin command: %s", parse_ptr);
+    if(!buffer_can_write(&conn->out_buff)) {
+      LOG(WARNING, "Output buffer full for fd %d", key->fd);
+      // NO DEBERÍA PASAR
+      return;
+    }
+    size_t n_response;
+    char *response_ptr = (char *)buffer_write_ptr(&conn->out_buff, &n_response);
+    int config_result = config_handler(parse_ptr, response_ptr, n_response);
+    if(config_result <= 0){
       selector_unregister_fd(key->s, conn->fd);
       close(conn->fd);
       free(conn);
       return;
     }
-    LOG(DEBUG, "Wrote %zd bytes to admin connection fd %d", n, conn->fd);
-    conn->outbuf_sent += n;
+    // Comando leído del in_buff
+    size_t cmd_len = (newline - parse_ptr) + 1;
+    buffer_read_adv(&conn->in_buff, cmd_len);
+    // Respuesta generada y escrita en out_buff
+    buffer_write_adv(&conn->out_buff, config_result);
+
+    selector_set_interest_key(key, OP_WRITE);
+    
   }
-  // Terminó de escribir, volver a leer
+}
+
+static void admin_write(struct selector_key *key) {
+  admin_conn_t *conn = key->data;
+  if (!buffer_can_read(&conn->out_buff)) {
+    LOG(WARNING, "Output buffer empty for fd %d", key->fd);
+    return;
+  }
+
+  size_t n;
+  uint8_t *read_ptr = buffer_read_ptr(&conn->out_buff, &n);
+
+  ssize_t n_written = send(key->fd, read_ptr, n, MSG_DONTWAIT);
+  if (n_written < 0) {
+    if (errno == EAGAIN || errno == EWOULDBLOCK) return;
+    LOG(ERROR, "Error writing to admin connection fd %d: %s", conn->fd, strerror(errno));
+    selector_unregister_fd(key->s, conn->fd);
+    close(conn->fd);
+    free(conn);
+    return;
+  }
+  LOG(DEBUG, "Wrote %zd bytes to admin connection fd %d", n_written, conn->fd);
+  buffer_read_adv(&conn->out_buff, n_written);
+
   selector_set_interest_key(key, OP_READ);
 }

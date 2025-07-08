@@ -46,6 +46,7 @@
     "socks5_copy.h": "c",
     "logger.h": "c",
     "cstdlib": "c",
-    "stat.h": "c"
+    "stat.h": "c",
+    "cstring": "c"
   }
 }

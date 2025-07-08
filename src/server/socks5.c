@@ -143,6 +143,6 @@ static void socksv5_close(struct selector_key *key) {
   
   stm_handler_close(conn->stm, key);
   socks5_stm_free(conn->stm);
-  //metrics_dec_curr_conn(get_server_data()->metrics);
+  metrics_dec_curr_conn(get_server_data()->metrics);
   free(conn);
 }
