@@ -131,5 +131,6 @@ typedef enum socks5_state {
 } socks5_state;
 
 struct state_machine *socks5_stm_init();
+void socks5_stm_free(struct state_machine *stm);
 
 #endif

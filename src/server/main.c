@@ -102,6 +102,7 @@ int main(int argc, char *argv[]) {
   LOG_MSG(DEBUG, "Server data allocated successfully");
   _server_data->metrics = metrics_init();
   _server_data->access_register = access_register_init();
+  
 
   const char *error_msg = NULL;
   fd_selector fd_selector = NULL;

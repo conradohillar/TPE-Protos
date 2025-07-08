@@ -31,6 +31,24 @@ unsigned int copy_read(struct selector_key *key) {
 }
 
 
+void copy_on_departure(unsigned state, struct selector_key *key) {
+    socks5_conn_t *conn = key->data;
+
+    LOG(INFO, "Ending copy phase for fd %d (client) -> fd %d (origin)", conn->client_fd, conn->origin_fd);
+
+    if(selector_unregister_fd(key->s, conn->origin_fd) != SELECTOR_SUCCESS) {
+        LOG(ERROR, "Failed to unregister origin fd %d in copy phase", conn->origin_fd);
+    }
+    if (close(conn->origin_fd) < 0) {
+        LOG(ERROR, "Failed to close origin fd %d: %s", conn->origin_fd, strerror(errno));
+    } else {
+        LOG(DEBUG, "Closed origin fd %d successfully", conn->origin_fd);
+    }
+    
+}
+
+
+
 void copy_read_handler(struct selector_key *key) {
      socks5_conn_t *conn = key->data;
 
@@ -73,6 +91,8 @@ void copy_write_handler(struct selector_key *key) {
         return;
     }
 
+    bool full_buffer = !buffer_can_write(&conn->in_buff);
+
     size_t n;
     uint8_t *read_ptr = buffer_read_ptr(&conn->in_buff, &n);
 
@@ -83,6 +103,9 @@ void copy_write_handler(struct selector_key *key) {
         if(!buffer_can_read(&conn->in_buff)) {
             selector_set_interest(key->s, conn->origin_fd, OP_READ);  //Si ya no hay nada que enviar, ponemos el fd en NOOP
         }
+        if(full_buffer) {
+            selector_set_interest(key->s, conn->client_fd, OP_READ); 
+        } 
 
     } else if (n_written == 0) {
         LOG(INFO, "Connection closed by dest on fd %d", conn->origin_fd);

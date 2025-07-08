@@ -15,8 +15,7 @@ static void admin_write(struct selector_key *key);
 
 static const fd_handler admin_handler = {.handle_read = admin_read,
                                          .handle_write = admin_write,
-                                         .handle_close = NULL,
-                                         .handle_block = NULL};
+                                        };
 
 // Handler para aceptar conexiones
 void s5admin_passive_accept(struct selector_key *key) {
@@ -37,8 +36,7 @@ void s5admin_passive_accept(struct selector_key *key) {
 
 static void admin_read(struct selector_key *key) {
   admin_conn_t *conn = key->data;
-  ssize_t n = read(conn->fd, conn->inbuf + conn->inbuf_len,
-                   sizeof(conn->inbuf) - conn->inbuf_len - 1);
+  ssize_t n = read(conn->fd, conn->inbuf + conn->inbuf_len, sizeof(conn->inbuf) - conn->inbuf_len - 1);
   if (n <= 0) {
     LOG(INFO, "Admin connection closed on fd %d", conn->fd);
     selector_unregister_fd(key->s, conn->fd);

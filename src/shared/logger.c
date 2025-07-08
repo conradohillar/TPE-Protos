@@ -14,7 +14,7 @@
 #define COLOR_WHITE "\x1b[37m"
 #define COLOR_RESET "\x1b[0m"
 
-static LogLevel current_log_level = INFO;
+static LogLevel current_log_level = DEBUG;
 static FILE *log_file = NULL;
 
 void init_logging(const char *filename) {

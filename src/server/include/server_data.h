@@ -10,7 +10,8 @@ typedef struct {
 
     // Access Register
     access_register_t *access_register;
-
+    uint8_t buffer_size;
+    
 } server_data_t;
 
 server_data_t *get_server_data();

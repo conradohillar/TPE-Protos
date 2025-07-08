@@ -30,8 +30,8 @@ struct state_definition socks5_states[] = {
     {
         .state = SOCKS5_COPY,
         .on_arrival = copy_on_arrival,
-        .on_read_ready =
-            copy_read // Aca leemos del buffer interno y reenviamos al destino
+        .on_read_ready = copy_read, // Aca leemos del buffer interno y reenviamos al destino
+        .on_departure = copy_on_departure
     },
     {.state = SOCKS5_DONE, .on_arrival = handle_done},
     {.state = SOCKS5_ERROR, .on_arrival = handle_error}};
@@ -61,7 +61,7 @@ static void handle_done(unsigned state, struct selector_key *key) {
       close(conn->origin_fd);
     }
     LOG(DEBUG, "Cleaning up connection resources for fd %d", key->fd);
-    // Additional cleanup can be added here
+    free(conn->stm);
   }
   return;
 }
@@ -81,4 +81,13 @@ static void handle_error(unsigned state, struct selector_key *key) {
     // Additional cleanup can be added here
   }
   return;
+}
+
+void socks5_stm_free(struct state_machine *stm){
+  if (stm != NULL) {
+    LOG(DEBUG, "Freeing SOCKS5 state machine with %d states", stm->max_state);
+    free(stm);
+  } else {
+    LOG_MSG(WARNING, "Attempted to free a NULL SOCKS5 state machine");
+  }
 }

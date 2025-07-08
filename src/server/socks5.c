@@ -23,7 +23,7 @@ static const struct fd_handler socks5_handler = {
 /** Intenta aceptar la nueva conexión entrante*/
 void socksv5_passive_accept(struct selector_key *key) {
   LOG_MSG(DEBUG, "Trying to accept a new SOCKSv5 connection");
-  // crear el struct
+
   socks5_conn_t *conn = malloc(sizeof(socks5_conn_t));
   if (conn == NULL) {
     LOG_MSG(ERROR, "Failed to allocate memory for SOCKSv5 connection");
@@ -38,6 +38,7 @@ void socksv5_passive_accept(struct selector_key *key) {
     return;
   }
   conn->client_fd = fd;
+  conn->origin_fd = 0; 
   buffer_init(&conn->in_buff, SOCKS5_BUFF_MAX_LEN, conn->in_buff_data);
   buffer_init(&conn->out_buff, SOCKS5_BUFF_MAX_LEN, conn->out_buff_data);
   conn->stm = socks5_stm_init();
@@ -51,15 +52,13 @@ void socksv5_passive_accept(struct selector_key *key) {
 static void socksv5_read(struct selector_key *key) {
   socks5_conn_t *conn = key->data;
 
-  if (!buffer_can_write(
-          &conn->in_buff)) { // Puede pasar que este lleno el buffer de entrada,
-                             // cerramos la conexion o que?
+  if (!buffer_can_write(&conn->in_buff)) { // Puede pasar que este lleno el buffer de entrada,
     LOG(WARNING, "Input buffer full for fd %d, setting NOOP", key->fd);
-    selector_set_interest_key(
-        key,
-        OP_NOOP); // Por ahora no hago nada, hago que quede el socket muerto y
-                  // despues vemos igual no deberia pasar este caso creo
-    return;
+    selector_set_interest_key(key,OP_NOOP); // Por ahora no hago nada, hago que quede el socket muerto y
+    if(conn->origin_fd != 0) {
+      selector_set_interest(key->s, conn->origin_fd, OP_WRITE);
+    }
+    return;// despues vemos igual no deberia pasar este caso creo
   }
 
   size_t n;
@@ -141,6 +140,9 @@ static void socksv5_block(struct selector_key *key) {
 static void socksv5_close(struct selector_key *key) {
   socks5_conn_t *conn = key->data;
   LOG(INFO, "Closing SOCKS5 connection on fd %d", key->fd);
+  
   stm_handler_close(conn->stm, key);
-  metrics_dec_curr_conn(get_server_data()->metrics);
+  socks5_stm_free(conn->stm);
+  //metrics_dec_curr_conn(get_server_data()->metrics);
+  free(conn);
 }
