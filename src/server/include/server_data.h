@@ -7,11 +7,11 @@
 
 typedef struct {
     // Metrics
-    server_metrics_t *metrics;
+    server_metrics_t* metrics;
 
     // Access Register
-    access_register_t *access_register;
-    
+    access_register_t* access_register;
+
     // Connection buffers size
     int buffer_size;
 
@@ -20,7 +20,7 @@ typedef struct {
 
 } server_data_t;
 
-server_data_t *get_server_data();
+server_data_t* get_server_data();
 
 void server_data_init();
 

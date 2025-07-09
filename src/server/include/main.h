@@ -7,7 +7,7 @@
 #include <auth_table.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <selector.h>  
+#include <selector.h>
 #include <signal.h> // Para sigaction, sigemptyset, sigaddset, SIG_BLOCK (senales)
 #include <sys/signal.h>
 #include <errno.h>
@@ -20,7 +20,6 @@
 #include <server_data.h>
 #include <logger.h>
 
-
 #define FD_STDIN 0
 #define INITIAL_QUANTITY_FDS 1024
 #define MAX_PENDING_CONNECTIONS 128
@@ -28,6 +27,5 @@
 #define NANO_SEC_TIMEOUT 0
 #define SOCKS5 "SOCKS5"
 #define CONF_PROTOCOL "CONF PROTOCOL"
-
 
 #endif // MAIN_H

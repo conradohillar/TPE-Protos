@@ -5,14 +5,12 @@
 
 #define MAX_USERS 10
 
-struct users
-{
+struct users {
     char* name;
     char* pass;
 };
 
-typedef struct server_args
-{
+typedef struct server_args {
     char* socks_addr;
     unsigned short socks_port;
 
@@ -25,14 +23,11 @@ typedef struct server_args
     unsigned short users_count;
 } server_args;
 
-
-
 /**
  * Interpreta la linea de comandos (argc, argv) llenando
  * args con defaults o la seleccion humana. Puede cortar
  * la ejecución.
  */
-void
-parse_args(const int argc, char** argv, struct server_args* args);
+void parse_args(const int argc, char** argv, struct server_args* args);
 
 #endif

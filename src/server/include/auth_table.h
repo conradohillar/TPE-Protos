@@ -14,9 +14,9 @@
 void auth_init();
 void auth_destroy();
 
-bool auth_add_user(const char *username, const char *password);
-bool auth_remove_user(const char *username);
-bool auth_check_credentials(const char *username, const char *password);
-size_t auth_list_users(char *response, size_t response_size);
+bool auth_add_user(const char* username, const char* password);
+bool auth_remove_user(const char* username);
+bool auth_check_credentials(const char* username, const char* password);
+size_t auth_list_users(char* response, size_t response_size);
 
-#endif 
+#endif

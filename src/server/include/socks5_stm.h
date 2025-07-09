@@ -122,16 +122,16 @@ o  BND.PORT es el puerto de enlace del servidor en orden de octetos de red
 // Estados de la stm para el protocolo SOCKS5
 
 typedef enum socks5_state {
-  SOCKS5_HANDSHAKE,
-  SOCKS5_AUTH,
-  SOCKS5_CONNECTION_REQ,
-  SOCKS5_CONNECTING,
-  SOCKS5_COPY,
-  SOCKS5_DONE,
-  SOCKS5_ERROR,
+    SOCKS5_HANDSHAKE,
+    SOCKS5_AUTH,
+    SOCKS5_CONNECTION_REQ,
+    SOCKS5_CONNECTING,
+    SOCKS5_COPY,
+    SOCKS5_DONE,
+    SOCKS5_ERROR,
 } socks5_state;
 
-struct state_machine *socks5_stm_init();
-void socks5_stm_free(struct state_machine *stm);
+struct state_machine* socks5_stm_init();
+void socks5_stm_free(struct state_machine* stm);
 
 #endif

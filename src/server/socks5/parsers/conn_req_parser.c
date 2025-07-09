@@ -3,74 +3,74 @@
 #include <logger.h>
 #include <stdlib.h>
 
-static void version(struct parser_event *ret, const uint8_t c) {
-  LOG(DEBUG, "STATE: CONN_REQ_VERSION, reading byte: 0x%x", c);
-  ret->type = CONN_REQ_VERSION;
-  ret->n = 1;
-  ret->data[0] = c;
+static void version(struct parser_event* ret, const uint8_t c) {
+    LOG(DEBUG, "STATE: CONN_REQ_VERSION, reading byte: 0x%x", c);
+    ret->type = CONN_REQ_VERSION;
+    ret->n = 1;
+    ret->data[0] = c;
 }
 
-static void cmd(struct parser_event *ret, const uint8_t c) {
-  LOG(DEBUG, "STATE: CONN_REQ_CMD, reading byte: 0x%x", c);
-  ret->type = CONN_REQ_CMD;
-  ret->n = 1;
-  ret->data[0] = c;
+static void cmd(struct parser_event* ret, const uint8_t c) {
+    LOG(DEBUG, "STATE: CONN_REQ_CMD, reading byte: 0x%x", c);
+    ret->type = CONN_REQ_CMD;
+    ret->n = 1;
+    ret->data[0] = c;
 }
 
-static void rsv(struct parser_event *ret, const uint8_t c) {
-  LOG(DEBUG, "STATE: CONN_REQ_RSV, reading byte: 0x%x", c);
-  ret->type = CONN_REQ_RSV;
-  ret->n = 1;
-  ret->data[0] = c;
+static void rsv(struct parser_event* ret, const uint8_t c) {
+    LOG(DEBUG, "STATE: CONN_REQ_RSV, reading byte: 0x%x", c);
+    ret->type = CONN_REQ_RSV;
+    ret->n = 1;
+    ret->data[0] = c;
 }
 
-static void atyp(struct parser_event *ret, const uint8_t c) {
-  LOG(DEBUG, "STATE: CONN_REQ_ATYP, reading byte: 0x%x", c);
-  ret->type = CONN_REQ_ATYP;
-  ret->n = 1;
-  ret->data[0] = c;
+static void atyp(struct parser_event* ret, const uint8_t c) {
+    LOG(DEBUG, "STATE: CONN_REQ_ATYP, reading byte: 0x%x", c);
+    ret->type = CONN_REQ_ATYP;
+    ret->n = 1;
+    ret->data[0] = c;
 }
 
-static void dom_len(struct parser_event *ret, const uint8_t c) {
-  LOG(DEBUG, "STATE: CONN_REQ_DOM_LEN, reading byte: 0x%x", c);
-  ret->type = CONN_REQ_DOM_LEN;
-  ret->n = 1;
-  ret->data[0] = c;
+static void dom_len(struct parser_event* ret, const uint8_t c) {
+    LOG(DEBUG, "STATE: CONN_REQ_DOM_LEN, reading byte: 0x%x", c);
+    ret->type = CONN_REQ_DOM_LEN;
+    ret->n = 1;
+    ret->data[0] = c;
 }
 
-static void dst_addr(struct parser_event *ret, const uint8_t c) {
-  LOG(DEBUG, "STATE: CONN_REQ_DST_ADDR, reading byte: 0x%x", c);
-  ret->type = CONN_REQ_DST_ADDR;
-  ret->n = 1;
-  ret->data[0] = c;
+static void dst_addr(struct parser_event* ret, const uint8_t c) {
+    LOG(DEBUG, "STATE: CONN_REQ_DST_ADDR, reading byte: 0x%x", c);
+    ret->type = CONN_REQ_DST_ADDR;
+    ret->n = 1;
+    ret->data[0] = c;
 }
 
-static void dst_port_byte1(struct parser_event *ret, const uint8_t c) {
-  LOG(DEBUG, "STATE: CONN_REQ_DST_PORT_BYTE1, reading byte: 0x%x", c);
-  ret->type = CONN_REQ_DST_PORT_BYTE1;
-  ret->n = 1;
-  ret->data[0] = c;
+static void dst_port_byte1(struct parser_event* ret, const uint8_t c) {
+    LOG(DEBUG, "STATE: CONN_REQ_DST_PORT_BYTE1, reading byte: 0x%x", c);
+    ret->type = CONN_REQ_DST_PORT_BYTE1;
+    ret->n = 1;
+    ret->data[0] = c;
 }
 
-static void dst_port_byte2(struct parser_event *ret, const uint8_t c) {
-  LOG(DEBUG, "STATE: CONN_REQ_DST_PORT_BYTE2, reading byte: 0x%x", c);
-  ret->type = CONN_REQ_DST_PORT_BYTE2;
-  ret->n = 1;
-  ret->data[0] = c;
+static void dst_port_byte2(struct parser_event* ret, const uint8_t c) {
+    LOG(DEBUG, "STATE: CONN_REQ_DST_PORT_BYTE2, reading byte: 0x%x", c);
+    ret->type = CONN_REQ_DST_PORT_BYTE2;
+    ret->n = 1;
+    ret->data[0] = c;
 }
 
-static void done(struct parser_event *ret, const uint8_t c) {
-  LOG(DEBUG, "STATE: CONN_REQ_DONE, reading byte: 0x%x", c);
-  ret->type = CONN_REQ_DONE;
-  ret->n = 1;
-  ret->data[0] = c;
+static void done(struct parser_event* ret, const uint8_t c) {
+    LOG(DEBUG, "STATE: CONN_REQ_DONE, reading byte: 0x%x", c);
+    ret->type = CONN_REQ_DONE;
+    ret->n = 1;
+    ret->data[0] = c;
 }
 
-static void error(struct parser_event *ret, const uint8_t c) {
-  LOG(DEBUG, "STATE: CONN_REQ_ERROR, reading byte: 0x%x", c);
-  ret->type = CONN_REQ_ERROR;
-  ret->n = 1;
-  ret->data[0] = c;
+static void error(struct parser_event* ret, const uint8_t c) {
+    LOG(DEBUG, "STATE: CONN_REQ_ERROR, reading byte: 0x%x", c);
+    ret->type = CONN_REQ_ERROR;
+    ret->n = 1;
+    ret->data[0] = c;
 }
 
 static const struct parser_state_transition version_transitions[] = {
@@ -193,7 +193,7 @@ static const struct parser_state_transition error_transitions[] = {
     },
 };
 
-static const struct parser_state_transition *states[] = {
+static const struct parser_state_transition* states[] = {
     [CONN_REQ_VERSION] = version_transitions,
     [CONN_REQ_CMD] = cmd_transitions,
     [CONN_REQ_RSV] = rsv_transitions,
@@ -225,68 +225,68 @@ static const struct parser_definition conn_req_parser_definition = {
     .start_state = CONN_REQ_VERSION,
 };
 
-conn_req_parser *conn_req_parser_init(void) {
-  conn_req_parser *p = malloc(sizeof(conn_req_parser));
-  if (p == NULL) {
-    LOG_MSG(ERROR, "Failed to allocate memory for conn_req_parser");
-    return NULL;
-  }
-  p->parser = parser_init(parser_no_classes(), &conn_req_parser_definition);
-  p->cmd = 0;            // Comando inicial
-  p->atyp = 0;           // Tipo de dirección inicial
-  p->dst_addr_len = 0;   // Longitud del dominio destino inicial
-  p->dst_addr_count = 0; // Contador de bytes leídos de dst_addr inicial
-  p->dst_port = 0;       // Puerto destino inicial
-  return p;
+conn_req_parser* conn_req_parser_init(void) {
+    conn_req_parser* p = malloc(sizeof(conn_req_parser));
+    if (p == NULL) {
+        LOG_MSG(ERROR, "Failed to allocate memory for conn_req_parser");
+        return NULL;
+    }
+    p->parser = parser_init(parser_no_classes(), &conn_req_parser_definition);
+    p->cmd = 0;            // Comando inicial
+    p->atyp = 0;           // Tipo de dirección inicial
+    p->dst_addr_len = 0;   // Longitud del dominio destino inicial
+    p->dst_addr_count = 0; // Contador de bytes leídos de dst_addr inicial
+    p->dst_port = 0;       // Puerto destino inicial
+    return p;
 }
 
-conn_req_parser_state conn_req_parser_feed(conn_req_parser *p, uint8_t byte) {
-  const struct parser_event *e = parser_feed(p->parser, byte);
+conn_req_parser_state conn_req_parser_feed(conn_req_parser* p, uint8_t byte) {
+    const struct parser_event* e = parser_feed(p->parser, byte);
 
-  switch (e->type) {
-  case CONN_REQ_CMD:
-    p->cmd = e->data[0];
-    break;
-  case CONN_REQ_ATYP:
-    p->atyp = e->data[0];
-    switch (p->atyp) {
-    case SOCKS5_CONN_REQ_ATYP_IPV4:
-      p->dst_addr_len = 4;
-      break;
-    case SOCKS5_CONN_REQ_ATYP_DOMAIN_NAME:
-      break;
-    case SOCKS5_CONN_REQ_ATYP_IPV6:
-      p->dst_addr_len = 16;
-      break;
-    default:
-      return CONN_REQ_ERROR;
+    switch (e->type) {
+    case CONN_REQ_CMD:
+        p->cmd = e->data[0];
+        break;
+    case CONN_REQ_ATYP:
+        p->atyp = e->data[0];
+        switch (p->atyp) {
+        case SOCKS5_CONN_REQ_ATYP_IPV4:
+            p->dst_addr_len = 4;
+            break;
+        case SOCKS5_CONN_REQ_ATYP_DOMAIN_NAME:
+            break;
+        case SOCKS5_CONN_REQ_ATYP_IPV6:
+            p->dst_addr_len = 16;
+            break;
+        default:
+            return CONN_REQ_ERROR;
+        }
+        break;
+    case CONN_REQ_DOM_LEN:
+        p->dst_addr_len = e->data[0];
+        break;
+    case CONN_REQ_DST_ADDR:
+        p->dst_addr[p->dst_addr_count++] = e->data[0];
+        if (p->dst_addr_count >= p->dst_addr_len) {
+            p->dst_addr[p->dst_addr_count] = '\0';
+            parser_set(p->parser, CONN_REQ_DST_PORT_BYTE1);
+            return CONN_REQ_DST_PORT_BYTE1;
+        }
+        break;
+    case CONN_REQ_DST_PORT_BYTE1:
+        p->dst_port = e->data[0];
+        break;
+    case CONN_REQ_DST_PORT_BYTE2:
+        p->dst_port = (p->dst_port << 8) | e->data[0];
+        return CONN_REQ_DONE;
     }
-    break;
-  case CONN_REQ_DOM_LEN:
-    p->dst_addr_len = e->data[0];
-    break;
-  case CONN_REQ_DST_ADDR:
-    p->dst_addr[p->dst_addr_count++] = e->data[0];
-    if (p->dst_addr_count >= p->dst_addr_len) {
-      p->dst_addr[p->dst_addr_count] = '\0';
-      parser_set(p->parser, CONN_REQ_DST_PORT_BYTE1);
-      return CONN_REQ_DST_PORT_BYTE1;
-    }
-    break;
-  case CONN_REQ_DST_PORT_BYTE1:
-    p->dst_port = e->data[0];
-    break;
-  case CONN_REQ_DST_PORT_BYTE2:
-    p->dst_port = (p->dst_port << 8) | e->data[0];
-    return CONN_REQ_DONE;
-  }
-  return e->type;
+    return e->type;
 }
 
-void conn_req_parser_close(conn_req_parser *p) {
-  LOG_MSG(DEBUG, "Closing connection request parser");
-  parser_destroy(p->parser);
-  free(p);
+void conn_req_parser_close(conn_req_parser* p) {
+    LOG_MSG(DEBUG, "Closing connection request parser");
+    parser_destroy(p->parser);
+    free(p);
 }
 
 // int main(void) {

@@ -1,8 +1,8 @@
 #include <server_data.h>
 
-static server_data_t *_server_data = NULL;
+static server_data_t* _server_data = NULL;
 
-void server_data_init(){
+void server_data_init() {
     _server_data = malloc(sizeof(server_data_t));
     if (_server_data == NULL) {
         LOG_MSG(ERROR, "Failed to allocate memory for server data");
@@ -16,7 +16,7 @@ void server_data_init(){
     _server_data->timeout = TIMEOUT_DEFAULT;
 }
 
-server_data_t *get_server_data() { return _server_data; }
+server_data_t* get_server_data() { return _server_data; }
 
 void server_data_destroy() {
     if (_server_data != NULL) {

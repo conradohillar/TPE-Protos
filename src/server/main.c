@@ -2,168 +2,163 @@
 
 static bool done = false;
 
-static void sigterm_handler(int signum) {
-  LOG(INFO, "Received signal %d", signum);
-  done = true;
+static void
+sigterm_handler(int signum) {
+    LOG(INFO, "Received signal %d", signum);
+    done = true;
 }
 
-int create_and_register_passive_socket(fd_selector *selector, char *address, unsigned short port, const fd_handler *callback_functions, selector_status *ss, const char **error_msg, char *protocol) {
+int create_and_register_passive_socket(fd_selector* selector, char* address, unsigned short port, const fd_handler* callback_functions, selector_status* ss, const char** error_msg, char* protocol) {
 
-  struct sockaddr_in addr;
-  memset(&addr, 0, sizeof(addr));
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof(addr));
 
-  addr.sin_port = htons(port);
-  addr.sin_family = AF_INET;
-  if (address != NULL) {
-    if (inet_pton(AF_INET, address, &addr.sin_addr) <= 0) {
-      *error_msg = "Invalid address format for socks_addr";
-      goto error;
+    addr.sin_port = htons(port);
+    addr.sin_family = AF_INET;
+    if (address != NULL) {
+        if (inet_pton(AF_INET, address, &addr.sin_addr) <= 0) {
+            *error_msg = "Invalid address format for socks_addr";
+            goto error;
+        }
+    } else {
+        addr.sin_addr.s_addr = htonl(INADDR_ANY);
     }
-  } else {
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  }
 
-  const int fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  if (fd < 0) {
-    LOG_MSG(ERROR, "Error creating socket");
-    *error_msg = "Error creating socket";
-    goto error;
-  }
+    const int fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (fd < 0) {
+        LOG_MSG(ERROR, "Error creating socket");
+        *error_msg = "Error creating socket";
+        goto error;
+    }
 
-  LOG(INFO, "Server listening on TCP port %d - Protocol: %s", port, protocol);
+    LOG(INFO, "Server listening on TCP port %d - Protocol: %s", port, protocol);
 
-  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
 
-  if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    LOG_MSG(ERROR, "Error binding socket");
-    *error_msg = "Error binding socket";
-    goto error;
-  }
+    if (bind(fd, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
+        LOG_MSG(ERROR, "Error binding socket");
+        *error_msg = "Error binding socket";
+        goto error;
+    }
 
-  if (listen(fd, MAX_PENDING_CONNECTIONS) < 0) {
-    LOG_MSG(ERROR, "Error listening on socket");
-    *error_msg = "Error listening on socket";
-    goto error;
-  }
+    if (listen(fd, MAX_PENDING_CONNECTIONS) < 0) {
+        LOG_MSG(ERROR, "Error listening on socket");
+        *error_msg = "Error listening on socket";
+        goto error;
+    }
 
-  *ss = set_non_blocking_fd(fd);
-  if (*ss != SELECTOR_SUCCESS) {
-    LOG_MSG(ERROR, "Error setting server socket to non-blocking");
-    *error_msg = "Error setting server socket to non-blocking";
-    goto error;
-  }
+    *ss = set_non_blocking_fd(fd);
+    if (*ss != SELECTOR_SUCCESS) {
+        LOG_MSG(ERROR, "Error setting server socket to non-blocking");
+        *error_msg = "Error setting server socket to non-blocking";
+        goto error;
+    }
 
-  *ss = selector_register(*selector, fd, callback_functions, OP_READ, NULL);
-  if (*ss != SELECTOR_SUCCESS) {
-    LOG_MSG(ERROR, "Error registering server socket with selector");
-    *error_msg = "Error registering server socket with selector";
-    goto error;
-  }
+    *ss = selector_register(*selector, fd, callback_functions, OP_READ, NULL);
+    if (*ss != SELECTOR_SUCCESS) {
+        LOG_MSG(ERROR, "Error registering server socket with selector");
+        *error_msg = "Error registering server socket with selector";
+        goto error;
+    }
 
-  return 0;
+    return 0;
 
 error:
-  if (fd < 0)
-    close(fd);
-  return -1;
+    if (fd < 0)
+        close(fd);
+    return -1;
 }
 
-int main(int argc, char *argv[]) {
-  init_logging(NULL);
-  LOG_MSG(INFO, "Starting SOCKS5 server");
-  close(FD_STDIN);
+int main(int argc, char* argv[]) {
+    init_logging(NULL);
+    LOG_MSG(INFO, "Starting SOCKS5 server");
+    close(FD_STDIN);
 
-  server_args args = {0};
-  parse_args(argc, argv, &args);
+    server_args args = {0};
+    parse_args(argc, argv, &args);
 
-  signal(SIGINT, sigterm_handler);
-  signal(SIGTERM, sigterm_handler);
+    signal(SIGINT, sigterm_handler);
+    signal(SIGTERM, sigterm_handler);
 
-  server_data_init();
+    server_data_init();
 
-  LOG_MSG(INFO, "Initializing authentication system");
-  auth_init();
-  for (int i = 0; i < args.users_count; i++) {
-    LOG(DEBUG, "Adding user: %s", args.users[i].name);
-    auth_add_user(args.users[i].name, args.users[i].pass);
-  }
+    LOG_MSG(INFO, "Initializing authentication system");
+    auth_init();
+    for (int i = 0; i < args.users_count; i++) {
+        LOG(DEBUG, "Adding user: %s", args.users[i].name);
+        auth_add_user(args.users[i].name, args.users[i].pass);
+    }
 
-  const char *error_msg = NULL;
-  fd_selector fd_selector = NULL;
-  selector_status ss = SELECTOR_SUCCESS;
+    const char* error_msg = NULL;
+    fd_selector fd_selector = NULL;
+    selector_status ss = SELECTOR_SUCCESS;
 
-  const struct selector_init config = {
-      .signal = SIGALRM,
-      .select_timeout = {.tv_sec = SEC_TIMEOUT, .tv_nsec = NANO_SEC_TIMEOUT},
-  };
+    const struct selector_init config = {
+        .signal = SIGALRM,
+        .select_timeout = {.tv_sec = SEC_TIMEOUT, .tv_nsec = NANO_SEC_TIMEOUT},
+    };
 
-  ss = selector_init(&config);
-  if (ss != SELECTOR_SUCCESS) {
-    LOG_MSG(ERROR, "Error initializing selector");
-    error_msg = "Error initializing selector";
-    goto error;
-  }
-
-  LOG_MSG(DEBUG, "Selector initialized successfully");
-
-  fd_selector = selector_new(INITIAL_QUANTITY_FDS);
-  if (fd_selector == NULL) {
-    LOG_MSG(ERROR, "Error creating selector");
-    error_msg = "Error creating selector";
-    goto error;
-  }
-
-  LOG_MSG(DEBUG, "Selector created successfully");
-
-  const struct fd_handler socksv5 = {
-      .handle_read = socksv5_passive_accept,
-  };
-
-  const struct fd_handler conf_protocol = {.handle_read =
-                                               s5admin_passive_accept};
-
-  if (create_and_register_passive_socket(&fd_selector, args.socks_addr,
-                                         args.socks_port, &socksv5, &ss,
-                                         &error_msg, SOCKS5) == -1)
-    goto error;
-  if (create_and_register_passive_socket(&fd_selector, args.mng_addr,
-                                         args.mng_port, &conf_protocol, &ss,
-                                         &error_msg, CONF_PROTOCOL) == -1)
-    goto error;
-
-  LOG_MSG(INFO, "Server started successfully, entering main loop");
-  while (!done) {
-    ss = selector_select(fd_selector);
+    ss = selector_init(&config);
     if (ss != SELECTOR_SUCCESS) {
-      LOG_MSG(ERROR, "Error during selector select");
-      error_msg = "Error during selector select";
-      goto error;
+        LOG_MSG(ERROR, "Error initializing selector");
+        error_msg = "Error initializing selector";
+        goto error;
     }
-  }
 
-  int ret = 0;
+    LOG_MSG(DEBUG, "Selector initialized successfully");
+
+    fd_selector = selector_new(INITIAL_QUANTITY_FDS);
+    if (fd_selector == NULL) {
+        LOG_MSG(ERROR, "Error creating selector");
+        error_msg = "Error creating selector";
+        goto error;
+    }
+
+    LOG_MSG(DEBUG, "Selector created successfully");
+
+    const struct fd_handler socksv5 = {
+        .handle_read = socksv5_passive_accept,
+    };
+
+    const struct fd_handler conf_protocol = {.handle_read = s5admin_passive_accept};
+
+    if (create_and_register_passive_socket(&fd_selector, args.socks_addr, args.socks_port, &socksv5, &ss, &error_msg, SOCKS5) == -1)
+        goto error;
+    if (create_and_register_passive_socket(&fd_selector, args.mng_addr, args.mng_port, &conf_protocol, &ss, &error_msg, CONF_PROTOCOL) == -1)
+        goto error;
+
+    LOG_MSG(INFO, "Server started successfully, entering main loop");
+    while (!done) {
+        ss = selector_select(fd_selector);
+        if (ss != SELECTOR_SUCCESS) {
+            LOG_MSG(ERROR, "Error during selector select");
+            error_msg = "Error during selector select";
+            goto error;
+        }
+    }
+
+    int ret = 0;
 
 error:
-  if (ss != SELECTOR_SUCCESS) {
-    LOG(ERROR, "%s: %s", (error_msg == NULL) ? "" : error_msg,
-        ss == SELECTOR_IO ? strerror(errno) : selector_error(ss));
-    ret = 2;
-  } else if (error_msg) {
-    LOG(ERROR, "%s", error_msg);
-    ret = 1;
-  }
+    if (ss != SELECTOR_SUCCESS) {
+        LOG(ERROR, "%s: %s", (error_msg == NULL) ? "" : error_msg, ss == SELECTOR_IO ? strerror(errno) : selector_error(ss));
+        ret = 2;
+    } else if (error_msg) {
+        LOG(ERROR, "%s", error_msg);
+        ret = 1;
+    }
 
-  LOG_MSG(INFO, "Shutting down server");
-  if (fd_selector != NULL)
-    selector_destroy(fd_selector);
+    LOG_MSG(INFO, "Shutting down server");
+    if (fd_selector != NULL)
+        selector_destroy(fd_selector);
 
-  selector_close();
+    selector_close();
 
-  auth_destroy();
+    auth_destroy();
 
-  server_data_destroy();
+    server_data_destroy();
 
-  LOG_MSG(INFO, "Server shutdown complete");
-  close_logging();
-  return ret;
+    LOG_MSG(INFO, "Server shutdown complete");
+    close_logging();
+    return ret;
 }

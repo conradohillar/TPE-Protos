@@ -15,15 +15,15 @@ typedef struct {
     // Agregar más métricas ?
 } server_metrics_t;
 
-server_metrics_t *metrics_init(void);
+server_metrics_t* metrics_init(void);
 
 // Setters y updaters
-void metrics_inc_total_conn(server_metrics_t *server_metrics);
-void metrics_inc_curr_conn(server_metrics_t *server_metrics);
-void metrics_dec_curr_conn(server_metrics_t *server_metrics);
-void metrics_add_bytes(server_metrics_t *server_metrics, uint64_t bytes);
-void metrics_inc_errors(server_metrics_t *server_metrics);
+void metrics_inc_total_conn(server_metrics_t* server_metrics);
+void metrics_inc_curr_conn(server_metrics_t* server_metrics);
+void metrics_dec_curr_conn(server_metrics_t* server_metrics);
+void metrics_add_bytes(server_metrics_t* server_metrics, uint64_t bytes);
+void metrics_inc_errors(server_metrics_t* server_metrics);
 
-void metrics_print(server_metrics_t *server_metrics, char *buffer, size_t buffer_size);
+void metrics_print(server_metrics_t* server_metrics, char* buffer, size_t buffer_size);
 
 #endif // METRICS_H

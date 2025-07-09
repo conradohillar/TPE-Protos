@@ -8,27 +8,26 @@
 #include <stdlib.h>
 #include <defines.h>
 
-
 typedef enum handshake_state {
-  HANDSHAKE_VERSION,
-  HANDSHAKE_NMETHODS,
-  HANDSHAKE_METHODS,
-  HANDSHAKE_DONE,
-  HANDSHAKE_ERROR
+    HANDSHAKE_VERSION,
+    HANDSHAKE_NMETHODS,
+    HANDSHAKE_METHODS,
+    HANDSHAKE_DONE,
+    HANDSHAKE_ERROR
 } handshake_state;
 
 typedef struct handshake_parser {
-  struct parser *parser;
-  uint8_t nmethods;
-  uint8_t method_count;
+    struct parser* parser;
+    uint8_t nmethods;
+    uint8_t method_count;
 } handshake_parser;
 
-handshake_parser *handshake_parser_init();
+handshake_parser* handshake_parser_init();
 
-handshake_state handshake_parser_feed(handshake_parser *p, uint8_t byte);
+handshake_state handshake_parser_feed(handshake_parser* p, uint8_t byte);
 
-void handshake_parser_close(handshake_parser *p);
+void handshake_parser_close(handshake_parser* p);
 
-int handshake_process(handshake_parser *p);
+int handshake_process(handshake_parser* p);
 
 #endif

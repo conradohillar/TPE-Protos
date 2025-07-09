@@ -8,48 +8,46 @@
 #include <pthread.h>
 
 // Inicializa el buffer y offsets para la etapa de request
-void connection_req_on_arrival(unsigned state, struct selector_key *key) {
-    socks5_conn_t *conn = key->data;
+void connection_req_on_arrival(unsigned state, struct selector_key* key) {
+    socks5_conn_t* conn = key->data;
     LOG(DEBUG, "Starting connection request phase for fd %d", key->fd);
     conn->conn_req_parser = conn_req_parser_init();
 }
 
 // Lee y parsea el mensaje de request SOCKS5
-unsigned int connection_req_read(struct selector_key *key) {
-    socks5_conn_t *conn = key->data;
+unsigned int connection_req_read(struct selector_key* key) {
+    socks5_conn_t* conn = key->data;
     while (buffer_can_read(&conn->in_buff)) {
-        
+
         conn_req_parser_state state = conn_req_parser_feed(conn->conn_req_parser, buffer_read(&conn->in_buff));
 
         LOG(INFO, "Processing connection request for fd %d, state: %d", key->fd, state);
         if (state == CONN_REQ_DONE) {
             LOG(INFO, "Connection request received for fd %d, connecting to destination", key->fd);
             LOG(INFO, "Destination address: %s, port: %d", conn->conn_req_parser->dst_addr, conn->conn_req_parser->dst_port);
-            
+
             selector_set_interest_key(key, OP_NOOP);
 
             conn->dst_port = conn->conn_req_parser->dst_port;
-            strcpy(conn->dst_address, (char *)conn->conn_req_parser->dst_addr);
+            strcpy(conn->dst_address, (char*) conn->conn_req_parser->dst_addr);
 
-
-            
             pthread_t thread_id;
             int result = pthread_create(&thread_id, NULL, resolve_host_name, key->data);
 
-            if(result != 0){
-              LOG(ERROR, "Failed to create thread for connecting to host: %s", strerror(result));
+            if (result != 0) {
+                LOG(ERROR, "Failed to create thread for connecting to host: %s", strerror(result));
             }
 
             return SOCKS5_CONNECTING;
 
         } else if (state == CONN_REQ_ERROR) {
             LOG(ERROR, "Connection request error for fd %d", key->fd);
-            //TODO aca falta hacer todo el manejo de errores
-             buffer_write(&conn->out_buff, SOCKS5_VERSION); 
-            buffer_write(&conn->out_buff, SOCKS5_GENERAL_FAILURE); 
-            buffer_write(&conn->out_buff, 0x00); 
-            buffer_write(&conn->out_buff, ATYP_IPV4); 
-            //memset(conn->out_buff.data+4, 0, 6);
+            // TODO aca falta hacer todo el manejo de errores
+            buffer_write(&conn->out_buff, SOCKS5_VERSION);
+            buffer_write(&conn->out_buff, SOCKS5_GENERAL_FAILURE);
+            buffer_write(&conn->out_buff, 0x00);
+            buffer_write(&conn->out_buff, ATYP_IPV4);
+            // memset(conn->out_buff.data+4, 0, 6);
             selector_set_interest_key(key, OP_WRITE);
             buffer_reset(&conn->in_buff);
             return SOCKS5_ERROR;
@@ -58,8 +56,8 @@ unsigned int connection_req_read(struct selector_key *key) {
     return SOCKS5_CONNECTION_REQ;
 }
 
-void connection_req_on_departure(unsigned state, struct selector_key *key) {
-    socks5_conn_t *conn = key->data;
+void connection_req_on_departure(unsigned state, struct selector_key* key) {
+    socks5_conn_t* conn = key->data;
     LOG(DEBUG, "Connection request phase complete for fd %d", key->fd);
     conn_req_parser_close(conn->conn_req_parser);
     conn->conn_req_parser = NULL;
