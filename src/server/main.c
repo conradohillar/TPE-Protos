@@ -1,9 +1,5 @@
 #include <main.h>
 
-static server_data_t *_server_data = NULL;
-
-server_data_t *get_server_data() { return _server_data; }
-
 static bool done = false;
 
 static void sigterm_handler(int signum) {
@@ -87,22 +83,14 @@ int main(int argc, char *argv[]) {
   signal(SIGINT, sigterm_handler);
   signal(SIGTERM, sigterm_handler);
 
+  server_data_init();
+
   LOG_MSG(INFO, "Initializing authentication system");
   auth_init();
   for (int i = 0; i < args.users_count; i++) {
     LOG(DEBUG, "Adding user: %s", args.users[i].name);
     auth_add_user(args.users[i].name, args.users[i].pass);
   }
-
-  _server_data = malloc(sizeof(server_data_t));
-  if (_server_data == NULL) {
-    LOG_MSG(ERROR, "Failed to allocate memory for server data");
-    exit(EXIT_FAILURE);
-  }
-  LOG_MSG(DEBUG, "Server data allocated successfully");
-  _server_data->metrics = metrics_init();
-  _server_data->access_register = access_register_init();
-  
 
   const char *error_msg = NULL;
   fd_selector fd_selector = NULL;
@@ -175,11 +163,9 @@ error:
 
   selector_close();
 
-  free(_server_data->access_register);
-  free(_server_data->metrics);
-  free(_server_data);
-
   auth_destroy();
+
+  server_data_destroy();
 
   LOG_MSG(INFO, "Server shutdown complete");
   close_logging();

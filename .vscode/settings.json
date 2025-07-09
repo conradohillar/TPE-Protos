@@ -47,6 +47,7 @@
     "logger.h": "c",
     "cstdlib": "c",
     "stat.h": "c",
-    "cstring": "c"
+    "cstring": "c",
+    "server_data.h": "c"
   }
 }

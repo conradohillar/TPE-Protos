@@ -73,13 +73,4 @@ void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response, siz
  */
 config_cmd_parsed_t *config_parse_command(const char *cmd);
 
-// Setters y getters para parámetros globales
-int config_set_timeout(int seconds);
-int config_set_buffer_size(size_t bytes);
-int config_get_timeout(void);
-size_t config_get_buffer_size(void);
-
-// Devuelve el estado/configuración actual en formato texto
-void config_get_status(char *out, size_t outlen);
-
 #endif // CONFIG_H

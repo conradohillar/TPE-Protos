@@ -3,6 +3,7 @@
 
 #include <access_register.h>
 #include <metrics.h>
+#include <defines.h>
 
 typedef struct {
     // Metrics
@@ -10,10 +11,23 @@ typedef struct {
 
     // Access Register
     access_register_t *access_register;
-    uint8_t buffer_size;
     
+    // Connection buffers size
+    int buffer_size;
+
+    // Timeout for connections in seconds
+    int timeout;
+
 } server_data_t;
 
 server_data_t *get_server_data();
+
+void server_data_init();
+
+void server_data_destroy();
+
+int set_buffer_size(int size);
+
+int set_timeout(int seconds);
 
 #endif // SERVER_DATA_H

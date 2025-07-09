@@ -53,18 +53,25 @@ void config_process_command(config_cmd_parsed_t *parsed_cmd, char *response,
                           response_size);
     break;
   case CMD_SET_TIMEOUT:
-    LOG(INFO, "Timeout configured to %s seconds (simulated)", parsed_cmd->arg1);
-    snprintf(response, response_size, "OK\n");
+    if(set_timeout(atoi(parsed_cmd->arg1)) == 0) {
+      snprintf(response, response_size, "OK\n");
+    } else {
+      snprintf(response, response_size, "ERROR: Timeout must be at least %d seconds\n", TIMEOUT_MIN);
+    }
     break;
   case CMD_SET_BUFF:
-    LOG(INFO, "Buffer size configured to %s bytes (simulated)",
-        parsed_cmd->arg1);
-    snprintf(response, response_size, "OK\n");
+    if(set_buffer_size(atoi(parsed_cmd->arg1)) == 0) {
+      snprintf(response, response_size, "OK\n");
+    } else {
+      snprintf(response, response_size, "ERROR: Buffer size must be at least %d bytes\n", BUFF_MIN_LEN);
+    }
     break;
   case CMD_GET_CONFIG:
     LOG_MSG(DEBUG, "Get config command executed");
+    server_data_t *server_data = get_server_data();
     snprintf(response, response_size,
-             "Configuración actual: timeout=30, buffer_size=1024\nOK\n");
+             "Configuración actual: timeout=%ds, buffer_size=%dB\nOK\n",
+             server_data->timeout, server_data->buffer_size);
     break;
   case CMD_EXIT:
     LOG_MSG(DEBUG, "Exit command executed");

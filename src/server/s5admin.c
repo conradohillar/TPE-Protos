@@ -12,9 +12,11 @@ typedef struct {
 
 static void admin_read(struct selector_key *key);
 static void admin_write(struct selector_key *key);
+static void admin_close(struct selector_key *key);
 
 static const fd_handler admin_handler = {.handle_read = admin_read,
                                          .handle_write = admin_write,
+                                         .handle_close = admin_close
                                         };
 
 // Handler para aceptar conexiones
@@ -114,4 +116,10 @@ static void admin_write(struct selector_key *key) {
   buffer_read_adv(&conn->out_buff, n_written);
 
   selector_set_interest_key(key, OP_READ);
+}
+
+static void admin_close(struct selector_key *key) {
+  admin_conn_t *conn = key->data;
+  LOG(INFO, "Closing admin connection on fd %d", conn->fd);
+  free(conn);
 }
