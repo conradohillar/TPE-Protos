@@ -53,7 +53,7 @@ static void dst_port_byte1(struct parser_event *ret, const uint8_t c) {
 }
 
 static void dst_port_byte2(struct parser_event *ret, const uint8_t c) {
-  LOG(DEBUG, "STATE: CONN_REQ_DST_PORT_BYTE2, reading byte: 0x%x\n", c);
+  LOG(DEBUG, "STATE: CONN_REQ_DST_PORT_BYTE2, reading byte: 0x%x", c);
   ret->type = CONN_REQ_DST_PORT_BYTE2;
   ret->n = 1;
   ret->data[0] = c;
@@ -286,7 +286,7 @@ conn_req_parser_state conn_req_parser_feed(conn_req_parser *p, uint8_t byte) {
 void conn_req_parser_close(conn_req_parser *p) {
   LOG_MSG(DEBUG, "Closing connection request parser");
   parser_destroy(p->parser);
-  free(p); 
+  free(p);
 }
 
 // int main(void) {

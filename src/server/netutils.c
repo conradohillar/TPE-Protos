@@ -148,20 +148,27 @@ int connect_to_host(struct addrinfo ** res, int *sock_fd) {
             close(*sock_fd);
             return -1;
         }
-
         if (connect(*sock_fd, rp->ai_addr, rp->ai_addrlen) == 0) {
             LOG(DEBUG, "Successfully connected to the target host for fd %d", *sock_fd);
+            freeaddrinfo(*res);
             return CONNECTION_SUCCESS;
         }else if (errno == EINPROGRESS) {
             LOG(DEBUG, "Connection in progress for fd %d", *sock_fd);
+            struct addrinfo * aux = rp->ai_next;
+            rp->ai_next = NULL;
+            freeaddrinfo(*res);
+            *res = aux; 
             return CONNECTION_IN_PROGRESS;
         }
 
         close(*sock_fd);
         rp = rp->ai_next;
-        (*res)->ai_next = NULL;
-        freeaddrinfo(*res);
-        *res = rp;
     }   
+    if (*res != NULL) {
+        freeaddrinfo(*res);
+        *res = NULL;
+    }
     return CONNECTION_FAILED;
+
+    
 }

@@ -6,6 +6,10 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
+#include <string.h>
+#include <logger.h>
+#include <unistd.h>
+
 
 #define MAX_CMD_LEN 512
 #define MAX_RESPONSE_LEN 1024 * 100

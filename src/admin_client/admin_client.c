@@ -1,5 +1,5 @@
 #include <admin_client.h>
-#include <logger.h>
+
 
 int connect_to_admin_server(const char *host, int port) {
   struct sockaddr_in serv_addr;
@@ -59,6 +59,7 @@ void admin_client_loop(int sockfd) {
 }
 
 int main(int argc, char *argv[]) {
+  init_logging(NULL);
   const char *host = DEFAULT_SERVER_HOST;
   int port = DEFAULT_SERVER_PORT;
   for (int i = 1; i < argc; ++i) {
@@ -75,5 +76,6 @@ int main(int argc, char *argv[]) {
   LOG_MSG(INFO, "Conectado al servidor de administración");
   admin_client_loop(sockfd);
   close(sockfd);
+  close_logging();
   return 0;
 }

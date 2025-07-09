@@ -47,6 +47,11 @@
     "logger.h": "c",
     "cstdlib": "c",
     "stat.h": "c",
+<<<<<<< HEAD
     "socks5_connecting.h": "c"
+=======
+    "cstring": "c",
+    "server_data.h": "c"
+>>>>>>> 325bd41eb09c53993b4b4a0bf0aad34d7cbd01b1
   }
 }

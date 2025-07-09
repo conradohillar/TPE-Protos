@@ -1,5 +1,6 @@
 #ifndef __CONNECTION_HELPER_H__
 #define __CONNECTION_HELPER_H__
+#define _GNU_SOURCE
 
 #include <stddef.h>
 #include <netutils.h>

@@ -52,7 +52,7 @@ typedef struct {
     char dst_address[DOMAIN_NAME_MAX_LENGTH];
     uint16_t dst_port;
 
-    struct addrinfo *addr_info; 
+    struct addrinfo *addr_info;
 
 } socks5_conn_t;
 
