@@ -11,11 +11,7 @@ static void sigterm_handler(int signum) {
   done = true;
 }
 
-int create_and_register_passive_socket(fd_selector *selector, char *address,
-                                       unsigned short port,
-                                       const fd_handler *callback_functions,
-                                       selector_status *ss,
-                                       const char **error_msg, char *protocol) {
+int create_and_register_passive_socket(fd_selector *selector, char *address, unsigned short port, const fd_handler *callback_functions, selector_status *ss, const char **error_msg, char *protocol) {
 
   struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));

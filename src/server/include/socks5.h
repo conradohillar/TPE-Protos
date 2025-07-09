@@ -22,30 +22,37 @@
 #include <string.h> // memset
 #include <unistd.h> // close
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
 
 #define SOCKS5_BUFF_MAX_LEN 512
 
 #define N(x) (sizeof(x) / sizeof((x)[0]))
 
+#define DOMAIN_NAME_MAX_LENGTH 254
+
 typedef struct {
-    /** File descriptor del cliente */
+    fd_selector s; 
     int client_fd;
-    /** File descriptor del origen (servidor destino) */
     int origin_fd;
 
-    /** Máquina de estados principal */
     struct state_machine *stm;
 
     handshake_parser *handshake_parser;
     auth_parser *auth_parser;
     conn_req_parser *conn_req_parser;
 
-    // Manejo de buffers de la conexión
     buffer in_buff;
     buffer out_buff;
 
     uint8_t in_buff_data[SOCKS5_BUFF_MAX_LEN];
     uint8_t out_buff_data[SOCKS5_BUFF_MAX_LEN];
+
+
+    char dst_address[DOMAIN_NAME_MAX_LENGTH];
+    uint16_t dst_port;
+
+    struct addrinfo *addr_info; 
 
 } socks5_conn_t;
 

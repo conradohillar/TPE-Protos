@@ -1,7 +1,8 @@
 #include <netutils.h>
 
-
+#ifndef N
 #define N(x) (sizeof(x)/sizeof((x)[0]))
+#endif
 
 extern const char *
 sockaddr_to_human(char *buff, const size_t buffsize,
@@ -106,44 +107,61 @@ int set_non_blocking_fd(const int fd) {
   return ret;
 }
 
-
-int connect_to_host(const uint8_t *dst_addr, const uint16_t dst_port) {
-    LOG(DEBUG, "Attempting to connect to host: %s:%u", dst_addr, dst_port);
+void * resolve_host_name(void *arg) {
+    socks5_conn_t * conn = (socks5_conn_t *)arg;
+    LOG(DEBUG, "Attempting to connect to host: %s:%u", conn->dst_address, conn->dst_port);
     
-    struct addrinfo hints = {
-        .ai_family = AF_UNSPEC,
-        .ai_socktype = SOCK_STREAM
-    };
-    struct addrinfo *res;
+        struct addrinfo hints = {
+            .ai_family = AF_UNSPEC,
+            .ai_socktype = SOCK_STREAM
+        };
+        struct addrinfo *res;
 
-    char port_str[6];
-    snprintf(port_str, sizeof(port_str), "%u", dst_port);
+        char port_str[6];
+        snprintf(port_str, sizeof(port_str), "%u", conn->dst_port);
 
-    if (getaddrinfo((char*)dst_addr, port_str, &hints, &res) != 0) {
-        LOG(ERROR, "Failed to resolve hostname: %s", dst_addr);
-        return -1; 
-    }
-    //TODO Falta liberar todos los structs
-    LOG_MSG(DEBUG, "Hostname resolved, trying to connect");
-    for (struct addrinfo *rp = res; rp != NULL; rp = rp->ai_next) {
-        int sock = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-        if (sock < 0) {
+        if (getaddrinfo((char*)conn->dst_address, port_str, &hints, &res) != 0) {
+            LOG(ERROR, "Failed to resolve hostname: %s", conn->dst_address);
+            return NULL; 
+        }
+
+        LOG(DEBUG, "Resolved host %s to address family %d", conn->dst_address, res->ai_family);
+
+        conn->addr_info = res;
+        selector_notify_block(conn->s, conn->client_fd);
+        return NULL;
+}
+
+int connect_to_host(struct addrinfo ** res, int *sock_fd) {
+    struct addrinfo *rp = *res;
+    while (rp != NULL) {
+        *sock_fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (*sock_fd < 0) {
             LOG_MSG(DEBUG, "Failed to create socket, trying next address");
-            continue;
+            return -1;
         }
 
-        if (connect(sock, rp->ai_addr, rp->ai_addrlen) == 0) {
-            LOG(INFO, "Successfully connected to %s:%u on socket %d", dst_addr, dst_port, sock);
-            set_non_blocking_fd(sock);  
-            freeaddrinfo(res);
-            return sock;
+        setsockopt(*sock_fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+
+        if(set_non_blocking_fd(*sock_fd) != SELECTOR_SUCCESS) {
+            LOG(ERROR, "Failed to set socket %d to non-blocking mode", *sock_fd);
+            close(*sock_fd);
+            return -1;
         }
 
-        LOG_MSG(DEBUG, "Connection failed, trying next address");
-        close(sock);
-    }
+        if (connect(*sock_fd, rp->ai_addr, rp->ai_addrlen) == 0) {
+            LOG(DEBUG, "Successfully connected to the target host for fd %d", *sock_fd);
+            return CONNECTION_SUCCESS;
+        }else if (errno == EINPROGRESS) {
+            LOG(DEBUG, "Connection in progress for fd %d", *sock_fd);
+            return CONNECTION_IN_PROGRESS;
+        }
 
-    LOG(ERROR, "Failed to connect to any address for %s:%u", dst_addr, dst_port);
-    freeaddrinfo(res);
-    return -1;
+        close(*sock_fd);
+        rp = rp->ai_next;
+        (*res)->ai_next = NULL;
+        freeaddrinfo(*res);
+        *res = rp;
+    }   
+    return CONNECTION_FAILED;
 }

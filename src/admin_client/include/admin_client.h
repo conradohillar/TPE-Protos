@@ -5,7 +5,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <netutils.h>
 #include <stdlib.h>
 
 #define MAX_CMD_LEN 512

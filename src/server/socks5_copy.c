@@ -10,6 +10,7 @@ const struct fd_handler copy_selector_handler = {
     .handle_write = copy_write_handler,
 };
 
+
 void copy_on_arrival(unsigned state, struct selector_key *key) {
     socks5_conn_t *conn = key->data;
 

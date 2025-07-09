@@ -3,6 +3,7 @@
 #include <handshake.h>
 #include <logger.h>
 #include <socks5_copy.h>
+#include <socks5_connecting.h>
 #include <socks5_stm.h>
 #include <stm.h>
 #include <unistd.h>
@@ -19,22 +20,38 @@ struct state_definition socks5_states[] = {
         .on_departure = handshake_on_departure,
         .on_read_ready = handshake_read,
     },
-    {.state = SOCKS5_AUTH,
-     .on_arrival = auth_on_arrival,
-     .on_departure = auth_on_departure,
-     .on_read_ready = auth_read},
-    {.state = SOCKS5_CONNECTION_REQ,
-     .on_arrival = connection_req_on_arrival,
-     .on_departure = connection_req_on_departure,
-     .on_read_ready = connection_req_read},
     {
-        .state = SOCKS5_COPY,
-        .on_arrival = copy_on_arrival,
-        .on_read_ready = copy_read, // Aca leemos del buffer interno y reenviamos al destino
-        .on_departure = copy_on_departure
+      .state = SOCKS5_AUTH,
+      .on_arrival = auth_on_arrival,
+      .on_departure = auth_on_departure,
+      .on_read_ready = auth_read
     },
-    {.state = SOCKS5_DONE, .on_arrival = handle_done},
-    {.state = SOCKS5_ERROR, .on_arrival = handle_error}};
+    {
+      .state = SOCKS5_CONNECTION_REQ,
+      .on_arrival = connection_req_on_arrival,
+      .on_departure = connection_req_on_departure,
+      .on_read_ready = connection_req_read
+    },
+    {
+      .state = SOCKS5_CONNECTING,
+      .on_block_ready = connecting_on_block_ready,
+      .on_read_ready = connecting_read,
+    },
+    {
+      .state = SOCKS5_COPY,
+      .on_arrival = copy_on_arrival,
+      .on_read_ready = copy_read, // Aca leemos del buffer interno y reenviamos al destino
+      .on_departure = copy_on_departure
+    },
+    {
+      .state = SOCKS5_DONE,
+      .on_arrival = handle_done
+    },
+    {
+      .state = SOCKS5_ERROR,
+      .on_arrival = handle_error
+    }
+  };
 
 struct state_machine *socks5_stm_init() {
   struct state_machine *stm = malloc(sizeof(struct state_machine));

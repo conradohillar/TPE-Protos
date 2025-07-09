@@ -37,6 +37,8 @@ void socksv5_passive_accept(struct selector_key *key) {
     free(conn);
     return;
   }
+  
+  conn->s = key->s;
   conn->client_fd = fd;
   conn->origin_fd = 0; 
   buffer_init(&conn->in_buff, SOCKS5_BUFF_MAX_LEN, conn->in_buff_data);
@@ -146,3 +148,6 @@ static void socksv5_close(struct selector_key *key) {
   //metrics_dec_curr_conn(get_server_data()->metrics);
   free(conn);
 }
+
+
+
