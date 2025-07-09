@@ -63,6 +63,17 @@ static void wake_handler(const int signal) {
 struct selector_init conf;
 static sigset_t emptyset, blockset;
 
+static const char *interest_to_string(fd_interest interest) {
+  switch (interest) {
+  case OP_READ:
+    return "READ";
+  case OP_WRITE:
+    return "WRITE";
+  default:
+    return "UNKNOWN";
+  }
+}
+
 selector_status selector_init(const struct selector_init *c) {
   memcpy(&conf, c, sizeof(conf));
 
@@ -414,7 +425,7 @@ selector_status selector_set_interest(fd_selector s, int fd, fd_interest i) {
   }
   item->interest = i;
   items_update_fdset_for_fd(s, item);
-  LOG(DEBUG, "Set interest for fd %d to %d", fd, i);
+  LOG(DEBUG, "Set interest for fd %d to %s", fd, interest_to_string(i));
 finally:
   return ret;
 }
