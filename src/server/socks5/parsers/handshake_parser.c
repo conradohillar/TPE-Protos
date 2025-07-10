@@ -1,5 +1,5 @@
-#include "../include/handshake_parser.h"
-#include "../include/handshake.h"
+#include <handshake_parser.h>
+#include <handshake.h>
 #include <logger.h>
 #include <stdio.h>
 #include <stdlib.h>

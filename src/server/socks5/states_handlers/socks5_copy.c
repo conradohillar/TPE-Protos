@@ -121,5 +121,6 @@ void copy_close_handler(struct selector_key* key) {
     if(conn->origin_fd > 0) {
         LOG(DEBUG, "Closing origin connection fd %d", conn->origin_fd);
         close(conn->origin_fd);
+        conn->origin_fd = -1;
     }
 }

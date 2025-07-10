@@ -94,3 +94,10 @@ void buffer_compact(buffer* b) {
         b->write = b->data + n;
     }
 }
+
+void buffer_write_struct(buffer* b, const void* data, size_t size) {
+    if (buffer_can_write(b) && size <= (size_t)(b->limit - b->write)) {
+        memcpy(b->write, data, size);
+        buffer_write_adv(b, size);
+    }
+}

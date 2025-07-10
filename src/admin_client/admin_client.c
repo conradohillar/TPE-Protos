@@ -58,7 +58,7 @@ void admin_client_loop(int sockfd) {
 }
 
 int main(int argc, char* argv[]) {
-    init_logging(NULL);
+    init_logging(NULL, WARNING);
     const char* host = DEFAULT_SERVER_HOST;
     int port = DEFAULT_SERVER_PORT;
     for (int i = 1; i < argc; ++i) {

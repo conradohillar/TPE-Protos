@@ -83,9 +83,8 @@ static void handle_done(unsigned state, struct selector_key* key) {
 
 static void handle_error(unsigned state, struct selector_key* key) {
     LOG(ERROR, "SOCKS5 connection ended with error for fd %d", key->fd);
-    // Clean up resources on error
     socks5_conn_t* conn = key->data;
-    if (conn) {
+    if (conn != NULL) {
         if (conn->origin_fd > 0) {
             LOG(DEBUG, "Closing origin connection fd %d due to error", conn->origin_fd);
             selector_unregister_fd(key->s, conn->origin_fd);
@@ -95,7 +94,6 @@ static void handle_error(unsigned state, struct selector_key* key) {
             selector_unregister_fd(key->s, conn->client_fd);
         }
         LOG(DEBUG, "Cleaning up connection resources for fd %d due to error", key->fd);
-        // Additional cleanup can be added here
     }
     return;
 }

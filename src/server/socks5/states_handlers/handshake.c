@@ -3,6 +3,7 @@
 #include <socks5_stm.h>
 #include <stdint.h>
 #include <defines.h>
+#include <socks5_responses.h>
 
 void handshake_on_arrival(unsigned state, struct selector_key* key) {
     socks5_conn_t* conn = key->data;
@@ -18,16 +19,15 @@ unsigned int handshake_read(struct selector_key* key) {
 
         if (state == HANDSHAKE_DONE) {
             LOG(INFO, "Handshake successful for fd %d", key->fd);
-            buffer_write(&conn->out_buff, SOCKS5_VERSION);
-            buffer_write(&conn->out_buff, SOCKS5_AUTH_METHOD_USER_PASS);
+            handshake_response response = create_handshake_response(SOCKS5_AUTH_METHOD_USER_PASS);    
+            buffer_write_struct(&conn->out_buff, &response, HANDSHAKE_RESPONSE_SIZE);
             selector_set_interest_key(key, OP_WRITE);
-
             return SOCKS5_AUTH;
 
         } else if (state == HANDSHAKE_ERROR) {
             LOG(ERROR, "Handshake error for fd %d", key->fd);
-            buffer_write(&conn->out_buff, SOCKS5_VERSION);
-            buffer_write(&conn->out_buff, 0xFF);
+            handshake_response response = create_handshake_response(SOCKS5_AUTH_METHOD_NO_ACCEPTABLE);    
+            buffer_write_struct(&conn->out_buff, &response, HANDSHAKE_RESPONSE_SIZE);
             selector_set_interest_key(key, OP_WRITE);
 
             return SOCKS5_ERROR;
