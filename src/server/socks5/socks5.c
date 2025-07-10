@@ -120,6 +120,9 @@ static void socksv5_write(struct selector_key* key) {
             buffer_reset(&conn->out_buff);
         }
         if (buffer_can_write(&conn->in_buff)) { selector_set_interest_key(key, OP_READ); }
+        if(has_write_handler(conn->stm->current->state)){
+            stm_handler_write(conn->stm, key);
+        }
     } else if (n_written < 0) {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
             LOG(ERROR, "Error writing to fd %d: %s", key->fd, strerror(errno));

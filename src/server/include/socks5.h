@@ -53,6 +53,8 @@ typedef struct {
 
     struct addrinfo* addr_info;
 
+    bool is_error_response;
+
 } socks5_conn_t;
 
 void socksv5_passive_accept(struct selector_key* key);

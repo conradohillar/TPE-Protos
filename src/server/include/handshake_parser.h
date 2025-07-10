@@ -28,6 +28,5 @@ handshake_state handshake_parser_feed(handshake_parser* p, uint8_t byte);
 
 void handshake_parser_close(handshake_parser* p);
 
-int handshake_process(handshake_parser* p);
 
 #endif

@@ -22,6 +22,7 @@ unsigned int handshake_read(struct selector_key* key) {
             handshake_response response = create_handshake_response(SOCKS5_AUTH_METHOD_USER_PASS);    
             buffer_write_struct(&conn->out_buff, &response, HANDSHAKE_RESPONSE_SIZE);
             selector_set_interest_key(key, OP_WRITE);
+            conn->is_error_response = false;
             return SOCKS5_AUTH;
 
         } else if (state == HANDSHAKE_ERROR) {
@@ -29,11 +30,20 @@ unsigned int handshake_read(struct selector_key* key) {
             handshake_response response = create_handshake_response(SOCKS5_AUTH_METHOD_NO_ACCEPTABLE);    
             buffer_write_struct(&conn->out_buff, &response, HANDSHAKE_RESPONSE_SIZE);
             selector_set_interest_key(key, OP_WRITE);
-
-            return SOCKS5_ERROR;
+            conn->is_error_response = true;
+            return SOCKS5_HANDSHAKE;
         }
     }
     return SOCKS5_HANDSHAKE;
+}
+
+unsigned int handshake_write(struct selector_key* key){
+        socks5_conn_t* conn = key->data;
+        if(conn->is_error_response){
+            return SOCKS5_ERROR;
+        }else{
+            return SOCKS5_AUTH;
+        }
 }
 
 void handshake_on_departure(unsigned state, struct selector_key* key) {

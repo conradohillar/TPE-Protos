@@ -107,11 +107,7 @@ handshake_state handshake_parser_feed(handshake_parser* p, uint8_t byte) {
         break;
     case HANDSHAKE_METHODS:
         p->method_count++;
-        if (p->method_count > p->nmethods ||
-            (p->method_count == p->nmethods &&
-             e->data[0] != SOCKS5_AUTH_METHOD_USER_PASS)) {
-            // si se leyeron todos los métodos y el parser no "encontró" el metodo
-            // SOCKS5_AUTH_METHOD_USER_PASS, entonces se retorna un error
+        if (p->method_count > p->nmethods || (p->method_count == p->nmethods && e->data[0] != SOCKS5_AUTH_METHOD_USER_PASS)) {
             return HANDSHAKE_ERROR;
         }
 

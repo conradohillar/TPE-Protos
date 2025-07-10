@@ -18,6 +18,7 @@ struct state_definition socks5_states[] = {
         .on_arrival = handshake_on_arrival,
         .on_departure = handshake_on_departure,
         .on_read_ready = handshake_read,
+        .on_write_ready = handshake_write
     },
     {
         .state = SOCKS5_AUTH,
@@ -105,4 +106,12 @@ void socks5_stm_free(struct state_machine* stm) {
     } else {
         LOG_MSG(WARNING, "Attempted to free a NULL SOCKS5 state machine");
     }
+}
+
+
+bool has_write_handler(socks5_state state){
+    if(state == SOCKS5_HANDSHAKE){
+        return true;
+    }
+    return false;
 }
