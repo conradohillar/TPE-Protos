@@ -24,7 +24,7 @@ unsigned int handshake_read(struct selector_key* key) {
             selector_set_interest_key(key, OP_WRITE);
             conn->is_error_response = !(conn->handshake_parser->no_auth || conn->handshake_parser->user_pass_auth);
         } else if (state == HANDSHAKE_ERROR) {
-            LOG(ERROR, "Handshake error for fd %d", key->fd);
+            LOG(ERROR, "Failed to parse handshake packet for fd: %d", key->fd);
             return SOCKS5_ERROR;            
         }
     }

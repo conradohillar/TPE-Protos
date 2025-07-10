@@ -20,12 +20,8 @@ unsigned int auth_read(struct selector_key* key) {
             conn->is_error_response = !auth_ok;
             selector_set_interest_key(key, OP_WRITE);
         } else if (state == AUTH_ERROR) {
-            LOG(ERROR, "Authentication error for fd %d", key->fd);
-            socks5_auth_response response = create_auth_response(false);
-            buffer_write_struct(&conn->out_buff, &response, AUTH_RESPONSE_SIZE);
-            buffer_reset(&conn->in_buff);
-            conn->is_error_response = true;
-            selector_set_interest_key(key, OP_WRITE);
+            LOG(ERROR, "Failed to parse auth packet for fd: %d", key->fd);
+            return SOCKS5_ERROR;
         }
     }
     return SOCKS5_AUTH;
