@@ -24,7 +24,8 @@ struct state_definition socks5_states[] = {
         .state = SOCKS5_AUTH,
         .on_arrival = auth_on_arrival,
         .on_departure = auth_on_departure,
-        .on_read_ready = auth_read
+        .on_read_ready = auth_read,
+        .on_write_ready = auth_write
     },
     {
         .state = SOCKS5_CONNECTION_REQ,
@@ -110,7 +111,7 @@ void socks5_stm_free(struct state_machine* stm) {
 
 
 bool has_write_handler(socks5_state state){
-    if(state == SOCKS5_HANDSHAKE){
+    if(state == SOCKS5_HANDSHAKE || state == SOCKS5_AUTH){
         return true;
     }
     return false;

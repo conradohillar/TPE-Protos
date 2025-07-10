@@ -90,7 +90,7 @@ bool auth_check_credentials(const char* username, const char* password) {
     while (curr) {
         if (strcmp(curr->username, username) == 0 &&
             strcmp(curr->password, password) == 0) {
-            LOG(DEBUG, "Authentication successful for user: %s", username);
+            LOG(ERROR, "Authentication successful for user: %s", username);
             return true;
         }
         curr = curr->next;

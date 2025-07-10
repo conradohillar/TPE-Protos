@@ -8,20 +8,15 @@
 #include <stdint.h>
 #include <defines.h>
 #include <logger.h>
+#include <socks5_responses.h>
 
-// --- Autenticación ---
 
-// Inicializa el parser de autenticación y los campos necesarios en la conexión
 void auth_on_arrival(unsigned state, struct selector_key* key);
 
-// Leer del socket: VER, ULEN, UNAME, PLEN, PASSWD
-// Verificar VER == 0x01
-// Extraer usuario y contraseña
-// Validar credenciales (llamar a tu función de auth)
-// Guardar resultado (éxito/fallo) y pasar a AUTH_WRITE
 unsigned int auth_read(struct selector_key* key);
 
-// Cerrar el parser de autenticación y limpiar recursos
+unsigned int auth_write(struct selector_key* key);
+
 void auth_on_departure(unsigned state, struct selector_key* key);
 
 #endif

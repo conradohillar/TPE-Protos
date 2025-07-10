@@ -23,15 +23,12 @@ unsigned int handshake_read(struct selector_key* key) {
             buffer_write_struct(&conn->out_buff, &response, HANDSHAKE_RESPONSE_SIZE);
             selector_set_interest_key(key, OP_WRITE);
             conn->is_error_response = false;
-            return SOCKS5_AUTH;
-
         } else if (state == HANDSHAKE_ERROR) {
             LOG(ERROR, "Handshake error for fd %d", key->fd);
             handshake_response response = create_handshake_response(SOCKS5_AUTH_METHOD_NO_ACCEPTABLE);    
             buffer_write_struct(&conn->out_buff, &response, HANDSHAKE_RESPONSE_SIZE);
             selector_set_interest_key(key, OP_WRITE);
             conn->is_error_response = true;
-            return SOCKS5_HANDSHAKE;
         }
     }
     return SOCKS5_HANDSHAKE;
