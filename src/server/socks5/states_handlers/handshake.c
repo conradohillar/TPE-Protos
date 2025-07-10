@@ -36,7 +36,10 @@ unsigned int handshake_write(struct selector_key* key){
         if(conn->is_error_response){
             return SOCKS5_ERROR;
         }else{
-            return SOCKS5_AUTH;
+            if(conn->handshake_parser->user_pass_auth){
+                return SOCKS5_AUTH;
+            }
+            return SOCKS5_CONNECTION_REQ;
         }
 }
 

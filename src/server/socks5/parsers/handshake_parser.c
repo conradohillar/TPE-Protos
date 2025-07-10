@@ -117,7 +117,9 @@ handshake_state handshake_parser_feed(handshake_parser* p, uint8_t byte) {
         }
         p->no_auth = p->no_auth || (e->data[0] == SOCKS5_AUTH_METHOD_NO_AUTH);
         p->user_pass_auth = p->user_pass_auth || (e->data[0] == SOCKS5_AUTH_METHOD_USER_PASS);
-        
+        if(p->nmethods == p->method_count) {
+            return HANDSHAKE_DONE;
+        }
         break;
     
     }
