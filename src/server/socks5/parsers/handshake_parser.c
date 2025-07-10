@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 static void version(struct parser_event* ret, const uint8_t c) {
     LOG(DEBUG, "STATE: HANDSHAKE_VERSION, reading byte: 0x%x", c);
     ret->type = HANDSHAKE_VERSION;
@@ -49,9 +50,6 @@ static const struct parser_state_transition nmethods_transitions[] = {
 };
 
 static const struct parser_state_transition methods_transitions[] = {
-    {.when = SOCKS5_AUTH_METHOD_USER_PASS,
-     .dest = HANDSHAKE_DONE,
-     .act1 = done},
     {.when = ANY, .dest = HANDSHAKE_METHODS, .act1 = methods},
 };
 
@@ -95,8 +93,11 @@ handshake_parser* handshake_parser_init() {
     p->parser = parser_init(parser_no_classes(), &handshake_parser_definition);
     p->nmethods = 0;
     p->method_count = 0;
+    p->no_auth = false;
+    p->user_pass_auth = false;
     return p;
 }
+
 
 handshake_state handshake_parser_feed(handshake_parser* p, uint8_t byte) {
     const struct parser_event* e = parser_feed(p->parser, byte);
@@ -107,13 +108,18 @@ handshake_state handshake_parser_feed(handshake_parser* p, uint8_t byte) {
         break;
     case HANDSHAKE_METHODS:
         p->method_count++;
-        if (p->method_count > p->nmethods || (p->method_count == p->nmethods && e->data[0] != SOCKS5_AUTH_METHOD_USER_PASS)) {
+        if(!is_valid_socks5_auth_method(e->data[0])) {
+            LOG(ERROR, "Invalid SOCKS5 authentication method: 0x%x", e->data[0]);
             return HANDSHAKE_ERROR;
         }
-
+        if(p->nmethods < p->method_count) {
+            return HANDSHAKE_DONE;
+        }
+        p->no_auth = p->no_auth || (e->data[0] == SOCKS5_AUTH_METHOD_NO_AUTH);
+        p->user_pass_auth = p->user_pass_auth || (e->data[0] == SOCKS5_AUTH_METHOD_USER_PASS);
+        
         break;
-    default:
-        break;
+    
     }
     return e->type;
 }
@@ -122,4 +128,12 @@ void handshake_parser_close(handshake_parser* p) {
     LOG_MSG(DEBUG, "Closing handshake parser");
     parser_destroy(p->parser);
     free(p);
+}
+
+
+bool is_valid_socks5_auth_method(uint8_t method) {
+    return (method == SOCKS5_AUTH_METHOD_NO_AUTH || 
+            method == SOCKS5_AUTH_METHOD_GSSAPI || 
+            method == SOCKS5_AUTH_METHOD_USER_PASS
+        );
 }

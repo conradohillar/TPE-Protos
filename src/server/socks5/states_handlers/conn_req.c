@@ -7,14 +7,12 @@
 #include <netutils.h>
 #include <pthread.h>
 
-// Inicializa el buffer y offsets para la etapa de request
 void connection_req_on_arrival(unsigned state, struct selector_key* key) {
     socks5_conn_t* conn = key->data;
     LOG(DEBUG, "Starting connection request phase for fd %d", key->fd);
     conn->conn_req_parser = conn_req_parser_init();
 }
 
-// Lee y parsea el mensaje de request SOCKS5
 unsigned int connection_req_read(struct selector_key* key) {
     socks5_conn_t* conn = key->data;
     while (buffer_can_read(&conn->in_buff)) {

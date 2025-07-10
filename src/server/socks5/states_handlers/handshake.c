@@ -19,16 +19,13 @@ unsigned int handshake_read(struct selector_key* key) {
 
         if (state == HANDSHAKE_DONE) {
             LOG(INFO, "Handshake successful for fd %d", key->fd);
-            handshake_response response = create_handshake_response(SOCKS5_AUTH_METHOD_USER_PASS);    
+            socks5_handshake_response response = create_handshake_response(conn->handshake_parser->no_auth, conn->handshake_parser->user_pass_auth);    
             buffer_write_struct(&conn->out_buff, &response, HANDSHAKE_RESPONSE_SIZE);
             selector_set_interest_key(key, OP_WRITE);
-            conn->is_error_response = false;
+            conn->is_error_response = !(conn->handshake_parser->no_auth || conn->handshake_parser->user_pass_auth);
         } else if (state == HANDSHAKE_ERROR) {
             LOG(ERROR, "Handshake error for fd %d", key->fd);
-            handshake_response response = create_handshake_response(SOCKS5_AUTH_METHOD_NO_ACCEPTABLE);    
-            buffer_write_struct(&conn->out_buff, &response, HANDSHAKE_RESPONSE_SIZE);
-            selector_set_interest_key(key, OP_WRITE);
-            conn->is_error_response = true;
+            return SOCKS5_ERROR;            
         }
     }
     return SOCKS5_HANDSHAKE;
