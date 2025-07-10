@@ -20,7 +20,6 @@ static const struct fd_handler socks5_handler = {
     .handle_block = socksv5_block,
 };
 
-/** Intenta aceptar la nueva conexión entrante*/
 void socksv5_passive_accept(struct selector_key* key) {
     LOG_MSG(DEBUG, "Trying to accept a new SOCKSv5 connection");
 
@@ -54,13 +53,11 @@ void socksv5_passive_accept(struct selector_key* key) {
 static void socksv5_read(struct selector_key* key) {
     socks5_conn_t* conn = key->data;
 
-    if (!buffer_can_write(&conn->in_buff)) { // Puede pasar que este lleno el buffer de entrada,
+    if (!buffer_can_write(&conn->in_buff)) {
         LOG(WARNING, "Input buffer full for fd %d, setting NOOP", key->fd);
-        selector_set_interest_key(key, OP_NOOP); // Por ahora no hago nada, hago que quede el socket muerto y
-        if (conn->origin_fd != 0) {
-            selector_set_interest(key->s, conn->origin_fd, OP_WRITE);
-        }
-        return; // despues vemos igual no deberia pasar este caso creo
+        selector_set_interest_key(key, OP_NOOP);
+        if (conn->origin_fd != 0) { selector_set_interest(key->s, conn->origin_fd, OP_WRITE); }
+        return;
     }
 
     size_t n;
@@ -80,12 +77,11 @@ static void socksv5_read(struct selector_key* key) {
     } else if (n_read == 0) {
         LOG(INFO, "Connection closed by client on fd %d", key->fd);
         selector_unregister_fd(key->s, key->fd);
-        // ACA RECIBIMOS EOF, CREO QUE DEBERIAMOS LIBERAR LOS RECURSOS
     } else {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
             LOG(ERROR, "Error reading from fd %d: %s", key->fd, strerror(errno));
             metrics_inc_errors(get_server_data()->metrics);
-            // TODO: liberar recursos
+            selector_unregister_fd(key->s, key->fd);
         }
     }
 }
@@ -109,22 +105,15 @@ static void socksv5_write(struct selector_key* key) {
         metrics_add_bytes(get_server_data()->metrics, n_written);
         buffer_read_adv(&conn->out_buff, n_written);
         if (!buffer_can_read(&conn->out_buff)) {
-            selector_set_interest_key(
-                key,
-                OP_READ);                  // Si no hay mas para darle al cliente supongo que esta
-                                           // bien decir que ahora queremos leer
-            buffer_reset(&conn->out_buff); // Reseteamos el buffer de salida
+            selector_set_interest_key(key, OP_READ);
+            buffer_reset(&conn->out_buff);
         }
-        if (buffer_can_write(&conn->in_buff)) {
-            selector_set_interest_key(
-                key,
-                OP_READ); // Si hay espacio en el buffer de entrada
-        }
+        if (buffer_can_write(&conn->in_buff)) { selector_set_interest_key(key, OP_READ); }
     } else if (n_written < 0) {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
             LOG(ERROR, "Error writing to fd %d: %s", key->fd, strerror(errno));
             metrics_inc_errors(get_server_data()->metrics);
-            // TODO: liberar recursos
+            selector_unregister_fd(key->s, key->fd);
         }
     }
 }
@@ -136,7 +125,7 @@ static void socksv5_block(struct selector_key* key) {
     if (state == SOCKS5_ERROR) {
         LOG(ERROR, "Error in SOCKS5 state machine block handler for fd %d", key->fd);
         metrics_inc_errors(get_server_data()->metrics);
-        // TODO: liberar recursos
+        selector_unregister_fd(key->s, key->fd);
     }
 }
 
@@ -144,7 +133,14 @@ static void socksv5_close(struct selector_key* key) {
     socks5_conn_t* conn = key->data;
     LOG(INFO, "Closing SOCKS5 connection on fd %d", key->fd);
 
-    stm_handler_close(conn->stm, key);
+    if (conn->origin_fd > 0) {
+        LOG(DEBUG, "Closing origin connection fd %d", conn->origin_fd);
+        close(conn->origin_fd);
+    }
+    if (conn->client_fd > 0) {
+        LOG(DEBUG, "Closing client connection fd %d", conn->client_fd);
+        close(conn->client_fd);
+    }
     socks5_stm_free(conn->stm);
     metrics_dec_curr_conn(get_server_data()->metrics);
     free(conn);
