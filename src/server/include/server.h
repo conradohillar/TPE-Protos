@@ -1,5 +1,5 @@
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef __SERVER__H__
+#define __SERVER__H__
 
 // Declaraciones para el entry point del servidor SOCKSv5
 // Inicialización, ciclo principal, manejo de argumentos, etc.
@@ -19,6 +19,7 @@
 #include <s5admin.h>
 #include <server_data.h>
 #include <logger.h>
+#include <connection_helper.h>
 
 #define FD_STDIN 0
 #define INITIAL_QUANTITY_FDS 1024
@@ -28,4 +29,4 @@
 #define SOCKS5 "SOCKS5"
 #define CONF_PROTOCOL "CONF PROTOCOL"
 
-#endif // MAIN_H
+#endif

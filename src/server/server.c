@@ -1,89 +1,26 @@
-#include <main.h>
+#include <server.h>
 
 static bool done = false;
 
 static void
 sigterm_handler(int signum) {
-    LOG(INFO, "Received signal %d", signum);
+    LOG(DEBUG, "Received signal %d", signum);
     done = true;
 }
 
-int create_and_register_passive_socket(fd_selector* selector, char* address, unsigned short port, const fd_handler* callback_functions, selector_status* ss, const char** error_msg, char* protocol) {
-
-    struct sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-
-    addr.sin_port = htons(port);
-    addr.sin_family = AF_INET;
-    if (address != NULL) {
-        if (inet_pton(AF_INET, address, &addr.sin_addr) <= 0) {
-            *error_msg = "Invalid address format for socks_addr";
-            goto error;
-        }
-    } else {
-        addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    }
-
-    const int fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (fd < 0) {
-        LOG_MSG(ERROR, "Error creating socket");
-        *error_msg = "Error creating socket";
-        goto error;
-    }
-
-    LOG(INFO, "Server listening on TCP port %d - Protocol: %s", port, protocol);
-
-    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
-
-    if (bind(fd, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
-        LOG_MSG(ERROR, "Error binding socket");
-        *error_msg = "Error binding socket";
-        goto error;
-    }
-
-    if (listen(fd, MAX_PENDING_CONNECTIONS) < 0) {
-        LOG_MSG(ERROR, "Error listening on socket");
-        *error_msg = "Error listening on socket";
-        goto error;
-    }
-
-    *ss = set_non_blocking_fd(fd);
-    if (*ss != SELECTOR_SUCCESS) {
-        LOG_MSG(ERROR, "Error setting server socket to non-blocking");
-        *error_msg = "Error setting server socket to non-blocking";
-        goto error;
-    }
-
-    *ss = selector_register(*selector, fd, callback_functions, OP_READ, NULL);
-    if (*ss != SELECTOR_SUCCESS) {
-        LOG_MSG(ERROR, "Error registering server socket with selector");
-        *error_msg = "Error registering server socket with selector";
-        goto error;
-    }
-
-    return 0;
-
-error:
-    if (fd < 0)
-        close(fd);
-    return -1;
-}
-
 int main(int argc, char* argv[]) {
-    init_logging(NULL);
-    LOG_MSG(INFO, "Starting SOCKS5 server");
-    close(FD_STDIN);
-
     server_args args = {0};
     parse_args(argc, argv, &args);
+
+    init_logging(NULL);
+    server_data_init();
+    auth_init();
+
+    close(FD_STDIN);
 
     signal(SIGINT, sigterm_handler);
     signal(SIGTERM, sigterm_handler);
 
-    server_data_init();
-
-    LOG_MSG(INFO, "Initializing authentication system");
-    auth_init();
     for (int i = 0; i < args.users_count; i++) {
         LOG(DEBUG, "Adding user: %s", args.users[i].name);
         auth_add_user(args.users[i].name, args.users[i].pass);
@@ -141,11 +78,7 @@ int main(int argc, char* argv[]) {
 
 error:
     if (ss != SELECTOR_SUCCESS) {
-        LOG(ERROR, "%s: %s", (error_msg == NULL) ? "" : error_msg, ss == SELECTOR_IO ? strerror(errno) : selector_error(ss));
-        ret = 2;
-    } else if (error_msg) {
-        LOG(ERROR, "%s", error_msg);
-        ret = 1;
+        ret = EXIT_FAILURE;
     }
 
     LOG_MSG(INFO, "Shutting down server");

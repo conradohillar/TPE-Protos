@@ -11,7 +11,7 @@
 #include <logger.h>
 #include <stm.h>
 #include <metrics.h>
-#include <main.h>
+#include <server.h>
 
 #include <arpa/inet.h>
 #include <assert.h> // assert
