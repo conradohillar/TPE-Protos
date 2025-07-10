@@ -8,8 +8,7 @@
 #include <stm.h>
 #include <unistd.h>
 
-// Preparar la conexión para relay de datos (cliente <-> destino)
-// O limpiar recursos si corresponde
+
 static void handle_done(unsigned state, struct selector_key* key);
 static void handle_error(unsigned state, struct selector_key* key);
 
@@ -20,27 +19,38 @@ struct state_definition socks5_states[] = {
         .on_departure = handshake_on_departure,
         .on_read_ready = handshake_read,
     },
-    {.state = SOCKS5_AUTH,
-     .on_arrival = auth_on_arrival,
-     .on_departure = auth_on_departure,
-     .on_read_ready = auth_read},
-    {.state = SOCKS5_CONNECTION_REQ,
-     .on_arrival = connection_req_on_arrival,
-     .on_departure = connection_req_on_departure,
-     .on_read_ready = connection_req_read},
+    {
+        .state = SOCKS5_AUTH,
+        .on_arrival = auth_on_arrival,
+        .on_departure = auth_on_departure,
+        .on_read_ready = auth_read
+    },
+    {
+        .state = SOCKS5_CONNECTION_REQ,
+        .on_arrival = connection_req_on_arrival,
+        .on_departure = connection_req_on_departure,
+        .on_read_ready = connection_req_read
+    },
     {
         .state = SOCKS5_CONNECTING,
         .on_block_ready = connecting_on_block_ready,
         .on_read_ready = connecting_read,
     },
-    {.state = SOCKS5_COPY,
-     .on_arrival = copy_on_arrival,
-     .on_read_ready = copy_read, // Aca leemos del buffer interno y reenviamos al destino
-     .on_departure = copy_on_departure},
-    {.state = SOCKS5_DONE,
-     .on_arrival = handle_done},
-    {.state = SOCKS5_ERROR,
-     .on_arrival = handle_error}};
+    {
+        .state = SOCKS5_COPY,
+        .on_arrival = copy_on_arrival,
+        .on_read_ready = copy_read, 
+        .on_departure = copy_on_departure
+    },
+    {
+        .state = SOCKS5_DONE,
+        .on_arrival = handle_done
+    },
+    {
+        .state = SOCKS5_ERROR,
+        .on_arrival = handle_error
+    }
+};
 
 struct state_machine* socks5_stm_init() {
     struct state_machine* stm = malloc(sizeof(struct state_machine));
@@ -56,18 +66,17 @@ struct state_machine* socks5_stm_init() {
     return stm;
 }
 
-// --- Estados finales ---
 static void handle_done(unsigned state, struct selector_key* key) {
-    LOG(INFO, "SOCKS5 connection completed successfully for fd %d", key->fd);
-    // Clean up resources if needed
     socks5_conn_t* conn = key->data;
     if (conn) {
         if (conn->origin_fd > 0) {
             LOG(DEBUG, "Closing origin connection fd %d", conn->origin_fd);
-            close(conn->origin_fd);
+            selector_unregister_fd(key->s, conn->origin_fd);
         }
-        LOG(DEBUG, "Cleaning up connection resources for fd %d", key->fd);
-        free(conn->stm);
+        if(conn->client_fd > 0) {
+            LOG(DEBUG, "Closing client connection fd %d", conn->client_fd);
+            selector_unregister_fd(key->s, conn->client_fd);
+        }
     }
     return;
 }
@@ -79,7 +88,11 @@ static void handle_error(unsigned state, struct selector_key* key) {
     if (conn) {
         if (conn->origin_fd > 0) {
             LOG(DEBUG, "Closing origin connection fd %d due to error", conn->origin_fd);
-            close(conn->origin_fd);
+            selector_unregister_fd(key->s, conn->origin_fd);
+        }
+        if(conn->client_fd > 0) {
+            LOG(DEBUG, "Closing client connection fd %d due to error", conn->client_fd);
+            selector_unregister_fd(key->s, conn->client_fd);
         }
         LOG(DEBUG, "Cleaning up connection resources for fd %d due to error", key->fd);
         // Additional cleanup can be added here

@@ -23,7 +23,6 @@ unsigned int connecting_on_block_ready(struct selector_key* key) {
         selector_status status = selector_register(key->s, conn->origin_fd, &connecting_handler, OP_WRITE, key->data);
         if (status != SELECTOR_SUCCESS) {
             LOG(ERROR, "Failed to register origin_fd %d for write: %s", conn->origin_fd, selector_error(status));
-            close(conn->origin_fd);
             return SOCKS5_ERROR;
         }
         return SOCKS5_CONNECTING;
@@ -95,7 +94,6 @@ void handle_write_connecting(struct selector_key* key) {
             } else {
                 LOG(ERROR, "Failed to connect to destination for fd %d", key->fd);
                 selector_unregister_fd(key->s, conn->origin_fd);
-                close(conn->origin_fd);
                 selector_unregister_fd(key->s, conn->client_fd);
             }
         }

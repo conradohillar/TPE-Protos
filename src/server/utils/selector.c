@@ -423,7 +423,7 @@ selector_status selector_set_interest(fd_selector s, int fd, fd_interest i) {
     }
     item->interest = i;
     items_update_fdset_for_fd(s, item);
-    LOG(DEBUG, "Set interest for fd %d to %s", fd, interest_to_string(i));
+    // LOG(DEBUG, "Set interest for fd %d to %s", fd, interest_to_string(i));
 finally:
     return ret;
 }

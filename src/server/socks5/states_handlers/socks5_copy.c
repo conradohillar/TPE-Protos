@@ -4,10 +4,12 @@
 
 void copy_read_handler(struct selector_key* key);
 void copy_write_handler(struct selector_key* key);
+void copy_close_handler(struct selector_key* key);
 
 const struct fd_handler copy_selector_handler = {
     .handle_read = copy_read_handler,
     .handle_write = copy_write_handler,
+    .handle_close = copy_close_handler,
 };
 
 void copy_on_arrival(unsigned state, struct selector_key* key) {
@@ -37,11 +39,6 @@ void copy_on_departure(unsigned state, struct selector_key* key) {
 
     if (selector_unregister_fd(key->s, conn->origin_fd) != SELECTOR_SUCCESS) {
         LOG(ERROR, "Failed to unregister origin fd %d in copy phase", conn->origin_fd);
-    }
-    if (close(conn->origin_fd) < 0) {
-        LOG(ERROR, "Failed to close origin fd %d: %s", conn->origin_fd, strerror(errno));
-    } else {
-        LOG(DEBUG, "Closed origin fd %d successfully", conn->origin_fd);
     }
 }
 
@@ -116,5 +113,13 @@ void copy_write_handler(struct selector_key* key) {
         }
     }
 
-    // ENVIA LO QUE HABIA EN IN A FD_DEST Y SETEA ESE FD EN OP_READ
+}
+
+
+void copy_close_handler(struct selector_key* key) {
+    socks5_conn_t* conn = key->data;
+    if(conn->origin_fd > 0) {
+        LOG(DEBUG, "Closing origin connection fd %d", conn->origin_fd);
+        close(conn->origin_fd);
+    }
 }

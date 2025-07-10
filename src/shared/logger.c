@@ -14,10 +14,11 @@
 #define COLOR_WHITE "\x1b[37m"
 #define COLOR_RESET "\x1b[0m"
 
-static LogLevel current_log_level = DEBUG;
+static log_level_t current_log_level = DEBUG;
 static FILE* log_file = NULL;
 
-void init_logging(const char* filename) {
+void init_logging(const char* filename, log_level_t level) {
+    current_log_level = level;
     if (filename) {
         log_file = fopen(filename, "a");
         if (!log_file) {
@@ -39,9 +40,9 @@ void close_logging() {
     }
 }
 
-void set_log_level(LogLevel level) { current_log_level = level; }
+void set_log_level(log_level_t level) { current_log_level = level; }
 
-void log_message(LogLevel level, const char* text) {
+void log_message(log_level_t level, const char* text) {
     if (!log_file) {
         fprintf(stderr, "Logging not initialized.\n");
         return;
@@ -68,7 +69,7 @@ void log_message(LogLevel level, const char* text) {
     fflush(log_file);
 }
 
-void log_messagef(LogLevel level, const char* file, int line, const char* fmt,
+void log_messagef(log_level_t level, const char* file, int line, const char* fmt,
                   ...) {
     if (!log_file) {
         fprintf(stderr, "Logging not initialized.\n");

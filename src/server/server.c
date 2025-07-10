@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
     server_args args = {0};
     parse_args(argc, argv, &args);
 
-    init_logging(NULL);
+    init_logging(NULL, args.log_level);
     server_data_init();
     auth_init();
 
@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
     while (!done) {
         ss = selector_select(fd_selector);
         if (ss != SELECTOR_SUCCESS) {
-            LOG_MSG(ERROR, "Error during selector select");
+            LOG(ERROR, "Error during selector select: %s", selector_error(ss));
             error_msg = "Error during selector select";
             goto error;
         }

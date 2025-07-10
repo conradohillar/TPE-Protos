@@ -7,6 +7,7 @@
 
 #include "args.h"
 #include "logger.h"
+log_level_t log_level_from_string(const char* level);
 
 static unsigned short port(const char* s) {
     char* end = 0;
@@ -54,6 +55,8 @@ static void usage(const char* progname) {
         "proxy. Hasta 10.\n"
         "   -v               Imprime información sobre la versión versión y "
         "termina.\n"
+        "   -e <LOGLEVEL>  Establece el nivel de logueo. Valores: DEBUG, INFO, "
+        "WARNING, ERROR.\n"
         "\n",
         progname);
     exit(1);
@@ -71,6 +74,7 @@ void parse_args(const int argc, char** argv, struct server_args* args) {
 
     args->disectors_enabled = true;
     args->users_count = 0;
+    args->log_level = INFO;
 
     int c;
 
@@ -78,7 +82,7 @@ void parse_args(const int argc, char** argv, struct server_args* args) {
         int option_index = 0;
         static struct option long_options[] = {{0, 0, 0, 0}};
 
-        c = getopt_long(argc, argv, "hl:L:Np:P:u:v", long_options, &option_index);
+        c = getopt_long(argc, argv, "hl:L:Np:P:u:ve:", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -113,6 +117,13 @@ void parse_args(const int argc, char** argv, struct server_args* args) {
         case 'v':
             version();
             exit(0);
+        case 'e': {
+            args->log_level = log_level_from_string(optarg);
+            if(args->log_level < 0) {
+                exit(1);
+            }
+            break;
+        }
         default:
             LOG(ERROR, "Unknown argument %d.", c);
             exit(1);
@@ -125,5 +136,20 @@ void parse_args(const int argc, char** argv, struct server_args* args) {
         }
         LOG_MSG(ERROR, "\n");
         exit(1);
+    }
+}
+
+log_level_t log_level_from_string(const char* level) {
+    if (strcmp(level, "DEBUG") == 0) {
+        return DEBUG;
+    } else if (strcmp(level, "INFO") == 0) {
+        return INFO;
+    } else if (strcmp(level, "WARNING") == 0) {
+        return WARNING;
+    } else if (strcmp(level, "ERROR") == 0) {
+        return ERROR;
+    } else {
+        LOG(ERROR, "Invalid log level: %s", level);
+        return -1;
     }
 }

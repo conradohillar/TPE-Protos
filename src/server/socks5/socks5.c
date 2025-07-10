@@ -43,6 +43,11 @@ void socksv5_passive_accept(struct selector_key* key) {
     buffer_init(&conn->in_buff, SOCKS5_BUFF_MAX_LEN, conn->in_buff_data);
     buffer_init(&conn->out_buff, SOCKS5_BUFF_MAX_LEN, conn->out_buff_data);
     conn->stm = socks5_stm_init();
+    if (conn->stm == NULL) {
+        LOG_MSG(ERROR, "Failed to initialize SOCKSv5 state machine");
+        selector_unregister_fd(key->s, fd);
+        return;
+    }
 
     LOG(INFO, "New SOCKSv5 connection accepted on fd %d", fd);
 
@@ -76,11 +81,17 @@ static void socksv5_read(struct selector_key* key) {
 
     } else if (n_read == 0) {
         LOG(INFO, "Connection closed by client on fd %d", key->fd);
+        if(conn->origin_fd != 0) {
+            selector_unregister_fd(key->s, conn->origin_fd);
+        }
         selector_unregister_fd(key->s, key->fd);
     } else {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
             LOG(ERROR, "Error reading from fd %d: %s", key->fd, strerror(errno));
             metrics_inc_errors(get_server_data()->metrics);
+            if(conn->origin_fd != 0) {
+                selector_unregister_fd(key->s, conn->origin_fd);
+            }
             selector_unregister_fd(key->s, key->fd);
         }
     }
@@ -113,6 +124,9 @@ static void socksv5_write(struct selector_key* key) {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
             LOG(ERROR, "Error writing to fd %d: %s", key->fd, strerror(errno));
             metrics_inc_errors(get_server_data()->metrics);
+            if(conn->origin_fd != 0) {
+                selector_unregister_fd(key->s, conn->origin_fd);
+            }
             selector_unregister_fd(key->s, key->fd);
         }
     }
@@ -132,14 +146,10 @@ static void socksv5_block(struct selector_key* key) {
 static void socksv5_close(struct selector_key* key) {
     socks5_conn_t* conn = key->data;
     LOG(INFO, "Closing SOCKS5 connection on fd %d", key->fd);
-
-    if (conn->origin_fd > 0) {
-        LOG(DEBUG, "Closing origin connection fd %d", conn->origin_fd);
-        close(conn->origin_fd);
-    }
     if (conn->client_fd > 0) {
         LOG(DEBUG, "Closing client connection fd %d", conn->client_fd);
         close(conn->client_fd);
+        conn->client_fd = -1;
     }
     socks5_stm_free(conn->stm);
     metrics_dec_curr_conn(get_server_data()->metrics);

@@ -2,6 +2,7 @@
 #define ARGS_H_kFlmYm1tW9p5npzDr2opQJ9jM8
 
 #include <stdbool.h>
+#include <logger.h>
 
 #define MAX_USERS 10
 
@@ -21,6 +22,8 @@ typedef struct server_args {
 
     struct users users[MAX_USERS];
     unsigned short users_count;
+
+    log_level_t log_level;    
 } server_args;
 
 /**
