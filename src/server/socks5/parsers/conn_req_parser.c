@@ -232,11 +232,11 @@ conn_req_parser* conn_req_parser_init(void) {
         return NULL;
     }
     p->parser = parser_init(parser_no_classes(), &conn_req_parser_definition);
-    p->cmd = 0;            // Comando inicial
-    p->atyp = 0;           // Tipo de dirección inicial
-    p->dst_addr_len = 0;   // Longitud del dominio destino inicial
-    p->dst_addr_count = 0; // Contador de bytes leídos de dst_addr inicial
-    p->dst_port = 0;       // Puerto destino inicial
+    p->cmd = 0;            
+    p->atyp = 0;           
+    p->dst_addr_len = 0;   
+    p->dst_addr_count = 0; 
+    p->dst_port = 0;       
     return p;
 }
 
@@ -288,30 +288,3 @@ void conn_req_parser_close(conn_req_parser* p) {
     parser_destroy(p->parser);
     free(p);
 }
-
-// int main(void) {
-//   // TESTING CONNECTION REQUEST PARSER
-//   conn_req_parser *p = conn_req_parser_init();
-//   if (p == NULL) {
-//     return 1;
-//   }
-//   uint8_t mock_buffer[] = {0x05, 0x01, 0x00, 0x03, 14,  'w', 'w', 'w', '.',
-//   'g',
-//                            'o',  'o',  'g',  'l',  'e', '.', 'c', 'o', 'm'};
-
-//   for (size_t i = 0; i < sizeof(mock_buffer); i++) {
-//     conn_req_parser_feed(p, mock_buffer[i]);
-//   }
-
-//   printf("cmd: %d\n", p->cmd);
-//   printf("atyp: %d\n", p->atyp);
-//   printf("dst_addr_len: %d\n", p->dst_addr_len);
-//   printf("dst_addr: ");
-//   for (size_t i = 0; i < p->dst_addr_len; i++) {
-//     printf("%c", p->dst_addr[i]);
-//   }
-//   printf("\n");
-//   printf("dst_port: %d\n", p->dst_port);
-
-//   conn_req_parser_close(p);
-// }

@@ -40,14 +40,6 @@ unsigned int connection_req_read(struct selector_key* key) {
 
         } else if (state == CONN_REQ_ERROR) {
             LOG(ERROR, "Connection request error for fd %d", key->fd);
-            // TODO aca falta hacer todo el manejo de errores
-            buffer_write(&conn->out_buff, SOCKS5_VERSION);
-            buffer_write(&conn->out_buff, SOCKS5_GENERAL_FAILURE);
-            buffer_write(&conn->out_buff, 0x00);
-            buffer_write(&conn->out_buff, ATYP_IPV4);
-            // memset(conn->out_buff.data+4, 0, 6);
-            selector_set_interest_key(key, OP_WRITE);
-            buffer_reset(&conn->in_buff);
             return SOCKS5_ERROR;
         }
     }
