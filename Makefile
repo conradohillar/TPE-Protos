@@ -16,7 +16,7 @@ OBJECTS := $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SOURCES))
 SERVER_OBJECTS := $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SERVER_SOURCES)) $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SHARED_SOURCES))
 CLIENT_OBJECTS := $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(CLIENT_SOURCES)) $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SHARED_SOURCES))
 
-SERVER_OUTPUT_FILE := $(BIN_DIR)/server
+SERVER_OUTPUT_FILE := $(BIN_DIR)/socks5d
 CLIENT_OUTPUT_FILE := $(BIN_DIR)/admin_client
 
 all: server client
