@@ -42,7 +42,7 @@ int create_and_register_passive_socket(fd_selector* selector, char* address, uns
         return -1;
     }
 
-    LOG(INFO, "Server listening on TCP port %d - Protocol: %s", port, protocol);
+    LOG(INFO, "Server listening on TCP port %d - Address: %s - Protocol: %s", port, address, protocol);
 
     setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
 

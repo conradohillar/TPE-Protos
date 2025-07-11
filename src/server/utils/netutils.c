@@ -102,29 +102,41 @@ int set_non_blocking_fd(const int fd) {
     }
     return ret;
 }
-
 void* resolve_host_name(void* arg) {
     socks5_conn_t* conn = (socks5_conn_t*) arg;
 
     struct addrinfo hints = {
-        .ai_family = AF_UNSPEC,
-        .ai_socktype = SOCK_STREAM};
+        .ai_socktype = SOCK_STREAM,
+        .ai_flags = 0,
+    };
+
+    if (conn->a_type == SOCKS5_CONN_REQ_ATYP_IPV4) {
+        hints.ai_family = AF_INET;
+        hints.ai_flags = AI_NUMERICHOST;
+    } else if (conn->a_type == SOCKS5_CONN_REQ_ATYP_IPV6) {
+        hints.ai_family = AF_INET6;
+        hints.ai_flags = AI_NUMERICHOST;
+    } else {
+        hints.ai_family = AF_UNSPEC;
+    }
+
     struct addrinfo* res;
 
     char port_str[6];
     snprintf(port_str, sizeof(port_str), "%u", conn->dst_port);
 
     if (getaddrinfo((char*) conn->dst_address, port_str, &hints, &res) != 0) {
-        LOG(ERROR, "Failed to resolve hostname: %s", conn->dst_address);
+        LOG(ERROR, "Failed to resolve address: %s", conn->dst_address);
         return NULL;
     }
 
-    LOG(DEBUG, "Resolved host %s to address family %d", conn->dst_address, res->ai_family);
+    LOG(DEBUG, "Resolved %s to address family %d", conn->dst_address, res->ai_family);
 
     conn->addr_info = res;
     selector_notify_block(conn->s, conn->client_fd);
     return NULL;
 }
+
 
 int connect_to_host(struct addrinfo** res, int* sock_fd) {
     struct addrinfo* rp = *res;

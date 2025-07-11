@@ -11,7 +11,7 @@ unsigned int connecting_on_block_ready(struct selector_key* key) {
     socks5_conn_t* conn = key->data;
 
     if (conn->addr_info == NULL) {
-        LOG(ERROR, "Unsupported command %d for fd %d", conn->conn_req_parser->cmd, key->fd);
+        LOG(ERROR, "No address info available for fd %d", key->fd);
         socks5_conn_req_response response = create_conn_req_error_response(SOCKS5_REP_HOST_UNREACHABLE);
         buffer_write_struct(&conn->out_buff, &response, SOCKS5_CONN_REQ_RESPONSE_BASE_SIZE + IPV4_ADDR_SIZE);
         conn->is_error_response = true;

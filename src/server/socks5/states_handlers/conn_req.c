@@ -1,5 +1,6 @@
 #include <conn_req.h>
 
+void set_dst_address(char* dst_address, const uint8_t* addr, size_t addr_len, uint8_t a_type);
 
 void connection_req_on_arrival(unsigned state, struct selector_key* key) {
     socks5_conn_t* conn = key->data;
@@ -28,38 +29,24 @@ unsigned int connection_req_read(struct selector_key* key) {
             selector_set_interest_key(key, OP_NOOP);
 
             conn->dst_port = conn->conn_req_parser->dst_port;
-            if(conn->conn_req_parser->atyp == SOCKS5_CONN_REQ_ATYP_IPV4) {
-                snprintf(conn->dst_address, sizeof(conn->dst_address), "%d.%d.%d.%d",
-                         conn->conn_req_parser->dst_addr[0],
-                         conn->conn_req_parser->dst_addr[1],
-                         conn->conn_req_parser->dst_addr[2],
-                         conn->conn_req_parser->dst_addr[3]);
-            } else if(conn->conn_req_parser->atyp == SOCKS5_CONN_REQ_ATYP_IPV6) {
-                snprintf(conn->dst_address, sizeof(conn->dst_address), "%x:%x:%x:%x:%x:%x:%x:%x",
-                         (conn->conn_req_parser->dst_addr[0] << 8) | conn->conn_req_parser->dst_addr[1],
-                         (conn->conn_req_parser->dst_addr[2] << 8) | conn->conn_req_parser->dst_addr[3],
-                         (conn->conn_req_parser->dst_addr[4] << 8) | conn->conn_req_parser->dst_addr[5],
-                         (conn->conn_req_parser->dst_addr[6] << 8) | conn->conn_req_parser->dst_addr[7],
-                         (conn->conn_req_parser->dst_addr[8] << 8) | conn->conn_req_parser->dst_addr[9],
-                         (conn->conn_req_parser->dst_addr[10] << 8) | conn->conn_req_parser->dst_addr[11],
-                         (conn->conn_req_parser->dst_addr[12] << 8) | conn->conn_req_parser->dst_addr[13],
-                         (conn->conn_req_parser->dst_addr[14] << 8) | conn->conn_req_parser->dst_addr[15]);
-                conn->dst_address[sizeof(conn->dst_address) - 1] = '\0';
-            } else if(conn->conn_req_parser->atyp == SOCKS5_CONN_REQ_ATYP_DOMAIN_NAME) {
-                strcpy(conn->dst_address, (char *)conn->conn_req_parser->dst_addr);
-            } 
-
             conn->a_type = conn->conn_req_parser->atyp;
+            set_dst_address(conn->dst_address, conn->conn_req_parser->dst_addr, conn->conn_req_parser->dst_addr_len, conn->a_type);
 
-            pthread_t thread_id;
-            int result = pthread_create(&thread_id, NULL, resolve_host_name, key->data);
+            if(conn->a_type == SOCKS5_CONN_REQ_ATYP_DOMAIN_NAME){
+                pthread_t thread_id;
+                int result = pthread_create(&thread_id, NULL, resolve_host_name, key->data);
 
-            if (result != 0) {
-                LOG(ERROR, "Failed to create thread for connecting to host: %s", strerror(result));
-                return SOCKS5_ERROR;
+                if (result != 0) {
+                    LOG(ERROR, "Failed to create thread for connecting to host: %s", strerror(result));
+                    return SOCKS5_ERROR;
+                }
+
+                return SOCKS5_CONNECTING;
+            }else{
+                resolve_host_name(key->data);
+                return SOCKS5_CONNECTING;
             }
-
-            return SOCKS5_CONNECTING;
+            
 
         } else if (state == CONN_REQ_ERROR) {
             LOG(ERROR, "Invalid request received on fd %d", key->fd);
@@ -83,4 +70,19 @@ void connection_req_on_departure(unsigned state, struct selector_key* key) {
     LOG(DEBUG, "Connection request phase complete for fd %d", key->fd);
     conn_req_parser_close(conn->conn_req_parser);
     conn->conn_req_parser = NULL;
+}
+
+void set_dst_address(char* dst_address, const uint8_t* addr, size_t addr_len, uint8_t a_type) {
+    if (a_type == SOCKS5_CONN_REQ_ATYP_IPV4) {
+        snprintf(dst_address, DOMAIN_NAME_MAX_LENGTH, "%d.%d.%d.%d",
+                 addr[0], addr[1], addr[2], addr[3]);
+    } else if (a_type == SOCKS5_CONN_REQ_ATYP_IPV6) {
+        if (inet_ntop(AF_INET6, addr, dst_address, DOMAIN_NAME_MAX_LENGTH) == NULL) {
+            strncpy(dst_address, "<invalid IPv6>", DOMAIN_NAME_MAX_LENGTH);
+        }
+    } else if (a_type == SOCKS5_CONN_REQ_ATYP_DOMAIN_NAME) {
+        size_t max_copy = addr_len < DOMAIN_NAME_MAX_LENGTH - 1 ? addr_len : DOMAIN_NAME_MAX_LENGTH - 1;
+        memcpy(dst_address, addr, max_copy);
+        dst_address[max_copy] = '\0';
+    }
 }
