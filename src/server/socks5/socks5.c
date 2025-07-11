@@ -85,7 +85,7 @@ static void socksv5_read(struct selector_key* key) {
     socks5_conn_t* conn = key->data;
 
     if (!buffer_can_write(&conn->in_buff)) {
-        LOG(WARNING, "Input buffer full for fd %d, setting NOOP", key->fd);
+        LOG(DEBUG, "Input buffer full for fd %d, setting NOOP", key->fd);
         selector_set_interest_key(key, OP_NOOP);
         if (conn->origin_fd != 0) { selector_set_interest(key->s, conn->origin_fd, OP_WRITE); }
         return;
