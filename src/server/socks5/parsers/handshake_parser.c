@@ -83,7 +83,7 @@ static const struct parser_definition handshake_parser_definition = {
     .start_state = HANDSHAKE_VERSION,
 };
 
-handshake_parser* handshake_parser_init() {
+handshake_parser* handshake_parser_init(void) {
     handshake_parser* p = malloc(sizeof(handshake_parser));
     if (p == NULL) {
         LOG_MSG(ERROR, "Failed to allocate memory for handshake parser");

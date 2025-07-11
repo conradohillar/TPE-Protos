@@ -56,7 +56,7 @@ unsigned int connecting_write(struct selector_key* key) {
     }
 }
 
-uint8_t get_code() {
+uint8_t get_code(void) {
     switch (errno) {
         case ECONNREFUSED:
             return SOCKS5_REP_CONNECTION_REFUSED;

@@ -20,11 +20,11 @@ typedef struct {
 
 } server_data_t;
 
-server_data_t* get_server_data();
+server_data_t* get_server_data(void);
 
-void server_data_init();
+void server_data_init(void);
 
-void server_data_destroy();
+void server_data_destroy(void);
 
 int set_buffer_size(int size);
 

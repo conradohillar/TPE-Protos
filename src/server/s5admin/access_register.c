@@ -1,7 +1,7 @@
 #include "access_register.h"
 #include "logger.h"
 
-access_register_t* access_register_init() {
+access_register_t* access_register_init(void) {
     access_register_t* reg = malloc(sizeof(access_register_t));
     if (!reg) {
         LOG_MSG(ERROR, "Error initializing access register");

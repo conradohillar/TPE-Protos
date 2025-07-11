@@ -226,5 +226,5 @@ int config_handler(const char* cmd, char* response, size_t response_size) {
     }
     config_process_command(parsed, response, response_size);
     free(parsed);
-    return strlen(response);
+    return (int)strlen(response);
 }

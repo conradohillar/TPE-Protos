@@ -24,7 +24,7 @@ socks5_conn_req_response create_conn_req_response(socks5_reply_status response, 
 
     socks5_conn_req_response response_msg;
     response_msg.version = SOCKS5_VERSION;
-    response_msg.response = response;
+    response_msg.response = (uint8_t)response;
     response_msg.reserved = SOCKS5_CONN_REQ_RSV;
     response_msg.address_type = atyp == AF_INET ? SOCKS5_CONN_REQ_ATYP_IPV4 : SOCKS5_CONN_REQ_ATYP_IPV6;
 
@@ -41,7 +41,7 @@ socks5_conn_req_response create_conn_req_response(socks5_reply_status response, 
 socks5_conn_req_response create_conn_req_error_response(socks5_reply_status response) {
     socks5_conn_req_response response_msg;
     response_msg.version = SOCKS5_VERSION;
-    response_msg.response = response;
+    response_msg.response = (uint8_t)response;
     response_msg.reserved = SOCKS5_CONN_REQ_RSV;
     response_msg.address_type = SOCKS5_CONN_REQ_ATYP_IPV4;
     response_msg.bnd_addr.ipv4.addr[0] = 0;
@@ -51,3 +51,4 @@ socks5_conn_req_response create_conn_req_error_response(socks5_reply_status resp
     response_msg.bnd_port = 0;
     return response_msg;
 }
+

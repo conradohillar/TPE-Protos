@@ -277,7 +277,7 @@ conn_req_parser_state conn_req_parser_feed(conn_req_parser* p, uint8_t byte) {
         p->dst_port = e->data[0];
         break;
     case CONN_REQ_DST_PORT_BYTE2:
-        p->dst_port = (p->dst_port << 8) | e->data[0];
+        p->dst_port = (uint16_t)(p->dst_port << 8) | e->data[0];
         return CONN_REQ_DONE;
     }
     return e->type;

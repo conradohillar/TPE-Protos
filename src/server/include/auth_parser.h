@@ -30,7 +30,7 @@ auth_state auth_parser_feed(auth_parser* p, uint8_t byte);
 
 void auth_parser_close(auth_parser* p);
 
-auth_parser* auth_parser_init();
+auth_parser* auth_parser_init(void);
 void auth_parser_close(auth_parser* p);
 auth_state auth_parser_feed(auth_parser* p, uint8_t byte);
 

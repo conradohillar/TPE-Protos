@@ -11,8 +11,8 @@
 #include <logger.h>
 #include <string.h>
 
-void auth_init();
-void auth_destroy();
+void auth_init(void);
+void auth_destroy(void);
 
 bool auth_add_user(const char* username, const char* password);
 bool auth_remove_user(const char* username);

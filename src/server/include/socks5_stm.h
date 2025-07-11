@@ -131,7 +131,7 @@ typedef enum socks5_state {
     SOCKS5_ERROR,
 } socks5_state;
 
-struct state_machine* socks5_stm_init();
+struct state_machine* socks5_stm_init(void);
 void socks5_stm_free(struct state_machine* stm);
 bool has_write_handler(socks5_state state);
 

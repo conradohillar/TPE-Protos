@@ -27,7 +27,7 @@ sockaddr_to_human(char* buff, const size_t buffsize, const struct sockaddr* addr
         break;
     }
     if (handled) {
-        if (inet_ntop(addr->sa_family, p, buff, buffsize) == 0) {
+        if (inet_ntop(addr->sa_family, p, buff, (socklen_t)buffsize) == 0) {
             strncpy(buff, "unknown ip", buffsize);
             buff[buffsize - 1] = 0;
         }

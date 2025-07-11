@@ -56,7 +56,7 @@ struct state_definition socks5_states[] = {
     }
 };
 
-struct state_machine* socks5_stm_init() {
+struct state_machine* socks5_stm_init(void) {
     struct state_machine* stm = malloc(sizeof(struct state_machine));
     if (stm == NULL) {
         LOG_MSG(ERROR, "Failed to allocate memory for SOCKS5 state machine");

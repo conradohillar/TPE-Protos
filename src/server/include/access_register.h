@@ -29,7 +29,7 @@ typedef struct {
 } access_register_t;
 
 // Inicializa el registro de accesos
-access_register_t* access_register_init();
+access_register_t* access_register_init(void);
 
 // Agrega una nueva entrada al registro (FIFO, borra la más antigua si está lleno)
 void access_register_add_entry(access_register_t* reg, const char* username, const char* destination, time_t timestamp);

@@ -7,7 +7,7 @@ int connect_to_admin_server(const char* host, int port) {
         return -1;
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(port);
+    serv_addr.sin_port = htons((uint16_t)port);
     if (inet_pton(AF_INET, host, &serv_addr.sin_addr) <= 0) {
         struct hostent* he = gethostbyname(host);
         if (!he) {
@@ -30,14 +30,14 @@ void admin_client_loop(int sockfd) {
         printf(">: ");
         if (!fgets(cmd, sizeof(cmd), stdin))
             break;
-        int n_write = write(sockfd, cmd, strlen(cmd));
+        size_t n_write = write(sockfd, cmd, strlen(cmd));
         if (n_write <= 0) {
             printf("Error enviando comando\n");
             break;
         }
         int connection_closed = 0;
         do {
-            int n_read = read(sockfd, resp, sizeof(resp));
+            size_t n_read = read(sockfd, resp, sizeof(resp));
             if (n_read <= 0) {
                 printf("\n[Conexión cerrada por el servidor]\n");
                 connection_closed = 1;

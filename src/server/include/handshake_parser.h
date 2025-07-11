@@ -25,7 +25,7 @@ typedef struct handshake_parser {
     bool user_pass_auth;
 } handshake_parser;
 
-handshake_parser* handshake_parser_init();
+handshake_parser* handshake_parser_init(void);
 
 handshake_state handshake_parser_feed(handshake_parser* p, uint8_t byte);
 

@@ -33,7 +33,7 @@ void init_logging(const char* filename, log_level_t level) {
     }
 }
 
-void close_logging() {
+void close_logging(void) {
     if (log_file && log_file != stdout) {
         fclose(log_file);
         log_file = NULL;

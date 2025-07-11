@@ -20,7 +20,7 @@ static unsigned long hash(const char* str) {
     return hash % HASHMAP_SIZE;
 }
 
-void auth_init() {
+void auth_init(void) {
     memset(hashmap, 0, sizeof(hashmap));
     LOG(INFO, "%s", "Authentication system initialized");
 }
