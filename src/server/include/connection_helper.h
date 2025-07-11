@@ -12,6 +12,5 @@ int passive_accept(struct selector_key* key, void* data, const fd_handler* callb
 
 int create_and_register_passive_socket(fd_selector* selector, char* address, unsigned short port, const fd_handler* callback_functions, selector_status* ss, const char** error_msg, char* protocol);
 
-int get_ip_family(const char* ip_str, uint16_t port, struct sockaddr_storage* addr, socklen_t* addr_len);
 
 #endif
