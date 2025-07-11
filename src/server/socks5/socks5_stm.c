@@ -31,12 +31,14 @@ struct state_definition socks5_states[] = {
         .state = SOCKS5_CONNECTION_REQ,
         .on_arrival = connection_req_on_arrival,
         .on_departure = connection_req_on_departure,
-        .on_read_ready = connection_req_read
+        .on_read_ready = connection_req_read,
+        .on_write_ready = connection_req_write
     },
     {
         .state = SOCKS5_CONNECTING,
         .on_block_ready = connecting_on_block_ready,
         .on_read_ready = connecting_read,
+        .on_write_ready = connecting_write
     },
     {
         .state = SOCKS5_COPY,
@@ -111,7 +113,8 @@ void socks5_stm_free(struct state_machine* stm) {
 
 
 bool has_write_handler(socks5_state state){
-    if(state == SOCKS5_HANDSHAKE || state == SOCKS5_AUTH){
+    if(state == SOCKS5_HANDSHAKE || state == SOCKS5_AUTH || state == SOCKS5_CONNECTION_REQ ||
+       state == SOCKS5_CONNECTING) {
         return true;
     }
     return false;

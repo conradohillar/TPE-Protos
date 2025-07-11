@@ -52,6 +52,8 @@ int set_non_blocking_fd(const int fd);
 
 int connect_to_host(struct addrinfo** res, int* sock_fd);
 
-void* resolve_host_name(void* arg);
+void * resolve_host_name(void* arg);
+
+void get_sock_data(int fd, uint8_t * atyp, void ** addr_ptr, uint16_t * port);
 
 #endif

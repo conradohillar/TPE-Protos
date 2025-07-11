@@ -81,18 +81,18 @@ static void socksv5_read(struct selector_key* key) {
 
     } else if (n_read == 0) {
         LOG(INFO, "Connection closed by client on fd %d", key->fd);
-        if(conn->origin_fd != 0) {
+        if(conn->origin_fd > 0) {
             selector_unregister_fd(key->s, conn->origin_fd);
         }
-        selector_unregister_fd(key->s, key->fd);
+        selector_unregister_fd(key->s, conn->client_fd);
     } else {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
             LOG(ERROR, "Error reading from fd %d: %s", key->fd, strerror(errno));
             metrics_inc_errors(get_server_data()->metrics);
-            if(conn->origin_fd != 0) {
+            if(conn->origin_fd > 0) {
                 selector_unregister_fd(key->s, conn->origin_fd);
             }
-            selector_unregister_fd(key->s, key->fd);
+            selector_unregister_fd(key->s, conn->client_fd);
         }
     }
 }
@@ -127,10 +127,11 @@ static void socksv5_write(struct selector_key* key) {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
             LOG(ERROR, "Error writing to fd %d: %s", key->fd, strerror(errno));
             metrics_inc_errors(get_server_data()->metrics);
-            if(conn->origin_fd != 0) {
+            if(conn->origin_fd > 0) {
                 selector_unregister_fd(key->s, conn->origin_fd);
             }
-            selector_unregister_fd(key->s, key->fd);
+            selector_unregister_fd(key->s, conn->client_fd);
+
         }
     }
 }
@@ -142,7 +143,8 @@ static void socksv5_block(struct selector_key* key) {
     if (state == SOCKS5_ERROR) {
         LOG(ERROR, "Error in SOCKS5 state machine block handler for fd %d", key->fd);
         metrics_inc_errors(get_server_data()->metrics);
-        selector_unregister_fd(key->s, key->fd);
+                    selector_unregister_fd(key->s, conn->client_fd);
+
     }
 }
 

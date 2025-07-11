@@ -105,7 +105,6 @@ int set_non_blocking_fd(const int fd) {
 
 void* resolve_host_name(void* arg) {
     socks5_conn_t* conn = (socks5_conn_t*) arg;
-    LOG(DEBUG, "Attempting to connect to host: %s:%u", conn->dst_address, conn->dst_port);
 
     struct addrinfo hints = {
         .ai_family = AF_UNSPEC,
@@ -164,4 +163,23 @@ int connect_to_host(struct addrinfo** res, int* sock_fd) {
         *res = NULL;
     }
     return CONNECTION_FAILED;
+}
+
+void get_sock_data(int fd, uint8_t * atyp, void ** addr_ptr, uint16_t * port){
+    struct sockaddr_storage local_addr;
+    socklen_t addr_len = sizeof(local_addr);
+
+    getsockname(fd, (struct sockaddr*) &local_addr, &addr_len);
+
+    if (local_addr.ss_family == AF_INET) {
+        struct sockaddr_in* addr_in = (struct sockaddr_in*) &local_addr;
+        *atyp = ATYP_IPV4;
+        *addr_ptr = &addr_in->sin_addr;
+        *port = ntohs(addr_in->sin_port);
+    } else if (local_addr.ss_family == AF_INET6) {
+        struct sockaddr_in6* addr_in6 = (struct sockaddr_in6*) &local_addr;
+        *atyp = ATYP_IPV6;
+        *addr_ptr = &addr_in6->sin6_addr;
+        *port = ntohs(addr_in6->sin6_port);
+    } 
 }

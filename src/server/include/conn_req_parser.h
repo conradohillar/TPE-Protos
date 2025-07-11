@@ -24,13 +24,12 @@ typedef enum conn_req_parser_state {
 
 typedef struct {
     struct parser* parser;
-    uint8_t cmd;            // Comando (0x01 para CONNECT)
-    uint8_t atyp;           // Tipo de dirección (0x01 IPv4, 0x03 DOMAIN, 0x04 IPv6)
-    uint8_t dst_addr_len;   // Longitud del dominio destino (en caso de que sea un
-                            // dominio)
-    uint8_t dst_addr[256];  // Dirección destino (IPv4/IPv6 o dominio)
-    uint8_t dst_addr_count; // Contador de bytes leídos de dst_addr
-    uint16_t dst_port;      // Puerto destino
+    uint8_t cmd;            
+    uint8_t atyp;           
+    uint8_t dst_addr_len;                      
+    uint8_t dst_addr[256];  
+    uint8_t dst_addr_count; 
+    uint16_t dst_port;      
 } conn_req_parser;
 
 conn_req_parser* conn_req_parser_init(void);

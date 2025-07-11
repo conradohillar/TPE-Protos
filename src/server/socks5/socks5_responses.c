@@ -15,22 +15,39 @@ socks5_auth_response create_auth_response(bool auth_ok) {
     return response;
 }
 
-socks5_conn_req_response create_conn_req_response(uint8_t response, uint8_t address_type, const void* addr, uint16_t port) {
+socks5_conn_req_response create_conn_req_response(socks5_reply_status response, int fd){
+    uint8_t atyp;
+    void* addr_ptr;
+    uint16_t port;
+    
+    get_sock_data(fd, &atyp, &addr_ptr, &port);
+
     socks5_conn_req_response response_msg;
     response_msg.version = SOCKS5_VERSION;
     response_msg.response = response;
     response_msg.reserved = SOCKS5_CONN_REQ_RSV;
-    response_msg.address_type = address_type;
+    response_msg.address_type = atyp == AF_INET ? SOCKS5_CONN_REQ_ATYP_IPV4 : SOCKS5_CONN_REQ_ATYP_IPV6;
 
-    if (address_type == SOCKS5_CONN_REQ_ATYP_IPV4) {
-        memcpy(response_msg.bnd_addr.ipv4.addr, addr, 4);
-    } else if (address_type == SOCKS5_CONN_REQ_ATYP_IPV6) { 
-        memcpy(response_msg.bnd_addr.ipv6.addr, addr, 16);
-    } else if (address_type == SOCKS5_CONN_REQ_ATYP_DOMAIN_NAME) { 
-        response_msg.bnd_addr.domain.len = ((uint8_t*)addr)[0];
-        memcpy(response_msg.bnd_addr.domain.name, (uint8_t*)addr + 1, response_msg.bnd_addr.domain.len);
-    }
+    if (atyp == AF_INET) {
+        memcpy(response_msg.bnd_addr.ipv4.addr, addr_ptr, IPV4_ADDR_SIZE);
+    } else if (atyp == AF_INET6) { 
+        memcpy(response_msg.bnd_addr.ipv6.addr, addr_ptr, IPV6_ADDR_SIZE);
+    } 
 
     response_msg.bnd_port = htons(port);
+    return response_msg;
+}
+
+socks5_conn_req_response create_conn_req_error_response(socks5_reply_status response) {
+    socks5_conn_req_response response_msg;
+    response_msg.version = SOCKS5_VERSION;
+    response_msg.response = response;
+    response_msg.reserved = SOCKS5_CONN_REQ_RSV;
+    response_msg.address_type = SOCKS5_CONN_REQ_ATYP_IPV4;
+    response_msg.bnd_addr.ipv4.addr[0] = 0;
+    response_msg.bnd_addr.ipv4.addr[1] = 0;
+    response_msg.bnd_addr.ipv4.addr[2] = 0;
+    response_msg.bnd_addr.ipv4.addr[3] = 0;
+    response_msg.bnd_port = 0;
     return response_msg;
 }

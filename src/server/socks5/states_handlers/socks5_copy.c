@@ -63,13 +63,12 @@ void copy_read_handler(struct selector_key* key) {
     } else if (n_read == 0) {
         LOG(INFO, "Connection closed by dest on fd %d", conn->origin_fd);
         selector_unregister_fd(key->s, conn->origin_fd);
-        selector_unregister_fd(key->s, key->fd);
-        // veamos aca que hacer, por ahora quedan los dos fd muertos
-        //  ACA RECIBIMOS EOF, CREO QUE DEBERIAMOS LIBERAR LOS RECURSOS
+        selector_unregister_fd(key->s, conn->client_fd);
     } else {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
             LOG(ERROR, "Error reading from fd %d: %s", conn->origin_fd, strerror(errno));
-            // aca creo que tenemos que librerar los recursos
+            selector_unregister_fd(key->s, conn->origin_fd);
+            selector_unregister_fd(key->s, conn->client_fd);
         }
     }
     // LEER DEL FD DESTINO Y PONERLO EN EL BUFFER DE OUT SETEA EL FD DEL CLIENTE EN OP_WRITE
@@ -103,7 +102,8 @@ void copy_write_handler(struct selector_key* key) {
     } else if (n_written == 0) {
         LOG(INFO, "Connection closed by dest on fd %d", conn->origin_fd);
         selector_unregister_fd(key->s, conn->origin_fd);
-        selector_unregister_fd(key->s, key->fd);
+        selector_unregister_fd(key->s, conn->client_fd);
+
         // veamos aca que hacer, por ahora quedan los dos fd muertos
         //  ACA RECIBIMOS EOF, CREO QUE DEBERIAMOS LIBERAR LOS RECURSOS
     } else {

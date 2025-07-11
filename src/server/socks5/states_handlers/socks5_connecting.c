@@ -11,9 +11,12 @@ unsigned int connecting_on_block_ready(struct selector_key* key) {
     socks5_conn_t* conn = key->data;
 
     if (conn->addr_info == NULL) {
-        // TENEMOS QUE MANDAR UNA RESPUESTA DE ERROR USANDO SOCKS5(NO SE PUDO RESOLVER EL NOMBRE DEL HOST)
-        LOG(ERROR, "Address info is NULL for fd %d", key->fd);
-        return SOCKS5_ERROR; // No se puede continuar sin la información de la dirección
+        LOG(ERROR, "Unsupported command %d for fd %d", conn->conn_req_parser->cmd, key->fd);
+        socks5_conn_req_response response = create_conn_req_error_response(SOCKS5_REP_HOST_UNREACHABLE);
+        buffer_write_struct(&conn->out_buff, &response, SOCKS5_CONN_REQ_RESPONSE_BASE_SIZE + IPV4_ADDR_SIZE);
+        conn->is_error_response = true;
+        selector_set_interest(key->s, conn->client_fd, OP_WRITE);
+        return SOCKS5_CONNECTION_REQ;
     }
 
     int result = connect_to_host(&conn->addr_info, &conn->origin_fd);
@@ -27,30 +30,47 @@ unsigned int connecting_on_block_ready(struct selector_key* key) {
         }
         return SOCKS5_CONNECTING;
     } else if (result == CONNECTION_SUCCESS) {
-        // TODO esto deberia ser una funcion que manda la respuesta.
-        buffer_write(&conn->out_buff, SOCKS5_VERSION);
-        buffer_write(&conn->out_buff, SOCKS5_SUCCESS);
-        buffer_write(&conn->out_buff, SOCKS5_CONN_REQ_RSV); // RSV
-        buffer_write(&conn->out_buff, ATYP_IPV4);           // ESTO LO DEBERIAMOS TENER GUARDADO
-
-        // pongo una ip a mano para probar
-        buffer_write(&conn->out_buff, 0x7F); // IP
-        buffer_write(&conn->out_buff, 0x00); // IP
-        buffer_write(&conn->out_buff, 0x00); // IP
-        buffer_write(&conn->out_buff, 0x01); // IP
-        buffer_write(&conn->out_buff, (conn->conn_req_parser->dst_port >> 8) & 0xFF);
-        buffer_write(&conn->out_buff, conn->conn_req_parser->dst_port & 0xFF);
-
+        socks5_conn_req_response response = create_conn_req_response(SOCKS5_REP_SUCCEEDED, conn->origin_fd);
+        size_t response_size = response.address_type == SOCKS5_CONN_REQ_ATYP_IPV4 ? SOCKS5_CONN_REQ_RESPONSE_BASE_SIZE + IPV4_ADDR_SIZE : SOCKS5_CONN_REQ_RESPONSE_BASE_SIZE + IPV6_ADDR_SIZE;
+        buffer_write_struct(&conn->out_buff, &response, response_size);
         selector_set_interest_key(key, OP_WRITE);
         buffer_reset(&conn->in_buff);
         return SOCKS5_COPY;
     } else {
+       
         return SOCKS5_ERROR;
     }
 }
 
 unsigned int connecting_read(struct selector_key* key) {
     return SOCKS5_COPY;
+}
+
+
+unsigned int connecting_write(struct selector_key* key) {
+     socks5_conn_t* conn = key->data;
+    if(conn->is_error_response){
+        return SOCKS5_ERROR;
+    }else{
+        return SOCKS5_COPY;
+    }
+}
+
+uint8_t get_code() {
+    switch (errno) {
+        case ECONNREFUSED:
+            return SOCKS5_REP_CONNECTION_REFUSED;
+        case ENETUNREACH:
+            return SOCKS5_REP_NETWORK_UNREACHABLE;
+        case EHOSTUNREACH:
+            return SOCKS5_REP_HOST_UNREACHABLE;
+        case ETIMEDOUT:
+            return SOCKS5_REP_TTL_EXPIRED;
+        default:
+            return SOCKS5_REP_HOST_UNREACHABLE;
+    }
+
+    return SOCKS5_REP_GENERAL_FAILURE;
 }
 
 void handle_write_connecting(struct selector_key* key) {
@@ -64,6 +84,8 @@ void handle_write_connecting(struct selector_key* key) {
         close(conn->origin_fd);
     }
 
+    socks5_reply_status response_code = get_code();
+
     if (err != 0) {
         LOG(ERROR, "Connection error for fd %d: %s", conn->origin_fd, strerror(err));
         close(conn->origin_fd);
@@ -72,51 +94,36 @@ void handle_write_connecting(struct selector_key* key) {
             int result = connect_to_host(&conn->addr_info, &conn->origin_fd);
             if (result == CONNECTION_IN_PROGRESS) {
                 LOG(INFO, "Connection to destination for fd %d is in progress", key->fd);
-            } else if (result == CONNECTION_SUCCESS) {
-                // TODO esto deberia ser una funcion que manda la respuesta.
-                LOG(INFO, "Successfully connected to destination for fd %d, origin_fd: %d", key->fd, conn->origin_fd);
-                buffer_write(&conn->out_buff, SOCKS5_VERSION);
-                buffer_write(&conn->out_buff, SOCKS5_SUCCESS);
-                buffer_write(&conn->out_buff, SOCKS5_CONN_REQ_RSV); // RSV
-                buffer_write(&conn->out_buff, ATYP_IPV4);           // ESTO LO DEBERIAMOS TENER GUARDADO
-
-                // pongo una ip a mano para probar
-                buffer_write(&conn->out_buff, 0x7F); // IP
-                buffer_write(&conn->out_buff, 0x00); // IP
-                buffer_write(&conn->out_buff, 0x00); // IP
-                buffer_write(&conn->out_buff, 0x01); // IP
-                buffer_write(&conn->out_buff, (conn->conn_req_parser->dst_port >> 8) & 0xFF);
-                buffer_write(&conn->out_buff, conn->conn_req_parser->dst_port & 0xFF);
-
-                selector_unregister_fd(key->s, conn->origin_fd);
-                selector_set_interest_key(key, OP_WRITE);
-                buffer_reset(&conn->in_buff);
-            } else {
+                return ;
+            } else if (result == CONNECTION_FAILED) {
                 LOG(ERROR, "Failed to connect to destination for fd %d", key->fd);
+
                 selector_unregister_fd(key->s, conn->origin_fd);
+                close(conn->origin_fd);
+                conn->origin_fd = -1;
                 selector_unregister_fd(key->s, conn->client_fd);
+                return ;
             }
+        } else {
+            LOG(ERROR, "No address info available for fd %d", key->fd);
+            socks5_conn_req_response response = create_conn_req_error_response(response_code);
+            buffer_write_struct(&conn->out_buff, &response, SOCKS5_CONN_REQ_RESPONSE_BASE_SIZE + IPV4_ADDR_SIZE);
+            conn->is_error_response = true;
+            selector_unregister_fd(key->s, conn->origin_fd);
+            close(conn->origin_fd);
+            conn->origin_fd = -1;
+            selector_set_interest(key->s, conn->client_fd, OP_WRITE);
+            return ;
         }
     }
 
     freeaddrinfo(conn->addr_info);
-
     selector_unregister_fd(key->s, conn->origin_fd);
     stm_handler_read(conn->stm, key);
-    // TODO esto deberia ser una funcion que manda la respuesta.
-    buffer_write(&conn->out_buff, SOCKS5_VERSION);
-    buffer_write(&conn->out_buff, SOCKS5_SUCCESS);
-    buffer_write(&conn->out_buff, SOCKS5_CONN_REQ_RSV); // RSV
-    buffer_write(&conn->out_buff, ATYP_IPV4);           // ESTO LO DEBERIAMOS TENER GUARDADO
-
-    // pongo una ip a mano para probar
-    buffer_write(&conn->out_buff, 0x7F); // IP
-    buffer_write(&conn->out_buff, 0x00); // IP
-    buffer_write(&conn->out_buff, 0x00); // IP
-    buffer_write(&conn->out_buff, 0x01); // IP
-    buffer_write(&conn->out_buff, (conn->dst_port >> 8) & 0xFF);
-    buffer_write(&conn->out_buff, conn->dst_port & 0xFF);
-
+   
+    socks5_conn_req_response response = create_conn_req_response(SOCKS5_REP_SUCCEEDED, conn->origin_fd);
+    size_t response_size = response.address_type == SOCKS5_CONN_REQ_ATYP_IPV4 ? SOCKS5_CONN_REQ_RESPONSE_BASE_SIZE + IPV4_ADDR_SIZE : SOCKS5_CONN_REQ_RESPONSE_BASE_SIZE + IPV6_ADDR_SIZE;
+    buffer_write_struct(&conn->out_buff, &response, response_size);
     selector_set_interest(key->s, conn->client_fd, OP_WRITE);
     buffer_reset(&conn->in_buff);
 }

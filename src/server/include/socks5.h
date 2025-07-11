@@ -50,6 +50,7 @@ typedef struct {
 
     char dst_address[DOMAIN_NAME_MAX_LENGTH];
     uint16_t dst_port;
+    uint8_t a_type;
 
     struct addrinfo* addr_info;
 
