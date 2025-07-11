@@ -32,7 +32,7 @@ void server_data_destroy(void) {
 
 int set_buffer_size(int size) {
     if (size < BUFF_MIN_LEN) {
-        LOG(ERROR, "Admin tried to set buffer size below minimum: %d bytes", size);
+        LOG(WARNING, "Admin tried to set buffer size below minimum: %d bytes", size);
         return -1;
     }
     _server_data->buffer_size = size;
@@ -42,7 +42,7 @@ int set_buffer_size(int size) {
 
 int set_max_conn(int max_conn) {
     if (max_conn < 1) {
-        LOG(ERROR, "Admin tried to set max connections below minimum: %d", max_conn);
+        LOG(WARNING, "Admin tried to set max connections below minimum: %d", max_conn);
         return -1;
     }
     _server_data->max_conn = max_conn;
