@@ -11,8 +11,9 @@ void config_process_command(config_cmd_parsed_t* parsed_cmd, char* response, siz
             response,
             response_size,
             "ADD_USER <usuario> <password>\nREMOVE_USER "
-            "<usuario>\nLIST_USERS\nGET_METRICS\nGET_ACCESS_REGISTER\nSET_TIMEOUT "
-            "<segundos>\nSET_BUFF <bytes>\nGET_CONFIG\nHELP\nPING\nEXIT\nEND\n");
+            "<usuario>\nLIST_USERS\nGET_METRICS\nGET_ACCESS_REGISTER\nSET_LOGLEVEL "
+            "<DEBUG|INFO|WARNING|ERROR>\nSET_MAX_CONN <cantidad>\nSET_BUFF <bytes>\nGET_CONFIG\n"
+            "HELP\nPING\nEXIT\nEND\n");
         break;
     case CMD_PING:
         LOG_MSG(DEBUG, "Ping command executed");
@@ -48,11 +49,26 @@ void config_process_command(config_cmd_parsed_t* parsed_cmd, char* response, siz
         LOG_MSG(DEBUG, "Get access register command executed");
         access_register_print(get_server_data()->access_register, response, response_size);
         break;
-    case CMD_SET_TIMEOUT:
-        if (set_timeout(atoi(parsed_cmd->arg1)) == 0) {
+    case CMD_SET_LOGLEVEL:
+        if (strcmp(parsed_cmd->arg1, "DEBUG") == 0) {
+            set_log_level(DEBUG);
+        } else if (strcmp(parsed_cmd->arg1, "INFO") == 0) {
+            set_log_level(INFO);
+        } else if (strcmp(parsed_cmd->arg1, "WARNING") == 0) {
+            set_log_level(WARNING);
+        } else if (strcmp(parsed_cmd->arg1, "ERROR") == 0) {
+            set_log_level(ERROR);
+        } else {
+            snprintf(response, response_size, "ERROR: Invalid log level\n");
+            break;
+        }
+        snprintf(response, response_size, "OK\n");
+        break;
+    case CMD_SET_MAX_CONN:
+        if (set_max_conn(atoi(parsed_cmd->arg1)) == 0) {
             snprintf(response, response_size, "OK\n");
         } else {
-            snprintf(response, response_size, "ERROR: Timeout must be at least %d seconds\n", TIMEOUT_MIN);
+            snprintf(response, response_size, "ERROR: Max connections must be at least 1\n");
         }
         break;
     case CMD_SET_BUFF:
@@ -65,7 +81,8 @@ void config_process_command(config_cmd_parsed_t* parsed_cmd, char* response, siz
     case CMD_GET_CONFIG:
         LOG_MSG(DEBUG, "Get config command executed");
         server_data_t* server_data = get_server_data();
-        snprintf(response, response_size, "Configuración actual: timeout=%ds, buffer_size=%dB\nOK\n", server_data->timeout, server_data->buffer_size);
+        snprintf(response, response_size, "Configuración actual: log_level=%s, buffer_size=%dB, max_conn=%d\nOK\n", 
+            get_log_level_string(), server_data->buffer_size, server_data->max_conn);
         break;
     case CMD_EXIT:
         LOG_MSG(DEBUG, "Exit command executed");
@@ -157,14 +174,27 @@ config_cmd_parsed_t* config_parse_command(const char* cmd) {
             parsed->cmd = CMD_INVALID;
         } // Demasiados argumentos
 
-    } else if (strcmp(token, "SET_TIMEOUT") == 0) {
-        parsed->cmd = CMD_SET_TIMEOUT;
+    } else if (strcmp(token, "SET_LOGLEVEL") == 0) {
+        parsed->cmd = CMD_SET_LOGLEVEL;
         token = strtok_r(NULL, " \r\n", &saveptr);
         if (token)
             strncpy(parsed->arg1, token, sizeof(parsed->arg1) - 1);
         else {
             parsed->cmd = CMD_INVALID;
-        } // Falta el valor del timeout
+        } // Falta el valor del log_level
+        token = strtok_r(NULL, " \r\n", &saveptr);
+        if (token) {
+            parsed->cmd = CMD_INVALID;
+        } // Demasiados argumentos
+
+    } else if (strcmp(token, "SET_MAX_CONN") == 0) {
+        parsed->cmd = CMD_SET_MAX_CONN;
+        token = strtok_r(NULL, " \r\n", &saveptr);
+        if (token)
+            strncpy(parsed->arg1, token, sizeof(parsed->arg1) - 1);
+        else {
+            parsed->cmd = CMD_INVALID;
+        } // Falta el valor del max_conn
         token = strtok_r(NULL, " \r\n", &saveptr);
         if (token) {
             parsed->cmd = CMD_INVALID;

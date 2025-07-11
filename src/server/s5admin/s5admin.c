@@ -54,8 +54,6 @@ static void admin_read(struct selector_key* key) {
     if (n_read <= 0) {
         LOG(INFO, "Admin connection closed on fd %d", conn->fd);
         selector_unregister_fd(key->s, conn->fd);
-        close(conn->fd);
-        free(conn);
         return;
     }
     LOG(DEBUG, "Read %zd bytes from admin connection fd %d", n_read, conn->fd);
@@ -120,5 +118,6 @@ static void admin_write(struct selector_key* key) {
 static void admin_close(struct selector_key* key) {
     admin_conn_t* conn = key->data;
     LOG(INFO, "Closing admin connection on fd %d", conn->fd);
+    close(conn->fd);
     free(conn);
 }

@@ -42,6 +42,21 @@ void close_logging(void) {
 
 void set_log_level(log_level_t level) { current_log_level = level; }
 
+char* get_log_level_string() {
+    switch (current_log_level) {
+        case DEBUG:
+            return "DEBUG";
+        case INFO:
+            return "INFO";
+        case WARNING:
+            return "WARNING";
+        case ERROR:
+            return "ERROR";
+        default:
+            return "UNKNOWN";
+    }
+}
+
 void log_message(log_level_t level, const char* text) {
     if (!log_file) {
         fprintf(stderr, "Logging not initialized.\n");

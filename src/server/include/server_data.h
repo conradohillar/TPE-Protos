@@ -15,8 +15,8 @@ typedef struct {
     // Connection buffers size
     int buffer_size;
 
-    // Timeout for connections in seconds
-    int timeout;
+    // Maximum number of connections
+    int max_conn;
 
 } server_data_t;
 
@@ -28,6 +28,6 @@ void server_data_destroy(void);
 
 int set_buffer_size(int size);
 
-int set_timeout(int seconds);
+int set_max_conn(int max_conn);
 
 #endif // SERVER_DATA_H

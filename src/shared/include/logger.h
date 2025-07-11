@@ -11,8 +11,9 @@ typedef enum {
 } log_level_t;
 
 void init_logging(const char* filename, log_level_t level);
-void close_logging(void);
+void close_logging();
 void set_log_level(log_level_t level);
+char *get_log_level_string();
 void log_message(log_level_t level, const char* text);
 void log_messagef(log_level_t level, const char* file, int line, const char* fmt, ...);
 

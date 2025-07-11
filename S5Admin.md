@@ -37,18 +37,18 @@ Este documento describe el protocolo de texto utilizado para la administración 
   - Respuesta: una línea por entrada, indicando nombre de usuario, destino y tiempo de acceso. Luego, `END`.
 
 ### 3.3 Configuración Dinámica
-- `SET_TIMEOUT <segundos>`
-  - Cambia el timeout global de conexiones.
+- `SET_LOGLEVEL <nivel>`
+  - Cambia el nivel de logging del servidor. Valores posibles: `DEBUG`, `INFO`, `WARNING`, `ERROR`.
+  - Respuesta: `OK` o `ERROR <motivo>`
+- `SET_MAX_CONN <cantidad>`
+  - Cambia el máximo de conexiones simultáneas permitidas en el servidor.
+  - Si el máximo es menor que la cantidad actual de conexiones, se notifica y no se permiten nuevas conexiones hasta que la cantidad de conexiones activas sea menor al nuevo máximo.
   - Respuesta: `OK` o `ERROR <motivo>`
 - `SET_BUFF <bytes>`
   - Cambia el tamaño de los buffers de entrada/salida para todas las conexiones (actuales y futuras).
-  - Es válido setear una cantidad maxima de usuarios menor a la cantidad de usuarios conectados 
-    actualmente, pero se le notifica al usuario y no se permiten nuevas conexiones hasta que la cantidad 
-    de usuarios se decremente por debajo del máximo seteado.
   - Respuesta: `OK` o `ERROR <motivo>`
 - `GET_CONFIG`
-  - Devuelve la configuración actual del servidor (tamaño del buffer, cantidad de usuarios registrados, 
-    cantidad de usuarios máximos, timeout, etc.)
+  - Devuelve la configuración actual del servidor (tamaño del buffer, cantidad de usuarios registrados, cantidad de usuarios máximos, nivel de log, etc.)
   - Respuesta: una línea por parámetro, luego `END`.
 
 ### 3.4 Información y Ayuda
@@ -76,12 +76,16 @@ juan
 END
 > REMOVE_USER user
 OK
-> SET_TIMEOUT 60
+> SET_LOGLEVEL DEBUG
+OK
+> SET_MAX_CONN 100
 OK
 > SET_BUFF 8192
 OK
 > GET_CONFIG
-timeout:60
+loglevel:DEBUG
+max_conn:100
+buffer_size:8192
 port:9090
 END
 > GET_LOG
@@ -94,7 +98,8 @@ REMOVE_USER <usuario>
 LIST_USERS
 GET_METRICS
 GET_LOG
-SET_TIMEOUT <segundos>
+SET_LOGLEVEL <DEBUG|INFO|WARNING|ERROR>
+SET_MAX_CONN <cantidad>
 SET_BUFF <bytes>
 GET_CONFIG
 HELP

@@ -12,8 +12,8 @@ void server_data_init(void) {
     LOG_MSG(DEBUG, "Server data allocated successfully");
     _server_data->metrics = metrics_init();
     _server_data->access_register = access_register_init();
-    _server_data->buffer_size = BUFF_DEFAULT_LEN; // Default buffer size
-    _server_data->timeout = TIMEOUT_DEFAULT;
+    _server_data->buffer_size = BUFF_DEFAULT_LEN; 
+    _server_data->max_conn = MAX_CONN_DEFAULT;
 }
 
 server_data_t* get_server_data(void) { return _server_data; }
@@ -40,12 +40,12 @@ int set_buffer_size(int size) {
     return 0;
 }
 
-int set_timeout(int seconds) {
-    if (seconds < TIMEOUT_MIN) {
-        LOG(ERROR, "Admin tried to set timeout below minimum: %d seconds", seconds);
+int set_max_conn(int max_conn) {
+    if (max_conn < 1) {
+        LOG(ERROR, "Admin tried to set max connections below minimum: %d", max_conn);
         return -1;
     }
-    _server_data->timeout = seconds;
-    LOG(INFO, "Timeout set to %d seconds", seconds);
+    _server_data->max_conn = max_conn;
+    LOG(INFO, "Max connections set to %d", max_conn);
     return 0;
 }
