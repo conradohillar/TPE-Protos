@@ -40,6 +40,18 @@ void socksv5_passive_accept(struct selector_key* key) {
     conn->s = key->s;
     conn->client_fd = fd;
     conn->origin_fd = 0;
+    conn->in_buff_data = malloc(get_server_data()->buffer_size);
+    if(conn->in_buff_data == NULL) {
+        selector_unregister_fd(key->s, fd);
+        return;
+    }
+    conn->out_buff_data = malloc(get_server_data()->buffer_size);
+    if(conn->in_buff_data == NULL) {
+        LOG_MSG(ERROR, "Failed to allocate memory for output buffer data");
+        selector_unregister_fd(key->s, fd);
+
+        return;
+    }   
     buffer_init(&conn->in_buff, SOCKS5_BUFF_MAX_LEN, conn->in_buff_data);
     buffer_init(&conn->out_buff, SOCKS5_BUFF_MAX_LEN, conn->out_buff_data);
     conn->stm = socks5_stm_init();
@@ -48,7 +60,7 @@ void socksv5_passive_accept(struct selector_key* key) {
         selector_unregister_fd(key->s, fd);
         return;
     }
-
+   
     LOG(INFO, "New SOCKSv5 connection accepted on fd %d", fd);
 
     metrics_inc_curr_conn(get_server_data()->metrics);
@@ -158,5 +170,7 @@ static void socksv5_close(struct selector_key* key) {
     }
     socks5_stm_free(conn->stm);
     metrics_dec_curr_conn(get_server_data()->metrics);
+    free(conn->in_buff_data);
+    free(conn->out_buff_data);
     free(conn);
 }

@@ -45,8 +45,8 @@ typedef struct {
     buffer in_buff;
     buffer out_buff;
 
-    uint8_t in_buff_data[SOCKS5_BUFF_MAX_LEN];
-    uint8_t out_buff_data[SOCKS5_BUFF_MAX_LEN];
+    uint8_t *in_buff_data;
+    uint8_t *out_buff_data;
 
     char dst_address[DOMAIN_NAME_MAX_LENGTH];
     uint16_t dst_port;
