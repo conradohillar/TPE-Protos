@@ -37,7 +37,7 @@ static void user(char *s, struct users *user) {
 }
 
 static void version(void) {
-  LOG_MSG(INFO, "socks5v version 0.0\n"
+  printf("socks5v version 0.0\n"
                 "ITBA Protocolos de Comunicación 2025/1 -- Grupo 2\n"
                 "AQUI VA LA LICENCIA\n");
 }
