@@ -48,6 +48,10 @@ typedef struct {
     uint8_t *in_buff_data;
     uint8_t *out_buff_data;
 
+    char src_address[INET6_ADDRSTRLEN];
+    uint16_t src_port;
+    char username[MAX_USERNAME_LEN]; 
+
     char dst_address[DOMAIN_NAME_MAX_LENGTH];
     uint16_t dst_port;
     uint8_t a_type;

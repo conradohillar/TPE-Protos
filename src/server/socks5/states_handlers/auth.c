@@ -19,6 +19,9 @@ unsigned int auth_read(struct selector_key* key) {
             buffer_reset(&conn->in_buff);
             conn->is_error_response = !auth_ok;
             selector_set_interest_key(key, OP_WRITE);
+            if(auth_ok){
+                strcpy(conn->username, (const char*) conn->auth_parser->username);
+            }
         } else if (state == AUTH_ERROR) {
             LOG(ERROR, "Failed to parse auth packet for fd: %d", key->fd);
             return SOCKS5_ERROR;

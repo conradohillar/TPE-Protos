@@ -127,6 +127,7 @@ void* resolve_host_name(void* arg) {
 
     if (getaddrinfo((char*) conn->dst_address, port_str, &hints, &res) != 0) {
         LOG(ERROR, "Failed to resolve address: %s", conn->dst_address);
+        selector_notify_block(conn->s, conn->client_fd);
         return NULL;
     }
 
