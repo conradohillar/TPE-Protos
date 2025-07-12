@@ -16,6 +16,15 @@
 #define DEFAULT_SERVER_HOST "127.0.0.1"
 #define DEFAULT_SERVER_PORT 8080
 
+typedef enum response_code {
+    RESPONSE_OK,
+    RESPONSE_ERROR,
+    RESPONSE_END,
+    RESPONSE_PONG,
+    RESPONSE_EMPTY,
+    RESPONSE_BYE
+} response_code_t;
+
 // Conecta al servidor de administración, retorna el socket o -1 en error
 int connect_to_admin_server(const char* host, int port);
 

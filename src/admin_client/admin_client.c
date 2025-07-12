@@ -1,5 +1,15 @@
 #include <admin_client.h>
 
+static char * _responses[] = {
+    "OK",
+    "ERROR",
+    "END",
+    "PONG",
+    "",
+    "BYE"
+};
+
+
 int connect_to_admin_server(const char* host, int port) {
     struct sockaddr_in serv_addr;
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -35,7 +45,7 @@ void admin_client_loop(int sockfd) {
             printf("Error enviando comando\n");
             break;
         }
-        int connection_closed = 0;
+        int connection_closed = 0, response_found = 0;
         do {
             size_t n_read = read(sockfd, resp, sizeof(resp));
             if (n_read <= 0) {
@@ -45,13 +55,14 @@ void admin_client_loop(int sockfd) {
             }
             resp[n_read] = '\0';
             printf("%s", resp);
-            if (strstr(resp, "BYE")) {
+            if (strstr(resp, _responses[RESPONSE_BYE])) {
                 return;
             }
-            if (strstr(resp, "END") || strstr(resp, "OK") || strstr(resp, "ERROR") ||
-                strstr(resp, "PONG") || strstr(resp, "\0"))
-                break;
-        } while (1);
+            for(unsigned int i = 0; !response_found && i < (sizeof(_responses) / sizeof(_responses[0])) - 1; i++) {
+                response_found = strstr(resp, _responses[i]) != NULL;
+            }
+        } while (!response_found);
+        
         if (connection_closed)
             break;
     }

@@ -176,7 +176,7 @@ static void socksv5_close(struct selector_key* key) {
     }
     socks5_stm_free(conn->stm);
     metrics_dec_curr_conn(get_server_data()->metrics);
-    if(conn->in_buff_data != NULL) (conn->in_buff_data);
-    if(conn->out_buff_data != NULL) (conn->out_buff_data);
+    if(conn->in_buff_data != NULL) free(conn->in_buff_data);
+    if(conn->out_buff_data != NULL) free(conn->out_buff_data);
     free(conn);
 }
