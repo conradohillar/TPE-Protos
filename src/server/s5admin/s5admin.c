@@ -42,7 +42,7 @@ static void admin_read(struct selector_key* key) {
     admin_conn_t* conn = key->data;
 
     if (!buffer_can_write(&conn->in_buff)) { // Buffer de entrada lleno
-        LOG(WARNING, "Input buffer full for fd %d", key->fd);
+        LOG(DEBUG, "Input buffer full for fd %d", key->fd);
         // NO DEBERÍA PASAR
         return;
     }
