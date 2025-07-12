@@ -1,5 +1,5 @@
 #include <admin_client.h>
-
+#include <args_admin.h>
 static char * _responses[] = {
     "OK",
     "ERROR",
@@ -69,18 +69,13 @@ void admin_client_loop(int sockfd) {
 }
 
 int main(int argc, char* argv[]) {
-    init_logging(NULL, WARNING);
-    const char* host = DEFAULT_SERVER_HOST;
-    int port = DEFAULT_SERVER_PORT;
-    for (int i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], "-p") == 0 && i + 1 < argc)
-            port = atoi(argv[++i]);
-        else if (strcmp(argv[i], "-h") == 0 && i + 1 < argc)
-            host = argv[++i];
-    }
-    int sockfd = connect_to_admin_server(host, port);
+    admin_args args;
+    parse_args(argc, argv, &args);
+
+    init_logging(args.log_file, args.log_level);
+    int sockfd = connect_to_admin_server(args.host, args.port);
     if (sockfd < 0) {
-        LOG(ERROR, "No se pudo conectar a %s:%d", host, port);
+        LOG(ERROR, "No se pudo conectar a %s:%d", args.host, args.port);
         return 1;
     }
     LOG_MSG(INFO, "Conectado al servidor de administración");
