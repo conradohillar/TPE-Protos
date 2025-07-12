@@ -24,14 +24,12 @@ void socksv5_passive_accept(struct selector_key* key) {
     LOG_MSG(DEBUG, "Trying to accept a new SOCKSv5 connection");
     if(get_server_data()->metrics->current_connections >= get_server_data()->max_conn) {
         LOG_MSG(WARNING, "Max connections reached, rejecting new connection");
-        // Se acepta y cierra inmediatamente para notificar al cliente
-        // que se rechaza la conexión.
         int fd = accept(key->fd, NULL, NULL);
         if (fd != -1) close(fd);
         return;
     }
 
-    socks5_conn_t* conn = malloc(sizeof(socks5_conn_t));
+    socks5_conn_t* conn = calloc(1, sizeof(socks5_conn_t));
     if (conn == NULL) {
         LOG_MSG(ERROR, "Failed to allocate memory for SOCKSv5 connection");
         return;
@@ -47,7 +45,6 @@ void socksv5_passive_accept(struct selector_key* key) {
 
     conn->s = key->s;
     conn->client_fd = fd;
-    conn->origin_fd = 0;
     conn->in_buff_data = malloc(get_server_data()->buffer_size);
     if(conn->in_buff_data == NULL) {
         LOG_MSG(ERROR, "Failed to allocate memory for input buffer data");
@@ -179,7 +176,7 @@ static void socksv5_close(struct selector_key* key) {
     }
     socks5_stm_free(conn->stm);
     metrics_dec_curr_conn(get_server_data()->metrics);
-    free(conn->in_buff_data);
-    free(conn->out_buff_data);
+    if(conn->in_buff_data != NULL) (conn->in_buff_data);
+    if(conn->out_buff_data != NULL) (conn->out_buff_data);
     free(conn);
 }

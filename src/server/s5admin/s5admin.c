@@ -1,6 +1,5 @@
 #include <s5admin.h>
 
-// // Estructura para manejar el estado de cada conexión admin
 typedef struct {
     int fd;
     buffer in_buff;
@@ -14,11 +13,12 @@ static void admin_read(struct selector_key* key);
 static void admin_write(struct selector_key* key);
 static void admin_close(struct selector_key* key);
 
-static const fd_handler admin_handler = {.handle_read = admin_read,
-                                         .handle_write = admin_write,
-                                         .handle_close = admin_close};
+static const fd_handler admin_handler = {
+    .handle_read = admin_read,
+    .handle_write = admin_write,
+    .handle_close = admin_close
+};
 
-// Handler para aceptar conexiones
 void s5admin_passive_accept(struct selector_key* key) {
     admin_conn_t* conn = calloc(1, sizeof(admin_conn_t));
     if (conn == NULL) {
