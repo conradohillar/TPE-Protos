@@ -45,12 +45,12 @@ void admin_client_loop(int sockfd) {
             }
             resp[n_read] = '\0';
             printf("%s", resp);
-            if (strstr(resp, "END") || strstr(resp, "OK") || strstr(resp, "ERROR") ||
-                strstr(resp, "PONG"))
-                break;
-            else if (strstr(resp, "BYE")) {
+            if (strstr(resp, "BYE")) {
                 return;
             }
+            if (strstr(resp, "END") || strstr(resp, "OK") || strstr(resp, "ERROR") ||
+                strstr(resp, "PONG") || strstr(resp, "\0"))
+                break;
         } while (1);
         if (connection_closed)
             break;

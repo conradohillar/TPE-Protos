@@ -60,8 +60,8 @@ static void admin_read(struct selector_key* key) {
     buffer_write_adv(&conn->in_buff, n_read);
 
     size_t n_parse;
-    const char* parse_ptr = (const char*) buffer_read_ptr(&conn->in_buff, &n_parse);
-    char* newline = strchr(parse_ptr, '\n');
+    char* parse_ptr = (char*)buffer_read_ptr(&conn->in_buff, &n_parse);
+    char* newline = strchr((const char*)parse_ptr, '\n');
     if (newline) {
         *newline = '\0';
         LOG(DEBUG, "Processing admin command: %s", parse_ptr);
@@ -71,13 +71,19 @@ static void admin_read(struct selector_key* key) {
             return;
         }
         size_t n_response;
-        char* response_ptr = (char*) buffer_write_ptr(&conn->out_buff, &n_response);
-        int config_result = config_handler(parse_ptr, response_ptr, n_response);
-        if (config_result <= 0) {
-            selector_unregister_fd(key->s, conn->fd);
-            close(conn->fd);
-            free(conn);
-            return;
+        char* response_ptr = (char*)buffer_write_ptr(&conn->out_buff, &n_response);
+        int config_result;
+        if(parse_ptr[0] == '\0'){ // Comando vacío
+            strcpy(response_ptr, parse_ptr);
+            config_result = 1;
+        } else {
+            config_result = config_handler(parse_ptr, response_ptr, n_response);
+            if (config_result < 0) {
+                selector_unregister_fd(key->s, conn->fd);
+                close(conn->fd);
+                free(conn);
+                return;
+            }
         }
         // Comando leído del in_buff
         size_t cmd_len = (newline - parse_ptr) + 1;

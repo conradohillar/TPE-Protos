@@ -1,260 +1,226 @@
-#include "logger.h"
+#include <logger.h>
 #include <config.h>
 
-void config_process_command(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size) {
-    // TODO: Implementar la lógica de cada comando
-    LOG(DEBUG, "Processing admin command: %d", parsed_cmd->cmd);
-    switch (parsed_cmd->cmd) {
-    case CMD_HELP:
-        LOG_MSG(DEBUG, "Help command executed");
-        snprintf(
-            response,
-            response_size,
-            "ADD_USER <usuario> <password>\nREMOVE_USER "
-            "<usuario>\nLIST_USERS\nGET_METRICS\nGET_ACCESS_REGISTER\nSET_LOGLEVEL "
-            "<DEBUG|INFO|WARNING|ERROR>\nSET_MAX_CONN <cantidad>\nSET_BUFF <bytes>\nGET_CONFIG\n"
-            "HELP\nPING\nEXIT\nEND\n");
-        break;
-    case CMD_PING:
-        LOG_MSG(DEBUG, "Ping command executed");
-        snprintf(response, response_size, "PONG\n");
-        break;
-    case CMD_ADD_USER:
-        if (auth_add_user(parsed_cmd->arg1, parsed_cmd->arg2)) {
-            LOG(INFO, "User added successfully: %s", parsed_cmd->arg1);
-            snprintf(response, response_size, "OK\n");
-        } else {
-            LOG(WARNING, "Failed to add user (already exists): %s", parsed_cmd->arg1);
-            snprintf(response, response_size, "ERROR: %s already exists\n", parsed_cmd->arg1);
-        }
-        break;
-    case CMD_REMOVE_USER:
-        if (auth_remove_user(parsed_cmd->arg1)) {
-            LOG(INFO, "User removed successfully: %s", parsed_cmd->arg1);
-            snprintf(response, response_size, "OK\n");
-        } else {
-            LOG(WARNING, "Failed to remove user (does not exist): %s", parsed_cmd->arg1);
-            snprintf(response, response_size, "ERROR: %s does not exist\n", parsed_cmd->arg1);
-        }
-        break;
-    case CMD_LIST_USERS:
-        LOG_MSG(DEBUG, "List users command executed");
-        auth_list_users(response, response_size);
-        break;
-    case CMD_GET_METRICS:
-        LOG_MSG(DEBUG, "Get metrics command executed");
-        metrics_print(get_server_data()->metrics, response, response_size);
-        break;
-    case CMD_GET_ACCESS_REGISTER:
-        LOG_MSG(DEBUG, "Get access register command executed");
-        access_register_print(get_server_data()->access_register, response, response_size);
-        break;
-    case CMD_SET_LOGLEVEL:
-        if (strcmp(parsed_cmd->arg1, "DEBUG") == 0) {
-            set_log_level(DEBUG);
-        } else if (strcmp(parsed_cmd->arg1, "INFO") == 0) {
-            set_log_level(INFO);
-        } else if (strcmp(parsed_cmd->arg1, "WARNING") == 0) {
-            set_log_level(WARNING);
-        } else if (strcmp(parsed_cmd->arg1, "ERROR") == 0) {
-            set_log_level(ERROR);
-        } else {
-            snprintf(response, response_size, "ERROR: Invalid log level\n");
-            break;
-        }
-        snprintf(response, response_size, "OK\n");
-        break;
-    case CMD_SET_MAX_CONN:
-        if (set_max_conn(atoi(parsed_cmd->arg1)) == 0) {
-            snprintf(response, response_size, "OK\n");
-        } else {
-            snprintf(response, response_size, "ERROR: Max connections must be at least 1\n");
-        }
-        break;
-    case CMD_SET_BUFF:
-        if (set_buffer_size(atoi(parsed_cmd->arg1)) == 0) {
-            snprintf(response, response_size, "OK\n");
-        } else {
-            snprintf(response, response_size, "ERROR: Buffer size must be at least %d bytes\n", BUFF_MIN_LEN);
-        }
-        break;
-    case CMD_GET_CONFIG:
-        LOG_MSG(DEBUG, "Get config command executed");
-        server_data_t* server_data = get_server_data();
-        snprintf(response, response_size, "Configuración actual: log_level=%s, buffer_size=%dB, max_conn=%d\nOK\n", 
-            get_log_level_string(), server_data->buffer_size, server_data->max_conn);
-        break;
-    case CMD_EXIT:
-        LOG_MSG(DEBUG, "Exit command executed");
-        snprintf(response, response_size, "BYE\n");
-        break;
-    case CMD_INVALID:
-        LOG_MSG(WARNING, "Invalid command received");
-        snprintf(response, response_size, "ERROR: invalid command\n");
-        break;
-    default:
-        LOG(ERROR, "Unknown command type: %d", parsed_cmd->cmd);
-        break;
+static void check_command_args(config_cmd_parsed_t* parsed, char * token, char ** save_ptr, int expected_args);
+
+static void handle_add_user(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
+static void handle_remove_user(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
+static void handle_list_users(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
+static void handle_get_metrics(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
+static void handle_get_access_register(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
+static void handle_set_loglevel(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
+static void handle_set_max_conn(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
+static void handle_set_buff(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
+static void handle_get_config(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
+static void handle_help(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
+static void handle_ping(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
+static void handle_exit(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
+
+static config_cmd_info_t _commands[] = {
+    {"ADD_USER", 2, handle_add_user},
+    {"REMOVE_USER", 1, handle_remove_user},
+    {"LIST_USERS", 0, handle_list_users},
+    {"GET_METRICS", 0, handle_get_metrics},
+    {"GET_ACCESS_REGISTER", 0, handle_get_access_register},
+    {"SET_LOGLEVEL", 1, handle_set_loglevel},
+    {"SET_MAX_CONN", 1, handle_set_max_conn},
+    {"SET_BUFF", 1, handle_set_buff},
+    {"GET_CONFIG", 0, handle_get_config},
+    {"HELP", 0, handle_help},
+    {"PING", 0, handle_ping},
+    {"EXIT", 0, handle_exit},
+};
+
+int config_handler(char* cmd, char* response, size_t response_size) {
+    config_cmd_parsed_t* parsed = config_parse_command(cmd);
+    if (!parsed) {
+        return -1;
     }
+    
+    if(parsed->cmd == CMD_INVALID){
+        LOG_MSG(WARNING, "Invalid command received");
+        snprintf(response, response_size, "ERROR: %s\n", parsed->arg1);
+    } else {
+        _commands[parsed->cmd].handler(parsed, response, response_size);
+    }
+    free(parsed);
+    return (int)strlen(response);
 }
 
-config_cmd_parsed_t* config_parse_command(const char* cmd) {
+config_cmd_parsed_t* config_parse_command(char* cmd) {
     config_cmd_parsed_t* parsed = malloc(sizeof(config_cmd_parsed_t));
     if (!parsed)
         return NULL;
 
-    // Copiar el comando a un buffer local para no modificar el original
-    char local_cmd[MAX_CMD_LEN];
-    strncpy(local_cmd, cmd, sizeof(local_cmd) - 1);
-    local_cmd[sizeof(local_cmd) - 1] = '\0';
-
-    // Inicializar el comando como inválido
     parsed->cmd = CMD_INVALID;
-    memset(parsed->arg1, 0, sizeof(parsed->arg1));
-    memset(parsed->arg2, 0, sizeof(parsed->arg2));
+    strcpy(parsed->arg1, "invalid command");
 
-    // Parsear el comando (manejo robusto para comandos sin argumentos)
+    // Parsear el comando
     char* saveptr;
-    char* token = strtok_r(local_cmd, " \r\n", &saveptr);
-    if (!token) {
-        free(parsed);
-        return NULL; // Comando vacío
+    char* token = strtok_r(cmd, " \r\n", &saveptr);
+
+    for(unsigned int i = 0; i < sizeof(_commands) / sizeof(_commands[0]); i++) {
+        if (strcmp(token, _commands[i].name) == 0) {
+            parsed->cmd = i; 
+            check_command_args(parsed, token, &saveptr, _commands[i].expected_args);
+            return parsed;
+        }
     }
-
-    if (strcmp(token, "ADD_USER") == 0) {
-        parsed->cmd = CMD_ADD_USER;
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token)
-            strncpy(parsed->arg1, token, sizeof(parsed->arg1) - 1);
-        else {
-            parsed->cmd = CMD_INVALID;
-        } // Falta el usuario
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token)
-            strncpy(parsed->arg2, token, sizeof(parsed->arg2) - 1);
-        else {
-            parsed->cmd = CMD_INVALID;
-        } // Falta la contraseña
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token) {
-            parsed->cmd = CMD_INVALID;
-        } // Demasiados argumentos
-
-    } else if (strcmp(token, "REMOVE_USER") == 0) {
-        parsed->cmd = CMD_REMOVE_USER;
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token)
-            strncpy(parsed->arg1, token, sizeof(parsed->arg1) - 1);
-        else {
-            parsed->cmd = CMD_INVALID;
-        } // Falta el usuario
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token) {
-            parsed->cmd = CMD_INVALID;
-        } // Demasiados argumentos
-
-    } else if (strcmp(token, "LIST_USERS") == 0) {
-        parsed->cmd = CMD_LIST_USERS;
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token) {
-            parsed->cmd = CMD_INVALID;
-        } // Demasiados argumentos
-
-    } else if (strcmp(token, "GET_METRICS") == 0) {
-        parsed->cmd = CMD_GET_METRICS;
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token) {
-            parsed->cmd = CMD_INVALID;
-        } // Demasiados argumentos
-
-    } else if (strcmp(token, "GET_ACCESS_REGISTER") == 0) {
-        parsed->cmd = CMD_GET_ACCESS_REGISTER;
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token) {
-            parsed->cmd = CMD_INVALID;
-        } // Demasiados argumentos
-
-    } else if (strcmp(token, "SET_LOGLEVEL") == 0) {
-        parsed->cmd = CMD_SET_LOGLEVEL;
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token)
-            strncpy(parsed->arg1, token, sizeof(parsed->arg1) - 1);
-        else {
-            parsed->cmd = CMD_INVALID;
-        } // Falta el valor del log_level
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token) {
-            parsed->cmd = CMD_INVALID;
-        } // Demasiados argumentos
-
-    } else if (strcmp(token, "SET_MAX_CONN") == 0) {
-        parsed->cmd = CMD_SET_MAX_CONN;
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token)
-            strncpy(parsed->arg1, token, sizeof(parsed->arg1) - 1);
-        else {
-            parsed->cmd = CMD_INVALID;
-        } // Falta el valor del max_conn
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token) {
-            parsed->cmd = CMD_INVALID;
-        } // Demasiados argumentos
-
-    } else if (strcmp(token, "SET_BUFF") == 0) {
-        parsed->cmd = CMD_SET_BUFF;
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token)
-            strncpy(parsed->arg1, token, sizeof(parsed->arg1) - 1);
-        else {
-            parsed->cmd = CMD_INVALID;
-        } // Falta el valor del buffer
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token) {
-            parsed->cmd = CMD_INVALID;
-        } // Demasiados argumentos
-
-    } else if (strcmp(token, "GET_CONFIG") == 0) {
-        parsed->cmd = CMD_GET_CONFIG;
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token) {
-            parsed->cmd = CMD_INVALID;
-        } // Demasiados argumentos
-
-    } else if (strcmp(token, "HELP") == 0) {
-        parsed->cmd = CMD_HELP;
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token) {
-            parsed->cmd = CMD_INVALID;
-        } // Demasiados argumentos
-
-    } else if (strcmp(token, "PING") == 0) {
-        parsed->cmd = CMD_PING;
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token) {
-            parsed->cmd = CMD_INVALID;
-        } // Demasiados argumentos
-
-    } else if (strcmp(token, "EXIT") == 0) {
-        parsed->cmd = CMD_EXIT;
-        token = strtok_r(NULL, " \r\n", &saveptr);
-        if (token) {
-            parsed->cmd = CMD_INVALID;
-        } // Demasiados argumentos
-
-    } else {
-        parsed->cmd = CMD_INVALID; // Comando desconocido
-    }
-
+    parsed->cmd = CMD_INVALID;
     return parsed;
 }
 
-int config_handler(const char* cmd, char* response, size_t response_size) {
-    config_cmd_parsed_t* parsed = config_parse_command(cmd);
-    if (!parsed) {
-        LOG_MSG(ERROR, "Error de parseo");
-        return -1;
+static void check_command_args(config_cmd_parsed_t* parsed, char * token, char ** save_ptr, int expected_args) {
+    switch(expected_args){
+        case 0:
+            if (strtok_r(NULL, " \r\n", save_ptr)) {
+                goto too_many_args; 
+            }
+            return;
+
+        case 1:
+            token = strtok_r(NULL, " \r\n", save_ptr);
+            if (token)
+                strncpy(parsed->arg1, token, sizeof(parsed->arg1) - 1);
+            else {
+                goto missing_args;
+            }
+            if (strtok_r(NULL, " \r\n", save_ptr)) {
+                goto too_many_args;
+            }
+            return;
+
+        case 2:
+            token = strtok_r(NULL, " \r\n", save_ptr);
+            if (token)
+                strncpy(parsed->arg1, token, sizeof(parsed->arg1) - 1);
+            else {
+                goto missing_args;
+            }
+            token = strtok_r(NULL, " \r\n", save_ptr);
+            if (token)
+                strncpy(parsed->arg2, token, sizeof(parsed->arg2) - 1);
+            else {
+                goto missing_args;
+            }
+            if (strtok_r(NULL, " \r\n", save_ptr)) {
+                goto too_many_args;
+            }
+            return;
+
+        default:
+            LOG(WARNING, "Unsupported number of expected arguments: %d", expected_args);
+            parsed->cmd = CMD_INVALID;
+            return;
     }
-    config_process_command(parsed, response, response_size);
-    free(parsed);
-    return (int)strlen(response);
+
+    missing_args:
+        parsed->cmd = CMD_INVALID; 
+        strcpy(parsed->arg1, "missing argument");
+        return;
+
+    too_many_args:
+        parsed->cmd = CMD_INVALID; 
+        strcpy(parsed->arg1, "too many arguments");
+        return;   
+}
+
+static void handle_add_user(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size){
+    LOG_MSG(DEBUG, "ADD_USER command executed");
+    if (auth_add_user(parsed_cmd->arg1, parsed_cmd->arg2)) {
+        LOG(INFO, "User added successfully: %s", parsed_cmd->arg1);
+        snprintf(response, response_size, "OK\n");
+    } else {
+        LOG(WARNING, "Failed to add user (already exists): %s", parsed_cmd->arg1);
+        snprintf(response, response_size, "ERROR: %s already exists\n", parsed_cmd->arg1);
+    }
+}
+
+static void handle_remove_user(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size){
+    LOG_MSG(DEBUG, "REMOVE_USER command executed");
+    if (auth_remove_user(parsed_cmd->arg1)) {
+        LOG(INFO, "User removed successfully: %s", parsed_cmd->arg1);
+        snprintf(response, response_size, "OK\n");
+    } else {
+        LOG(WARNING, "Failed to remove user (does not exist): %s", parsed_cmd->arg1);
+        snprintf(response, response_size, "ERROR: %s does not exist\n", parsed_cmd->arg1);
+    }
+}
+
+static void handle_list_users(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size){
+    LOG_MSG(DEBUG, "LIST_USERS command executed");
+    auth_list_users(response, response_size);
+}
+
+static void handle_get_metrics(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size){
+    LOG_MSG(DEBUG, "GET_METRICS command executed");
+    metrics_print(get_server_data()->metrics, response, response_size);
+}
+
+static void handle_get_access_register(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size){
+    LOG_MSG(DEBUG, "GET_ACCESS_REGISTER command executed");
+    access_register_print(get_server_data()->access_register, response, response_size);
+}
+
+static void handle_set_loglevel(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size){
+    LOG_MSG(DEBUG, "SET_LOGLEVEL command executed");
+    if (strcmp(parsed_cmd->arg1, "DEBUG") == 0) {
+        set_log_level(DEBUG);
+    } else if (strcmp(parsed_cmd->arg1, "INFO") == 0) {
+        set_log_level(INFO);
+    } else if (strcmp(parsed_cmd->arg1, "WARNING") == 0) {
+        set_log_level(WARNING);
+    } else if (strcmp(parsed_cmd->arg1, "ERROR") == 0) {
+        set_log_level(ERROR);
+    } else {
+        snprintf(response, response_size, "ERROR: invalid log level\n");
+        return;
+    }
+    snprintf(response, response_size, "OK\n");
+}
+
+static void handle_set_max_conn(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size){
+    LOG_MSG(DEBUG, "SET_MAX_CONN command executed");
+    if (set_max_conn(atoi(parsed_cmd->arg1)) == 0) {
+        snprintf(response, response_size, "OK\n");
+    } else {
+        snprintf(response, response_size, "ERROR: max connections must be at least 1\n");
+    }
+}
+
+static void handle_set_buff(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size){
+    LOG_MSG(DEBUG, "SET_BUFF command executed");
+    if (set_buffer_size(atoi(parsed_cmd->arg1)) == 0) {
+        snprintf(response, response_size, "OK\n");
+    } else {
+        snprintf(response, response_size, "ERROR: buffer size must be at least %d bytes\n", BUFF_MIN_LEN);
+    }
+}
+
+static void handle_get_config(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size){
+    LOG_MSG(DEBUG, "GET_CONFIG command executed");
+    server_data_t* server_data = get_server_data();
+    snprintf(response, response_size, "Configuración actual: log_level=%s, buffer_size=%dB, max_conn=%d\nOK\n", 
+        get_log_level_string(), server_data->buffer_size, server_data->max_conn);
+}
+
+static void handle_help(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size){
+    LOG_MSG(DEBUG, "HELP command executed");
+    snprintf(
+        response,
+        response_size,
+        "ADD_USER <usuario> <password>\nREMOVE_USER "
+        "<usuario>\nLIST_USERS\nGET_METRICS\nGET_ACCESS_REGISTER\nSET_LOGLEVEL "
+        "<DEBUG|INFO|WARNING|ERROR>\nSET_MAX_CONN <cantidad>\nSET_BUFF <bytes>\nGET_CONFIG\n"
+        "HELP\nPING\nEXIT\nEND\n");
+}
+
+static void handle_ping(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size){
+    LOG_MSG(DEBUG, "PING command executed");
+    snprintf(response, response_size, "PONG\n");
+}
+
+static void handle_exit(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size){
+    LOG_MSG(DEBUG, "EXIT command executed");
+    snprintf(response, response_size, "BYE\n");
 }

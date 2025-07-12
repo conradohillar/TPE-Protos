@@ -52,14 +52,12 @@ void socksv5_passive_accept(struct selector_key* key) {
     if(conn->in_buff_data == NULL) {
         LOG_MSG(ERROR, "Failed to allocate memory for input buffer data");
         selector_unregister_fd(key->s, fd);
-        free(conn);
         return;
     }
     conn->out_buff_data = malloc(get_server_data()->buffer_size);
-    if(conn->in_buff_data == NULL) {
+    if(conn->out_buff_data == NULL) {
         LOG_MSG(ERROR, "Failed to allocate memory for output buffer data");
         selector_unregister_fd(key->s, fd);
-        free(conn);
         return;
     }   
     buffer_init(&conn->in_buff, SOCKS5_BUFF_MAX_LEN, conn->in_buff_data);
@@ -69,9 +67,6 @@ void socksv5_passive_accept(struct selector_key* key) {
     if (conn->stm == NULL) {
         LOG_MSG(ERROR, "Failed to initialize SOCKSv5 state machine");
         selector_unregister_fd(key->s, fd);
-        free(conn->in_buff_data);
-        free(conn->out_buff_data);
-        free(conn);
         return;
     }
    

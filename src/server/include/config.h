@@ -42,6 +42,16 @@ typedef struct {
     char arg2[ARGS_LEN];
 } config_cmd_parsed_t;
 
+// Estructura para almacenar información de los comandos
+typedef void (*config_cmd_handler_t)(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
+
+typedef struct {
+    const char* name;
+    int expected_args;
+    config_cmd_handler_t handler;
+} config_cmd_info_t;
+
+
 /*
  * Funciones para manejar comandos de configuración desde el cliente administrador
  * Manejo de parámetros globales como timeout, buffer size, etc.
@@ -55,7 +65,7 @@ typedef struct {
  * @param response_size El tamaño máximo del buffer de respuesta.
  * @return El tamaño de la respuesta escrita en el buffer, o -1 si hubo error de parseo
  */
-int config_handler(const char* cmd, char* response, size_t response_size);
+int config_handler(char* cmd, char* response, size_t response_size);
 
 /**
  * Ejecuta la acción correspondiente al comando de configuración y devuelve la respuesta correspondiente.
@@ -72,6 +82,6 @@ void config_process_command(config_cmd_parsed_t* parsed_cmd, char* response, siz
  * @return Un puntero a una estructura config_cmd_parsed_t con el resultado del parseo,
  *         o NULL en caso de error.
  */
-config_cmd_parsed_t* config_parse_command(const char* cmd);
+config_cmd_parsed_t* config_parse_command(char* cmd);
 
 #endif // CONFIG_H

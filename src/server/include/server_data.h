@@ -13,10 +13,10 @@ typedef struct {
     access_register_t* access_register;
 
     // Connection buffers size
-    int buffer_size;
+    unsigned int buffer_size;
 
     // Maximum number of connections
-    int max_conn;
+    unsigned int max_conn;
 
 } server_data_t;
 
