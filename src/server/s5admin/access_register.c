@@ -36,6 +36,15 @@ void access_register_add_entry(access_register_t* reg, const char* username, con
     } else {
         reg->head = (reg->head + 1) % REGISTER_MAX_ENTRIES; // sobrescribe el más antiguo
     }
+    printf("%-25s %-15s %-10c %-15s %-12d %-20s %-12d %-10d\n",
+            entry->iso_date,
+            entry->username,
+            entry->register_type,
+            entry->src_ip,
+            entry->src_port,
+            entry->destination,
+            entry->dest_port,
+            entry->status_code);
     LOG(DEBUG, "Access entry added: user=%s, src=%s:%u, dest=%s:%u, status=%d", username, src_ip, src_port, destination, dest_port, status_code);
 }
 
