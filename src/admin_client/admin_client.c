@@ -10,27 +10,53 @@ static char * _responses[] = {
 };
 
 
-int connect_to_admin_server(const char* host, int port) {
-    struct sockaddr_in serv_addr;
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0)
-        return -1;
-    memset(&serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons((uint16_t)port);
-    if (inet_pton(AF_INET, host, &serv_addr.sin_addr) <= 0) {
-        struct hostent* he = gethostbyname(host);
-        if (!he) {
-            close(sockfd);
+
+int connect_to_host(struct addrinfo* res) {
+    int sock_fd = -1;
+    struct addrinfo* rp = res;
+    while (rp != NULL) {
+        sock_fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (sock_fd < 0) {
+            LOG_MSG(DEBUG, "Failed to create socket, trying next address");
             return -1;
         }
-        memcpy(&serv_addr.sin_addr, he->h_addr_list[0], he->h_length);
+
+        setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+
+        if (connect(sock_fd, rp->ai_addr, rp->ai_addrlen) == 0) {
+            LOG(DEBUG, "Successfully connected to the target host for fd %d", sock_fd);
+            return sock_fd;
+        } 
+
+        close(sock_fd);
+        rp = rp->ai_next;
     }
-    if (connect(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0) {
-        close(sockfd);
+    return -1;
+}
+
+int connect_to_admin_server(const char* host, int port) {
+    struct addrinfo* res;
+
+    char port_str[6];
+    snprintf(port_str, sizeof(port_str), "%u", port);
+    
+    struct addrinfo hints = {
+        .ai_socktype = SOCK_STREAM,
+        .ai_flags = AF_UNSPEC,
+    };
+
+    if (getaddrinfo((char*) host, port_str, &hints, &res) != 0) {
+        LOG(ERROR, "Failed to resolve address: %s", host);
         return -1;
     }
-    return sockfd;
+    int sock_fd = connect_to_host(res);
+    freeaddrinfo(res);
+    if (sock_fd < 0) {
+        LOG(ERROR, "Failed to connect to %s:%d", host, port);
+        return -1;  
+    }
+    LOG(DEBUG, "Connected to %s:%d", host, port);
+    return sock_fd;
 }
 
 void admin_client_loop(int sockfd) {
