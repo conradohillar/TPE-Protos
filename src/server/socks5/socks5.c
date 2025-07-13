@@ -174,9 +174,15 @@ static void socksv5_close(struct selector_key* key) {
         close(conn->client_fd);
         conn->client_fd = -1;
     }
+    if (conn->origin_fd > 0) {
+        LOG(DEBUG, "Closing client connection fd %d", conn->origin_fd);
+        close(conn->origin_fd);
+        conn->origin_fd = -1;
+    }
     socks5_stm_free(conn->stm);
     metrics_dec_curr_conn(get_server_data()->metrics);
     if(conn->in_buff_data != NULL) free(conn->in_buff_data);
     if(conn->out_buff_data != NULL) free(conn->out_buff_data);
     free(conn);
+    key->data = NULL;
 }
