@@ -42,12 +42,12 @@ void metrics_inc_errors(server_metrics_t* server_metrics) {
 
 void metrics_print(server_metrics_t* server_metrics, char* buffer, size_t buffer_size) {
     if (buffer) {
-        snprintf(buffer, buffer_size, "Total Connections: %lu\n"
-                                      "Current Connections: %lu\n"
-                                      "Bytes Transferred: %lu\n"
-                                      "Errors: %lu\nEND\n",
-                 server_metrics->total_connections,
+        snprintf(buffer, buffer_size, "CONNECTED: %lu\n"
+                                      "HISTORICAL: %lu\n"
+                                      "BYTES: %lu\n"
+                                      "ERRORS: %lu\nEND\n",
                  server_metrics->current_connections,
+                 server_metrics->total_connections,
                  server_metrics->bytes_transferred,
                  server_metrics->errors);
     }
