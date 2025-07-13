@@ -15,7 +15,7 @@ const struct fd_handler copy_selector_handler = {
 void copy_on_arrival(unsigned state, struct selector_key* key) {
     socks5_conn_t* conn = key->data;
 
-    LOG(INFO, "Starting copy phase for fd %d (client) -> fd %d (origin)", conn->client_fd, conn->origin_fd);
+    LOG(DEBUG, "Starting copy phase for fd %d (client) -> fd %d (origin)", conn->client_fd, conn->origin_fd);
 
     if (selector_register(key->s, conn->origin_fd, &copy_selector_handler, OP_NOOP, key->data) != SELECTOR_SUCCESS) {
         LOG(ERROR, "Failed to register origin fd %d for copy phase", conn->origin_fd);
@@ -35,7 +35,7 @@ unsigned int copy_read(struct selector_key* key) {
 void copy_on_departure(unsigned state, struct selector_key* key) {
     socks5_conn_t* conn = key->data;
 
-    LOG(INFO, "Ending copy phase for fd %d (client) -> fd %d (origin)", conn->client_fd, conn->origin_fd);
+    LOG(DEBUG, "Ending copy phase for fd %d (client) -> fd %d (origin)", conn->client_fd, conn->origin_fd);
 
     if (selector_unregister_fd(key->s, conn->origin_fd) != SELECTOR_SUCCESS) {
         LOG(ERROR, "Failed to unregister origin fd %d in copy phase", conn->origin_fd);
@@ -61,7 +61,7 @@ void copy_read_handler(struct selector_key* key) {
         buffer_write_adv(&conn->out_buff, n_read);
         selector_set_interest(key->s, conn->client_fd, OP_WRITE);
     } else if (n_read == 0) {
-        LOG(INFO, "Connection closed by dest on fd %d", conn->origin_fd);
+        LOG(DEBUG, "Connection closed by dest on fd %d", conn->origin_fd);
         selector_unregister_fd(key->s, conn->origin_fd);
         selector_unregister_fd(key->s, conn->client_fd);
     } else {
@@ -100,7 +100,7 @@ void copy_write_handler(struct selector_key* key) {
         }
 
     } else if (n_written == 0) {
-        LOG(INFO, "Connection closed by dest on fd %d", conn->origin_fd);
+        LOG(DEBUG, "Connection closed by dest on fd %d", conn->origin_fd);
         selector_unregister_fd(key->s, conn->origin_fd);
         selector_unregister_fd(key->s, conn->client_fd);
 

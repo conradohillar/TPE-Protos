@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
     server_args args = {0};
     parse_args(argc, argv, &args);
 
-    init_logging(NULL, args.log_level);
+    init_logging(args.log_file, args.log_level);
     server_data_init();
     auth_init();
 

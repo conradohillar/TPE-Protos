@@ -23,7 +23,9 @@ typedef struct server_args {
     struct users users[MAX_USERS];
     unsigned short users_count;
 
-    log_level_t log_level;    
+    log_level_t log_level;  
+    
+    char* log_file;
 } server_args;
 
 /**

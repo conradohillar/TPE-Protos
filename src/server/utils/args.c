@@ -55,8 +55,9 @@ static void usage(const char *progname) {
       "proxy. Hasta 10.\n"
       "   -v               Imprime información sobre la versión versión y "
       "termina.\n"
-      "   -e <LOGLEVEL>    Establece el nivel de logueo. Valores: DEBUG, INFO, "
+      "   -g <LOGLEVEL>    Establece el nivel de logueo. Valores: DEBUG, INFO, "
       "WARNING, ERROR.\n"
+      "   -f <file>            Archivo donde se escriben los logs.\n"
       "\n",
       progname);
   exit(1);
@@ -75,6 +76,7 @@ void parse_args(const int argc, char **argv, struct server_args *args) {
   args->disectors_enabled = true;
   args->users_count = 0;
   args->log_level = INFO;
+  args->log_file = NULL;
 
   int c;
 
@@ -82,7 +84,7 @@ void parse_args(const int argc, char **argv, struct server_args *args) {
     int option_index = 0;
     static struct option long_options[] = {{0, 0, 0, 0}};
 
-    c = getopt_long(argc, argv, "hl:L:Np:P:u:ve:", long_options, &option_index);
+    c = getopt_long(argc, argv, "hl:L:Np:P:u:vg:f:", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -118,13 +120,16 @@ void parse_args(const int argc, char **argv, struct server_args *args) {
     case 'v':
       version();
       exit(0);
-    case 'e': {
+    case 'g': {
       args->log_level = log_level_from_string(optarg);
       if (args->log_level < 0) {
         exit(1);
       }
       break;
     }
+    case 'f':
+      args->log_file = optarg;
+      break;
     default:
       LOG(ERROR, "Unknown argument %d.", c);
       exit(1);
