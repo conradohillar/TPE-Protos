@@ -23,12 +23,13 @@ unsigned int handshake_read(struct selector_key* key) {
             buffer_write_struct(&conn->out_buff, &response, HANDSHAKE_RESPONSE_SIZE);
             selector_set_interest_key(key, OP_WRITE);
             conn->is_error_response = !(conn->handshake_parser->no_auth || conn->handshake_parser->user_pass_auth);
+            socksv5_write(key);
         } else if (state == HANDSHAKE_ERROR) {
             LOG(ERROR, "Failed to parse handshake packet for fd: %d", key->fd);
             return SOCKS5_ERROR;            
         }
     }
-    return SOCKS5_HANDSHAKE;
+    return conn->stm->current->state;
 }
 
 unsigned int handshake_write(struct selector_key* key){
