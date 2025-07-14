@@ -100,27 +100,22 @@ void handle_write_connecting(struct selector_key* key) {
                 LOG(INFO, "Connection to destination for fd %d is in progress", key->fd);
                 return ;
             } else if (result == CONNECTION_FAILED) {
-                // TODO: aca tenemos que enviar un error al cliente
                 LOG(ERROR, "Failed to connect to destination for fd %d", key->fd);
-                access_register_add_entry(get_server_data()->access_register, conn->username, conn->src_address, conn->src_port, conn->dst_address, conn->dst_port, response_code, time(NULL));
-                selector_unregister_fd(key->s, conn->origin_fd);
-                close(conn->origin_fd);
-                conn->origin_fd = -1;
-                selector_unregister_fd(key->s, conn->client_fd);
-                return ;
+                response_code = get_code();
             }
-        } else {
+        }else{
             LOG(ERROR, "No address info available for fd %d", key->fd);
-            access_register_add_entry(get_server_data()->access_register, conn->username, conn->src_address, conn->src_port, conn->dst_address, conn->dst_port, response_code, time(NULL));
-            socks5_conn_req_response response = create_conn_req_error_response(response_code);
-            buffer_write_struct(&conn->out_buff, &response, SOCKS5_CONN_REQ_RESPONSE_BASE_SIZE + IPV4_ADDR_SIZE);
-            conn->is_error_response = true;
-            selector_unregister_fd(key->s, conn->origin_fd);
-            close(conn->origin_fd);
-            conn->origin_fd = -1;
-            selector_set_interest(key->s, conn->client_fd, OP_WRITE);
-            return ;
         }
+        access_register_add_entry(get_server_data()->access_register, conn->username, conn->src_address, conn->src_port, conn->dst_address, conn->dst_port, response_code, time(NULL));
+        socks5_conn_req_response response = create_conn_req_error_response(response_code);
+        buffer_write_struct(&conn->out_buff, &response, SOCKS5_CONN_REQ_RESPONSE_BASE_SIZE + IPV4_ADDR_SIZE);
+        conn->is_error_response = true;
+        selector_unregister_fd(key->s, conn->origin_fd);
+        close(conn->origin_fd);
+        conn->origin_fd = -1;
+        selector_set_interest(key->s, conn->client_fd, OP_WRITE);
+        return ;
+        
     }
 
     freeaddrinfo(conn->addr_info);
