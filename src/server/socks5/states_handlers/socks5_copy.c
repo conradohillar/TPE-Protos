@@ -44,7 +44,8 @@ void copy_read_handler(struct selector_key* key) {
 
     if (!buffer_can_write(&conn->out_buff)) {
         LOG(WARNING, "Output buffer full for fd %d, setting NOOP", key->fd);
-        selector_set_interest(key->s, conn->origin_fd, OP_NOOP); // Por ahora no hago nada, hago que quede el socket muerto y despues vemos igual no deberia pasar este caso creo
+        selector_set_interest(key->s, conn->origin_fd, OP_NOOP);
+        selector_set_interest(key->s, conn->client_fd, OP_WRITE);
         return;
     }
 
@@ -89,7 +90,8 @@ void copy_write_handler(struct selector_key* key) {
     ssize_t n_written = send(conn->origin_fd, read_ptr, n, MSG_DONTWAIT);
     if (n_written > 0) {
         LOG(DEBUG, "Wrote %zd bytes to fd %d", n_written, conn->origin_fd);
-        buffer_read_adv(&conn->in_buff, n_written); 
+        buffer_read_adv(&conn->in_buff, n_written);
+        buffer_compact(&conn->in_buff);
         if (!buffer_can_read(&conn->in_buff)) {
             selector_set_interest(key->s, conn->origin_fd, OP_READ); 
         }
