@@ -17,10 +17,10 @@ socks5_auth_response create_auth_response(bool auth_ok) {
 
 socks5_conn_req_response create_conn_req_response(socks5_reply_status response, int fd){
     uint8_t atyp;
-    void* addr_ptr;
+    char addr_ptr[INET6_ADDRSTRLEN];
     uint16_t port;
     
-    get_sock_data(fd, &atyp, &addr_ptr, &port);
+    get_sock_data(fd, &atyp, (void *)addr_ptr, &port);
 
     socks5_conn_req_response response_msg;
     response_msg.version = SOCKS5_VERSION;
