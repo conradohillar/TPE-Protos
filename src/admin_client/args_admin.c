@@ -40,7 +40,7 @@ static void usage(const char *progname) {
 
 void parse_args(const int argc, char **argv, admin_args *args) {
   memset(args, 0,
-         sizeof(*args)); // sobre todo para setear en null los punteros de users
+         sizeof(*args)); 
 
   args->host = "127.0.0.1";
   args->port = 1080;

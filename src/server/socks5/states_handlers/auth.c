@@ -22,12 +22,13 @@ unsigned int auth_read(struct selector_key* key) {
             if(auth_ok){
                 strcpy(conn->username, (const char*) conn->auth_parser->username);
             }
+            socksv5_write(key);
         } else if (state == AUTH_ERROR) {
             LOG(ERROR, "Failed to parse auth packet for fd: %d", key->fd);
             return SOCKS5_ERROR;
         }
     }
-    return SOCKS5_AUTH;
+    return conn->stm->current->state;
 }
 
 unsigned int auth_write(struct selector_key* key){

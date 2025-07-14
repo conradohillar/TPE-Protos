@@ -1,8 +1,7 @@
 #include <connection_helper.h>
 
 int passive_accept(struct selector_key* key, void* data, const fd_handler* callback_functions) {
-
-    struct sockaddr client_addr;
+    struct sockaddr_storage client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
 
     const int client = accept(key->fd, (struct sockaddr*) &client_addr, &client_addr_len);
@@ -15,13 +14,12 @@ int passive_accept(struct selector_key* key, void* data, const fd_handler* callb
     if (selector_register(key->s, client, callback_functions, OP_READ, data) != SELECTOR_SUCCESS)
         goto fail;
 
-    // Se guarda dirección IP y puerto del cliente
     socks5_conn_t* conn = (socks5_conn_t*)data;
-    if (client_addr.sa_family == AF_INET) {
+    if (((struct sockaddr*)&client_addr)->sa_family == AF_INET) {
         struct sockaddr_in *s = (struct sockaddr_in *)&client_addr;
         inet_ntop(AF_INET, &s->sin_addr, conn->src_address, sizeof(conn->src_address));
         conn->src_port = ntohs(s->sin_port);
-    } else if (client_addr.sa_family == AF_INET6) {
+    } else if (((struct sockaddr*)&client_addr)->sa_family == AF_INET6) {
         struct sockaddr_in6 *s = (struct sockaddr_in6 *)&client_addr;
         inet_ntop(AF_INET6, &s->sin6_addr, conn->src_address, sizeof(conn->src_address));
         conn->src_port = ntohs(s->sin6_port);
@@ -35,6 +33,7 @@ fail:
     }
     return -1;
 }
+
 
 int create_and_register_passive_socket(fd_selector* selector, char* address, unsigned short port, const fd_handler* callback_functions, selector_status* ss, const char** error_msg, char* protocol) {
     struct addrinfo hints, *res = NULL;

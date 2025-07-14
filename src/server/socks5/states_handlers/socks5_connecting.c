@@ -38,6 +38,7 @@ unsigned int connecting_on_block_ready(struct selector_key* key) {
         buffer_write_struct(&conn->out_buff, &response, response_size);
         selector_set_interest_key(key, OP_WRITE);
         buffer_reset(&conn->in_buff);
+        socksv5_write(key);
         return SOCKS5_COPY;
     } else {
        
@@ -99,6 +100,7 @@ void handle_write_connecting(struct selector_key* key) {
                 LOG(INFO, "Connection to destination for fd %d is in progress", key->fd);
                 return ;
             } else if (result == CONNECTION_FAILED) {
+                // TODO: aca tenemos que enviar un error al cliente
                 LOG(ERROR, "Failed to connect to destination for fd %d", key->fd);
                 access_register_add_entry(get_server_data()->access_register, conn->username, conn->src_address, conn->src_port, conn->dst_address, conn->dst_port, response_code, time(NULL));
                 selector_unregister_fd(key->s, conn->origin_fd);
@@ -131,4 +133,5 @@ void handle_write_connecting(struct selector_key* key) {
     buffer_write_struct(&conn->out_buff, &response, response_size);
     selector_set_interest(key->s, conn->client_fd, OP_WRITE);
     buffer_reset(&conn->in_buff);
+    socksv5_write(key);
 }
