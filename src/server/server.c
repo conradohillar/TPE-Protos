@@ -22,7 +22,6 @@ int main(int argc, char* argv[]) {
     signal(SIGTERM, sigterm_handler);
 
     for (int i = 0; i < args.users_count; i++) {
-        LOG(DEBUG, "Adding user: %s", args.users[i].name);
         auth_add_user(args.users[i].name, args.users[i].pass);
     }
 
@@ -42,16 +41,12 @@ int main(int argc, char* argv[]) {
         goto error;
     }
 
-    LOG_MSG(DEBUG, "Selector initialized successfully");
-
     fd_selector = selector_new(INITIAL_QUANTITY_FDS);
     if (fd_selector == NULL) {
         LOG_MSG(ERROR, "Error creating selector");
         error_msg = "Error creating selector";
         goto error;
     }
-
-    LOG_MSG(DEBUG, "Selector created successfully");
 
     const struct fd_handler socksv5 = {
         .handle_read = socksv5_passive_accept,
