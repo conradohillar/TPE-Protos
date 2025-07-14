@@ -200,7 +200,7 @@ static void handle_set_buff(config_cmd_parsed_t* parsed_cmd, char* response, siz
 static void handle_get_config(config_cmd_parsed_t* parsed_cmd, char* response, size_t response_size){
     LOG_MSG(DEBUG, "GET_CONFIG command executed");
     server_data_t* server_data = get_server_data();
-    snprintf(response, response_size, "Configuración actual: log_level=%s, buffer_size=%dB, max_conn=%d\nOK\n", 
+    snprintf(response, response_size, "LOG_LEVEL: %s\nBUFFER_SIZE: %dB\nMAX_CONN: %d\nEND\n",
         get_log_level_string(), server_data->buffer_size, server_data->max_conn);
 }
 
