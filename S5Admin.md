@@ -3,6 +3,8 @@
 ## 1. Introducción
 Este documento describe el protocolo de texto utilizado para la administración y monitoreo en tiempo real del servidor proxy SOCKSv5. Permite a un cliente administrador conectarse al servidor y ejecutar comandos para consultar métricas, modificar la configuración y gestionar usuarios, sin necesidad de reiniciar el servidor.
 
+Este protocolo, correspondiente a la capa de aplicación, esta diseñado para correr sobre TCP.
+
 ## 2. Conexión
 - El cliente se conecta al puerto de administración especificado por línea de comandos (`-p <puerto>`).
 
