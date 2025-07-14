@@ -137,23 +137,25 @@ for file_size in "${FILE_SIZES[@]}"; do
             continue
         fi
 
-        # Direct runs
-        echo -n "  Running $ROUNDS direct rounds... "
-        direct_results=$( (
-            for i in $(seq 1 "$ROUNDS"); do
-                curl --fail -w "$CURL_FORMAT" -o /dev/null -s "$URL" || echo "failed,0"
-            done
-        ) | calc_avg )
+        # Layered runs
+        direct_run_outputs=""
+        proxy_run_outputs=""
+
+        echo -n "  Running $ROUNDS layered rounds (Direct/Proxy)... "
+        for i in $(seq 1 "$ROUNDS"); do
+            # Direct run
+            direct_output=$(curl --fail -w "$CURL_FORMAT" -o /dev/null -s "$URL" || echo "failed,0")
+            direct_run_outputs+="${direct_output}\n"
+
+            # Proxy run
+            proxy_output=$(curl --fail --socks5-hostname "$PROXY" -w "$CURL_FORMAT" -o /dev/null -s "$URL" || echo "failed,0")
+            proxy_run_outputs+="${proxy_output}\n"
+        done
         echo "Done."
 
-        # Proxy runs
-        echo -n "  Running $ROUNDS proxy rounds... "
-        proxy_results=$( (
-            for i in $(seq 1 "$ROUNDS"); do
-                curl --fail --socks5-hostname "$PROXY" -w "$CURL_FORMAT" -o /dev/null -s "$URL" || echo "failed,0"
-            done
-        ) | calc_avg )
-        echo "Done."
+        # Calculate averages from collected results
+        direct_results=$(echo -e "$direct_run_outputs" | calc_avg)
+        proxy_results=$(echo -e "$proxy_run_outputs" | calc_avg)
         
         # Append to summary CSV
         echo "$buffer_size,$file_size,$direct_results,$proxy_results" >> "$SUMMARY_CSV"

@@ -113,8 +113,7 @@ void socks5_stm_free(struct state_machine* stm) {
 
 
 bool has_write_handler(socks5_state state){
-    if(state == SOCKS5_HANDSHAKE || state == SOCKS5_AUTH || state == SOCKS5_CONNECTION_REQ ||
-       state == SOCKS5_CONNECTING) {
+    if(state == SOCKS5_HANDSHAKE || state == SOCKS5_AUTH || state == SOCKS5_CONNECTION_REQ || state == SOCKS5_CONNECTING) {
         return true;
     }
     return false;

@@ -178,7 +178,7 @@ int connect_to_host(struct addrinfo** res, int* sock_fd) {
     return CONNECTION_FAILED;
 }
 
-void get_sock_data(int fd, uint8_t * atyp, void ** addr_ptr, uint16_t * port){
+void get_sock_data(int fd, uint8_t * atyp, void * addr_ptr, uint16_t * port){
     struct sockaddr_storage local_addr;
     socklen_t addr_len = sizeof(local_addr);
 
@@ -187,12 +187,12 @@ void get_sock_data(int fd, uint8_t * atyp, void ** addr_ptr, uint16_t * port){
     if (local_addr.ss_family == AF_INET) {
         struct sockaddr_in* addr_in = (struct sockaddr_in*) &local_addr;
         *atyp = ATYP_IPV4;
-        *addr_ptr = &addr_in->sin_addr;
+        memcpy(addr_ptr, &addr_in->sin_addr, sizeof(addr_in->sin_addr));
         *port = ntohs(addr_in->sin_port);
     } else if (local_addr.ss_family == AF_INET6) {
         struct sockaddr_in6* addr_in6 = (struct sockaddr_in6*) &local_addr;
         *atyp = ATYP_IPV6;
-        *addr_ptr = &addr_in6->sin6_addr;
+        memcpy(addr_ptr, &addr_in6->sin6_addr, sizeof(addr_in6->sin6_addr));
         *port = ntohs(addr_in6->sin6_port);
     } 
 }
