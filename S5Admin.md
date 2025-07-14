@@ -12,22 +12,23 @@ Este documento describe el protocolo de texto utilizado para la administración 
 - Ante un comando inválido, la respuesta será: `ERROR: invalid command`. **Los comandos son case sensitive**.
 - Si la cantidad de argumentos es menor que la esperada, la respuesta será: `ERROR: missing argument`.
 - Si la cantidad de argumentos es mayor que la esperada, la respuesta será: `ERROR: too many arguments`.
+- Si algún argumento es más largo de lo esperado (máximo 256B), la respuesta será: `ERROR: argument too long`.
 
 ## 4. Comandos Soportados
 
 ### 4.1 Gestión de Usuarios
 - `ADD_USER <usuario> <password>`
   - Agrega un nuevo usuario.
+  - `<usuario>` y `<password>` debe tener entre 1 y 255 bytes de longitud.
   - Respuesta: `OK` o `ERROR: <motivo>`
   - **Posibles errores específicos:**
-    - `ERROR: user already exists`
-    - `ERROR: invalid username or password`
-    - `ERROR: max users reached`
+    - `ERROR: <usuario> already exists`
 - `REMOVE_USER <usuario>`
   - Elimina un usuario existente.
+  - `<usuario>` debe tener entre 1 y 255 bytes de longitud.
   - Respuesta: `OK` o `ERROR: <motivo>`
   - **Posibles errores específicos:**
-    - `ERROR: user not found`
+    - `ERROR: <usuario> not found`
 - `LIST_USERS`
   - Lista todos los usuarios registrados.
   - Respuesta: una línea por usuario, luego `END`.

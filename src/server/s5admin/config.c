@@ -1,6 +1,8 @@
 #include <config.h>
 #include <logger.h>
 
+static s5admin_cmd_parsed_t _parsed_cmd;
+
 static void handle_add_user(s5admin_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
 static void handle_remove_user(s5admin_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
 static void handle_list_users(s5admin_cmd_parsed_t* parsed_cmd, char* response, size_t response_size);
@@ -30,33 +32,15 @@ static s5admin_cmd_handler_t _command_handlers[] = {
 };
 
 int config_handler(char* cmd, char* response, size_t response_size) {
-    s5admin_cmd_parsed_t * parsed = config_parse_command(cmd);
-    if (!parsed) {
-        return -1;
-    }
-    if(parsed->cmd == CMD_INVALID){
+    s5admin_parse_command(&_parsed_cmd, cmd);
+    if(_parsed_cmd.cmd == CMD_INVALID){
         LOG_MSG(WARNING, "Invalid command received");
-        snprintf(response, response_size, "ERROR: %s\n", parsed->arg1);
+        snprintf(response, response_size, "ERROR: %s\n", _parsed_cmd.arg1);
     } else {
-        s5admin_cmd_handler_t handler = _command_handlers[parsed->cmd];
-        handler(parsed, response, response_size);
+        s5admin_cmd_handler_t handler = _command_handlers[_parsed_cmd.cmd];
+        handler(&_parsed_cmd, response, response_size);
     }
-    free(parsed);
     return (int)strlen(response);
-}
-
-s5admin_cmd_parsed_t * config_parse_command(char* cmd) {
-    s5admin_cmd_parsed_t * parsed = malloc(sizeof(s5admin_cmd_parsed_t));
-    if (!parsed)
-        return NULL;
-
-    parsed->cmd = CMD_INVALID;
-    strcpy(parsed->arg1, "invalid command");
-
-    // Parsear el comando
-    s5admin_parse_command(parsed, cmd);
-    
-    return parsed;
 }
 
 static void handle_add_user(s5admin_cmd_parsed_t* parsed_cmd, char* response, size_t response_size){

@@ -10,9 +10,6 @@
 #include <logger.h>
 #include <unistd.h>
 
-#define MAX_CMD_LEN 512
-#define MAX_RESPONSE_LEN 1024 * 100
-
 #define DEFAULT_SERVER_HOST "127.0.0.1"
 #define DEFAULT_SERVER_PORT 8080
 

@@ -18,7 +18,10 @@ static s5admin_cmd_info_t _commands[] = {
     {"EXIT", 0},
 };
 
-void s5admin_parse_command(s5admin_cmd_parsed_t* parsed, char* cmd) {
+void s5admin_parse_command(s5admin_cmd_parsed_t * parsed, char * cmd) {
+    parsed->cmd = CMD_INVALID;
+    strcpy(parsed->arg1, "invalid command");
+
     char* saveptr;
     char* token = strtok_r(cmd, " \r\n", &saveptr);
 

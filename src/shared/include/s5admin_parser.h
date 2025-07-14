@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #define ARGS_LEN 256
-#define MAX_CMD_LEN 512
+#define MAX_CMD_LEN 1024
 #define MAX_RESPONSE_LEN 1024 * 100
 
 // Enum de comandos posibles
@@ -39,6 +39,6 @@ typedef struct {
 } s5admin_cmd_info_t;
 
 
-void s5admin_parse_command(s5admin_cmd_parsed_t* parsed, char* cmd);
+void s5admin_parse_command(s5admin_cmd_parsed_t * parsed, char* cmd);
 
 #endif // S5ADMIN_PARSER_H

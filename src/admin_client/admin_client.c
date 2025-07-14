@@ -1,5 +1,11 @@
 #include <admin_client.h>
 #include <args_admin.h>
+#include <s5admin_parser.h>
+
+static void flush_stdin(void);
+
+static s5admin_cmd_parsed_t _parsed_cmd;
+
 static char * _responses[] = {
     "OK",
     "ERROR",
@@ -8,7 +14,6 @@ static char * _responses[] = {
     "",
     "BYE"
 };
-
 
 
 int connect_to_host(struct addrinfo* res) {
@@ -61,11 +66,23 @@ int connect_to_admin_server(const char* host, int port) {
 
 void admin_client_loop(int sockfd) {
     char cmd[MAX_CMD_LEN];
+    char cmd_to_parse[MAX_CMD_LEN];
     char resp[MAX_RESPONSE_LEN];
     while (1) {
         printf(">: ");
         if (!fgets(cmd, sizeof(cmd), stdin))
             break;
+        if(strchr((const char*)cmd, '\n') == NULL) {
+            flush_stdin();
+            printf("ERROR: Command too long\n");
+            continue;
+        }
+        strcpy(cmd_to_parse, cmd);
+        s5admin_parse_command(&_parsed_cmd, cmd_to_parse);
+        if (_parsed_cmd.cmd == CMD_INVALID) {
+            printf("ERROR: %s\n", _parsed_cmd.arg1);
+            continue;
+        }
         size_t n_write = write(sockfd, cmd, strlen(cmd));
         if (n_write <= 0) {
             printf("Error enviando comando\n");
@@ -109,4 +126,9 @@ int main(int argc, char* argv[]) {
     close(sockfd);
     close_logging();
     return 0;
+}
+
+static void flush_stdin(void) {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
 }
