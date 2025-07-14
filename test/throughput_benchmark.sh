@@ -8,21 +8,51 @@ PORT=8081
 FILE="100MB.bin"
 CURL_FORMAT="%{time_total},%{speed_download}\n"
 
-# === Determine Mode & Rounds ===
+# === Default Settings ===
 USE_CUSTOM_URL=false
-ROUNDS=1000
+ROUNDS=5
+FILE_SIZE=100
 
-if [ -n "$1" ]; then
-    URL="$1"
-    USE_CUSTOM_URL=true
+# === Help Function ===
+print_help() {
+    echo "Usage: $0 [-h] [-r rounds] [-l url] [-s size]"
+    echo "Options:"
+    echo "  -h        Print this help message"
+    echo "  -r N      Set number of test rounds (default: 5)"
+    echo "  -l URL    Use custom URL instead of local server"
+    echo "  -s SIZE   Set size of test file in MB (default: 100)"
+    exit 0
+}
+
+# === Parse Arguments ===
+while getopts "hr:l:s:" opt; do
+    case $opt in
+        h)
+            print_help
+            ;;
+        r)
+            ROUNDS="$OPTARG"
+            ;;
+        l)
+            URL="$OPTARG"
+            USE_CUSTOM_URL=true
+            ;;
+        s)
+            FILE_SIZE="$OPTARG"
+            FILE="${FILE_SIZE}MB.bin"
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            print_help
+            ;;
+    esac
+done
+
+if [ "$USE_CUSTOM_URL" = true ]; then
     echo "==> Using custom URL: $URL"
 else
     URL="http://127.0.0.1:$PORT/$FILE"
     echo "==> No URL provided — using local server mode"
-fi
-
-if [ -n "$2" ]; then
-    ROUNDS="$2"
 fi
 
 # === Output logs ===
@@ -34,8 +64,12 @@ echo "time_total,speed_download" > "$PROXY_OUT"
 
 # === Local server setup ===
 if ! $USE_CUSTOM_URL; then
-    echo "==> Generating 100MB test file..."
-    dd if=/dev/urandom of="$FILE" bs=1M count=100 status=none
+    if [ ! -f "$FILE" ]; then
+        echo "==> Generating ${FILE_SIZE}MB test file..."
+        dd if=/dev/urandom of="$FILE" bs=1M count="$FILE_SIZE" status=none
+    else
+        echo "==> Using existing test file: $FILE"
+    fi
 
     echo "==> Starting local HTTP server on port $PORT..."
     python3 -m http.server "$PORT" > /dev/null 2>&1 &
@@ -57,13 +91,13 @@ if ! $USE_CUSTOM_URL; then
     trap cleanup EXIT
 fi
 
-# === Run Benchmarks ===
-# echo "==> Running $ROUNDS rounds without proxy..."
-# for i in $(seq 1 "$ROUNDS"); do
-#     echo -n "Run $i (direct): "
-#     curl --fail -w "$CURL_FORMAT" -o /dev/null -s "$URL" >> "$DIRECT_OUT" || echo "Curl failed" >> "$DIRECT_OUT"
-#     tail -n1 "$DIRECT_OUT"
-# done
+#=== Run Benchmarks ===
+echo "==> Running $ROUNDS rounds without proxy..."
+for i in $(seq 1 "$ROUNDS"); do
+    echo -n "Run $i (direct): "
+    curl --fail -w "$CURL_FORMAT" -o /dev/null -s "$URL" >> "$DIRECT_OUT" || echo "Curl failed" >> "$DIRECT_OUT"
+    tail -n1 "$DIRECT_OUT"
+done
 
 echo "==> Running $ROUNDS rounds with SOCKS5 proxy..."
 for i in $(seq 1 "$ROUNDS"); do
