@@ -118,31 +118,31 @@ void socksv5_write(struct selector_key* key) {
     socks5_conn_t* conn = key->data;
 
     if (!buffer_can_read(&conn->out_buff)) {
-        LOG(DEBUG, "Output buffer empty for fd %d, setting NOOP", key->fd);
-        selector_set_interest_key(key, OP_NOOP);
+        LOG(DEBUG, "Output buffer empty for fd %d, setting NOOP", conn->client_fd);
+        selector_set_interest(key->s, conn->client_fd, OP_NOOP);
         return;
     }
 
     size_t n;
     uint8_t* read_ptr = buffer_read_ptr(&conn->out_buff, &n);
 
-    ssize_t n_written = send(key->fd, read_ptr, n, MSG_DONTWAIT);
+    ssize_t n_written = send(conn->client_fd, read_ptr, n, MSG_DONTWAIT);
 
     if (n_written > 0) {
-        LOG(DEBUG, "Wrote %zd bytes to fd %d", n_written, key->fd);
+        LOG(DEBUG, "Wrote %zd bytes to fd %d", n_written, conn->client_fd);
         metrics_add_bytes(get_server_data()->metrics, n_written);
         buffer_read_adv(&conn->out_buff, n_written);
         if (!buffer_can_read(&conn->out_buff)) {
-            selector_set_interest_key(key, OP_READ);
+            selector_set_interest(key->s, conn->client_fd, OP_READ);
             buffer_reset(&conn->out_buff);
         }
-        if (buffer_can_write(&conn->in_buff)) { selector_set_interest_key(key, OP_READ); }
+        if (buffer_can_write(&conn->in_buff)) { selector_set_interest(key->s, conn->client_fd, OP_READ); }
         if(has_write_handler(conn->stm->current->state)){
             stm_handler_write(conn->stm, key);
         }
     } else if (n_written < 0) {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
-            LOG(ERROR, "Error writing to fd %d: %s", key->fd, strerror(errno));
+            LOG(ERROR, "Error writing to fd %d: %s", conn->client_fd, strerror(errno));
             metrics_inc_errors(get_server_data()->metrics);
             if(conn->origin_fd > 0) {
                 selector_unregister_fd(key->s, conn->origin_fd);
