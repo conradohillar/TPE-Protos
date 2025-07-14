@@ -117,6 +117,7 @@ static void admin_write(struct selector_key* key) {
     }
     LOG(DEBUG, "Wrote %zd bytes to admin connection fd %d", n_written, conn->fd);
     buffer_read_adv(&conn->out_buff, n_written);
+    buffer_compact(&conn->out_buff);
 
     selector_set_interest_key(key, OP_READ);
 }
