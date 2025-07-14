@@ -6,7 +6,6 @@ typedef struct {
     buffer out_buff;
     uint8_t in_data[MAX_CMD_LEN];
     uint8_t out_data[MAX_RESPONSE_LEN];
-
 } admin_conn_t;
 
 static void admin_read(struct selector_key* key);
@@ -92,6 +91,19 @@ static void admin_read(struct selector_key* key) {
         buffer_write_adv(&conn->out_buff, config_result);
 
         selector_set_interest_key(key, OP_WRITE);
+
+    } else {
+        LOG_MSG(WARNING, "Command too long");
+        if(buffer_can_write(&conn->out_buff)){
+            char* response_ptr = (char*)buffer_write_ptr(&conn->out_buff, &n);
+            snprintf(response_ptr, n, "ERROR: command too long\n");
+            buffer_write_adv(&conn->out_buff, strlen(response_ptr));
+            selector_set_interest_key(key, OP_WRITE);
+        } else {
+            LOG(WARNING, "Output buffer full for fd %d", key->fd);
+        }
+        buffer_reset(&conn->in_buff);
+        return;
     }
 }
 

@@ -6,52 +6,62 @@ Este documento describe el protocolo de texto utilizado para la administración 
 ## 2. Conexión
 - El cliente se conecta al puerto de administración especificado por línea de comandos (`-p <puerto>`).
 
-### 2.1 Handshake
-- Negociación de versión realizada de la siguiente forma:
-  - El server envía un paquete indicando las versiones del protocolo que soporta.
-  - El cliente responde con otro paquete especificando la versión que desea utilizar.
-
-### 2.2 Reglas generales
+### 3. Reglas generales
 - Cada comando y respuesta se transmite como una línea de texto terminada en `\n`.
-- El servidor responde a cada comando con una línea de texto.
+- El servidor responde a cada comando con una o más líneas de texto.
+- Ante un comando inválido, la respuesta será: `ERROR: invalid command`. **Los comandos son case sensitive**.
+- Si la cantidad de argumentos es menor que la esperada, la respuesta será: `ERROR: missing argument`.
+- Si la cantidad de argumentos es mayor que la esperada, la respuesta será: `ERROR: too many arguments`.
 
-## 3. Comandos Soportados
+## 4. Comandos Soportados
 
-### 3.1 Gestión de Usuarios
+### 4.1 Gestión de Usuarios
 - `ADD_USER <usuario> <password>`
   - Agrega un nuevo usuario.
-  - Respuesta: `OK` o `ERROR <motivo>`
+  - Respuesta: `OK` o `ERROR: <motivo>`
+  - **Posibles errores específicos:**
+    - `ERROR: user already exists`
+    - `ERROR: invalid username or password`
+    - `ERROR: max users reached`
 - `REMOVE_USER <usuario>`
   - Elimina un usuario existente.
-  - Respuesta: `OK` o `ERROR <motivo>`
+  - Respuesta: `OK` o `ERROR: <motivo>`
+  - **Posibles errores específicos:**
+    - `ERROR: user not found`
 - `LIST_USERS`
   - Lista todos los usuarios registrados.
   - Respuesta: una línea por usuario, luego `END`.
 
-### 3.2 Métricas y Monitoreo
+### 4.2 Métricas y Monitoreo
 - `GET_METRICS`
-  - Devuelve métricas actuales del servidor.
-  - Respuesta ejemplo: `CONNECTIONS:5 HISTORICAL:20 BYTES:10240`
+  - Devuelve métricas actuales del servidor (conexiones actuales, conexiones históricas, bytes transferidos y errores).
+  - Respuesta: una línea por métrica, luego `END`.
 - `GET_ACCESS_REGISTER`
   - Devuelve las entradas del registro de accesos.
-  - Respuesta: una línea por entrada, indicando nombre de usuario, destino y tiempo de acceso. Luego, `END`.
+  - Respuesta: una línea por entrada, indicando fecha de acceso, nombre de usuario, tipo de registro, IP/puerto de origen y destino y status de SOCKS5. Luego, `END`.
 
-### 3.3 Configuración Dinámica
+### 4.3 Configuración Dinámica
 - `SET_LOGLEVEL <nivel>`
   - Cambia el nivel de logging del servidor. Valores posibles: `DEBUG`, `INFO`, `WARNING`, `ERROR`.
-  - Respuesta: `OK` o `ERROR <motivo>`
+  - Respuesta: `OK` o `ERROR: <motivo>`
+  - **Posibles errores específicos:**
+    - `ERROR: invalid log level`
 - `SET_MAX_CONN <cantidad>`
   - Cambia el máximo de conexiones simultáneas permitidas en el servidor.
   - Si el máximo es menor que la cantidad actual de conexiones, se notifica y no se permiten nuevas conexiones hasta que la cantidad de conexiones activas sea menor al nuevo máximo.
-  - Respuesta: `OK` o `ERROR <motivo>`
+  - Respuesta: `OK` o `ERROR: <motivo>`
+  - **Posibles errores específicos:**
+    - `ERROR: max connections must be at least 1`
 - `SET_BUFF <bytes>`
-  - Cambia el tamaño de los buffers de entrada/salida para todas las conexiones (actuales y futuras).
-  - Respuesta: `OK` o `ERROR <motivo>`
+  - Cambia el tamaño de los buffers de entrada/salida para las conexiones futuras.
+  - Respuesta: `OK` o `ERROR: <motivo>`
+  - **Posibles errores específicos:**
+    - `ERROR: buffer size must be at least 256 bytes`
 - `GET_CONFIG`
-  - Devuelve la configuración actual del servidor (tamaño del buffer, cantidad de usuarios registrados, cantidad de usuarios máximos, nivel de log, etc.)
-  - Respuesta: una línea por parámetro, luego `END`.
+  - Devuelve la configuración actual del servidor (tamaño del buffer, cantidad de usuarios máximos y nivel de log).
+  - Respuesta: una línea por variable de configuración, luego `END`.
 
-### 3.4 Información y Ayuda
+### 4.4 Información y Ayuda
 - `HELP`
   - Lista los comandos disponibles.
   - Respuesta: una línea por comando, luego `END`.
@@ -59,16 +69,20 @@ Este documento describe el protocolo de texto utilizado para la administración 
   - Prueba de conectividad.
   - Respuesta: `PONG`
 
-### 3.5 Cerrar conexión
+### 4.5 Cerrar conexión
 - `EXIT`
   - Respuesta: `BYE`
 
-## 4. Ejemplo de Sesión
+## 5. Ejemplo de Sesión
 ```
 > ADD_USER juan 1234
 OK
 > GET_METRICS
-CONNECTIONS:3 HISTORICAL:10 BYTES:20480
+CONNECTED: 5
+HISTORICAL: 20
+BYTES: 10240
+ERRORS: 0
+END
 > LIST_USERS
 admin
 user
@@ -83,32 +97,27 @@ OK
 > SET_BUFF 8192
 OK
 > GET_CONFIG
-loglevel:DEBUG
-max_conn:100
-buffer_size:8192
-port:9090
+LOG_LEVEL: INFO
+BUFFER_SIZE: 512B
+MAX_CONN: 500
 END
-> GET_LOG
-2025-06-25 10:00:01 admin login OK
-2025-06-25 10:01:12 juan login FAIL
+> GET_ACCESS_REGISTER
+Fecha                     Usuario         Tipo       IP_origen       Pto_org     Destino              Pto_dst     Status    
+2025-07-13T18:20:00Z      user1           A          192.168.0.2     54786       www.example.com      443         0         
+2025-07-13T18:21:15Z      user2           A          ::1             12345       www.google.com       443         0         
 END
 > HELP
 ADD_USER <usuario> <password>
 REMOVE_USER <usuario>
 LIST_USERS
 GET_METRICS
-GET_LOG
+GET_ACCESS_REGISTER
 SET_LOGLEVEL <DEBUG|INFO|WARNING|ERROR>
 SET_MAX_CONN <cantidad>
 SET_BUFF <bytes>
 GET_CONFIG
 HELP
 PING
+EXIT
 END
 ```
-
-## 5. Consideraciones
-- Los comandos y respuestas no distinguen mayúsculas/minúsculas.
-- Los errores se reportan con `ERROR <motivo>`.
-- El protocolo puede extenderse agregando nuevos comandos.
-
