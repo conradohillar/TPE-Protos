@@ -9,7 +9,6 @@
  * establecida entre un cliente y el proxy.
  */
 static void socksv5_read(struct selector_key* key);
-static void socksv5_write(struct selector_key* key);
 static void socksv5_block(struct selector_key* key);
 static void socksv5_close(struct selector_key* key);
 
@@ -115,7 +114,7 @@ static void socksv5_read(struct selector_key* key) {
     }
 }
 
-static void socksv5_write(struct selector_key* key) {
+void socksv5_write(struct selector_key* key) {
     socks5_conn_t* conn = key->data;
 
     if (!buffer_can_read(&conn->out_buff)) {

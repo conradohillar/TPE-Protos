@@ -63,5 +63,6 @@ typedef struct {
 } socks5_conn_t;
 
 void socksv5_passive_accept(struct selector_key* key);
+void socksv5_write(struct selector_key* key);
 
 #endif

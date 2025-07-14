@@ -1,6 +1,5 @@
 #include <socks5_copy.h>
-#include <errno.h>
-#include <string.h>
+
 
 void copy_read_handler(struct selector_key* key);
 void copy_write_handler(struct selector_key* key);
@@ -20,13 +19,13 @@ void copy_on_arrival(unsigned state, struct selector_key* key) {
     }
 }
 
-// el fd quiere escribir algo por eso el socket se "levanta" con interes de lectura
 unsigned int copy_read(struct selector_key* key) {
     socks5_conn_t* conn = key->data;
     if (selector_set_interest(key->s, conn->origin_fd, OP_WRITE)) {
         LOG(ERROR, "Failed to set interest for origin fd %d in copy phase", conn->origin_fd);
         return SOCKS5_ERROR;
     }
+    copy_write_handler(key);
     return SOCKS5_COPY;
 }
 
@@ -58,6 +57,7 @@ void copy_read_handler(struct selector_key* key) {
         LOG(DEBUG, "Read %zd bytes from fd %d", n_read, conn->origin_fd);
         buffer_write_adv(&conn->out_buff, n_read);
         selector_set_interest(key->s, conn->client_fd, OP_WRITE);
+        socksv5_write(key);
     } else if (n_read == 0) {
         LOG(DEBUG, "Connection closed by dest on fd %d", conn->origin_fd);
         selector_unregister_fd(key->s, conn->origin_fd);
@@ -69,7 +69,7 @@ void copy_read_handler(struct selector_key* key) {
             selector_unregister_fd(key->s, conn->client_fd);
         }
     }
-    // LEER DEL FD DESTINO Y PONERLO EN EL BUFFER DE OUT SETEA EL FD DEL CLIENTE EN OP_WRITE
+   
 }
 
 void copy_write_handler(struct selector_key* key) {
@@ -77,7 +77,7 @@ void copy_write_handler(struct selector_key* key) {
 
     if (!buffer_can_read(&conn->in_buff)) {
         LOG(DEBUG, "Output buffer empty for fd %d, setting NOOP", key->fd);
-        selector_set_interest(key->s, conn->origin_fd, OP_NOOP); // No hay nada que enviar, no hacemos nada
+        selector_set_interest(key->s, conn->origin_fd, OP_NOOP); 
         return;
     }
 
@@ -89,9 +89,9 @@ void copy_write_handler(struct selector_key* key) {
     ssize_t n_written = send(conn->origin_fd, read_ptr, n, MSG_DONTWAIT);
     if (n_written > 0) {
         LOG(DEBUG, "Wrote %zd bytes to fd %d", n_written, conn->origin_fd);
-        buffer_read_adv(&conn->in_buff, n_written); // Avanzamos el puntero de lectura del buffer de salida
+        buffer_read_adv(&conn->in_buff, n_written); 
         if (!buffer_can_read(&conn->in_buff)) {
-            selector_set_interest(key->s, conn->origin_fd, OP_READ); // Si ya no hay nada que enviar, ponemos el fd en NOOP
+            selector_set_interest(key->s, conn->origin_fd, OP_READ); 
         }
         if (full_buffer) {
             selector_set_interest(key->s, conn->client_fd, OP_READ);
@@ -102,12 +102,11 @@ void copy_write_handler(struct selector_key* key) {
         selector_unregister_fd(key->s, conn->origin_fd);
         selector_unregister_fd(key->s, conn->client_fd);
 
-        // veamos aca que hacer, por ahora quedan los dos fd muertos
-        //  ACA RECIBIMOS EOF, CREO QUE DEBERIAMOS LIBERAR LOS RECURSOS
     } else {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
             LOG(ERROR, "Error writing to fd %d: %s", conn->origin_fd, strerror(errno));
-            // aca creo que tenemos que librerar los recursos
+            selector_unregister_fd(key->s, conn->origin_fd);
+            selector_unregister_fd(key->s, conn->client_fd);
         }
     }
 
