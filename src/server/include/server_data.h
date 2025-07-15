@@ -6,16 +6,16 @@
 #include <defines.h>
 
 typedef struct {
-    // Metrics
+    // Metricas
     server_metrics_t* metrics;
 
-    // Access Register
+    // Registro de accesos
     access_register_t* access_register;
 
-    // Connection buffers size
+    // Tamaño de los buffers de conexión
     unsigned int buffer_size;
 
-    // Maximum number of connections
+    // Número máximo de conexiones
     unsigned int max_conn;
 
 } server_data_t;

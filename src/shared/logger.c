@@ -29,7 +29,7 @@ void init_logging(const char* filename, log_level_t level) {
         log_file = stdout;
     }
     if (filename && log_file) {
-        chmod(filename, S_IRUSR | S_IWUSR); // Owner can read and write
+        chmod(filename, S_IRUSR | S_IWUSR); // Dueño puede leer y escribir
     }
 }
 

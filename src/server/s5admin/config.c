@@ -127,9 +127,9 @@ static void handle_help(s5admin_cmd_parsed_t* parsed_cmd, char* response, size_t
     snprintf(
         response,
         response_size,
-        "ADD_USER <usuario> <password>\nREMOVE_USER "
-        "<usuario>\nLIST_USERS\nGET_METRICS\nGET_ACCESS_REGISTER\nSET_LOGLEVEL "
-        "<DEBUG|INFO|WARNING|ERROR>\nSET_MAX_CONN <cantidad>\nSET_BUFF <bytes>\nGET_CONFIG\n"
+        "ADD_USER <username> <password>\nREMOVE_USER "
+        "<username>\nLIST_USERS\nGET_METRICS\nGET_ACCESS_REGISTER\nSET_LOGLEVEL "
+        "<DEBUG|INFO|WARNING|ERROR>\nSET_MAX_CONN <quantity>\nSET_BUFF <bytes>\nGET_CONFIG\n"
         "HELP\nPING\nEXIT\nEND\n");
 }
 

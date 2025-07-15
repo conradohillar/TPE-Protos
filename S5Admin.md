@@ -19,18 +19,18 @@ Este protocolo, correspondiente a la capa de aplicación, esta diseñado para co
 ## 4. Comandos Soportados
 
 ### 4.1 Gestión de Usuarios
-- `ADD_USER <usuario> <password>`
+- `ADD_USER <username> <password>`
   - Agrega un nuevo usuario.
-  - `<usuario>` y `<password>` debe tener entre 1 y 255 bytes de longitud.
+  - `<username>` y `<password>` deben tener entre 1 y 255 bytes de longitud.
   - Respuesta: `OK` o `ERROR: <motivo>`
   - **Posibles errores específicos:**
-    - `ERROR: <usuario> already exists`
-- `REMOVE_USER <usuario>`
+    - `ERROR: <username> already exists`
+- `REMOVE_USER <username>`
   - Elimina un usuario existente.
-  - `<usuario>` debe tener entre 1 y 255 bytes de longitud.
+  - `<username>` debe tener entre 1 y 255 bytes de longitud.
   - Respuesta: `OK` o `ERROR: <motivo>`
   - **Posibles errores específicos:**
-    - `ERROR: <usuario> not found`
+    - `ERROR: <username> not found`
 - `LIST_USERS`
   - Lista todos los usuarios registrados.
   - Respuesta: una línea por usuario, luego `END`.
@@ -44,12 +44,12 @@ Este protocolo, correspondiente a la capa de aplicación, esta diseñado para co
   - Respuesta: una línea por entrada, indicando fecha de acceso, nombre de usuario, tipo de registro, IP/puerto de origen y destino y status de SOCKS5. Luego, `END`.
 
 ### 4.3 Configuración Dinámica
-- `SET_LOGLEVEL <nivel>`
+- `SET_LOGLEVEL <level>`
   - Cambia el nivel de logging del servidor. Valores posibles: `DEBUG`, `INFO`, `WARNING`, `ERROR`.
   - Respuesta: `OK` o `ERROR: <motivo>`
   - **Posibles errores específicos:**
     - `ERROR: invalid log level`
-- `SET_MAX_CONN <cantidad>`
+- `SET_MAX_CONN <quantity>`
   - Cambia el máximo de conexiones simultáneas permitidas en el servidor.
   - Si el máximo es menor que la cantidad actual de conexiones, se notifica y no se permiten nuevas conexiones hasta que la cantidad de conexiones activas sea menor al nuevo máximo.
   - Respuesta: `OK` o `ERROR: <motivo>`
@@ -110,13 +110,13 @@ Fecha                     Usuario         Tipo       IP_origen       Pto_org    
 2025-07-13T18:21:15Z      user2           A          ::1             12345       www.google.com       443         0         
 END
 > HELP
-ADD_USER <usuario> <password>
-REMOVE_USER <usuario>
+ADD_USER <username> <password>
+REMOVE_USER <username>
 LIST_USERS
 GET_METRICS
 GET_ACCESS_REGISTER
 SET_LOGLEVEL <DEBUG|INFO|WARNING|ERROR>
-SET_MAX_CONN <cantidad>
+SET_MAX_CONN <quantity>
 SET_BUFF <bytes>
 GET_CONFIG
 HELP

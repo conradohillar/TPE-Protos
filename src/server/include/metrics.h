@@ -12,12 +12,10 @@ typedef struct {
     uint64_t current_connections;
     uint64_t bytes_transferred;
     uint64_t errors;
-    // Agregar más métricas ?
 } server_metrics_t;
 
 server_metrics_t* metrics_init(void);
 
-// Setters y updaters
 void metrics_inc_total_conn(server_metrics_t* server_metrics);
 void metrics_inc_curr_conn(server_metrics_t* server_metrics);
 void metrics_dec_curr_conn(server_metrics_t* server_metrics);
