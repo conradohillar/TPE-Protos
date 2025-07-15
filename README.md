@@ -1,6 +1,6 @@
 # SOCKSv5 Proxy con Aplicacion de Administración
 
-Este proyecto implementa un servidor proxy que utiliza el protocolo SOCKS versión 5 (RFC 1928) para intermediar conexiones entre clientes y servidores finales. Además, incluye una aplicación de administración que permite configurar y monitorear el servidor en tiempo real.
+Este proyecto implementa un servidor proxy que utiliza el protocolo SOCKS versión 5 (RFC 1928) para intermediar conexiones entre clientes y servidores finales. Además, incluye una aplicación de administración que permite configurar y monitorear el servidor en tiempo real, mediante un protocolo propio denominado S5ADMIN, cuya especificación se encuentra en el archivo S5Admin.md.
 
 ## 🛠️ Compilación
 
