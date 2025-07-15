@@ -193,7 +193,12 @@ static void socksv5_close(struct selector_key *key) {
     close(conn->origin_fd);
     conn->origin_fd = -1;
   }
-  socks5_stm_free(conn->stm);
+
+  if(conn->stm != NULL) free(conn->stm);
+  if(conn->handshake_parser != NULL) handshake_parser_close(conn->handshake_parser);
+  if(conn->auth_parser != NULL) auth_parser_close(conn->auth_parser);
+  if(conn->conn_req_parser != NULL) conn_req_parser_close(conn->conn_req_parser);
+  if(conn->addr_info != NULL) freeaddrinfo(conn->addr_info);
   metrics_dec_curr_conn(get_server_data()->metrics);
   if (conn->in_buff_data != NULL)
     free(conn->in_buff_data);

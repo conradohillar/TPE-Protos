@@ -158,6 +158,7 @@ int connect_to_host(struct addrinfo** res, int* sock_fd) {
         if (connect(*sock_fd, rp->ai_addr, rp->ai_addrlen) == 0) {
             LOG(DEBUG, "Successfully connected to the target host for fd %d", *sock_fd);
             freeaddrinfo(*res);
+            *res = NULL;
             return CONNECTION_SUCCESS;
         } else if (errno == EINPROGRESS) {
             LOG(DEBUG, "Connection in progress for fd %d", *sock_fd);
