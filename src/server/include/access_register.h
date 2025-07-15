@@ -21,12 +21,12 @@
 typedef struct {
     char iso_date[ISO_DATE_LEN]; 
     char username[MAX_USERNAME_LEN];
-    char register_type; // Siempre 'A'
+    char register_type; 
     char src_ip[IP_MAX_LEN];
     uint16_t src_port;
     char destination[DEST_MAX_LEN]; // nombre o dirección IP
     uint16_t dest_port;
-    int status_code; // Status code de SOCKSv5
+    int status_code; 
 } access_entry_t;
 
 // Estructura para el registro completo (cola circular)
@@ -37,13 +37,10 @@ typedef struct {
     size_t count; // cantidad de elementos actuales
 } access_register_t;
 
-// Inicializa el registro de accesos
 access_register_t* access_register_init(void);
 
-// Agrega una nueva entrada al registro (FIFO, borra la más antigua si está lleno)
 void access_register_add_entry(access_register_t* reg, const char* username, const char* src_ip, uint16_t src_port, const char* destination, uint16_t dest_port, int status_code, time_t timestamp);
 
-// Imprime todas las entradas del registro en el stream dado
 size_t access_register_print(const access_register_t* reg, char* response, size_t response_size);
 
 #endif // ACCESS_REGISTER_H

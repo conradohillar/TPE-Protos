@@ -22,10 +22,8 @@ typedef enum response_code {
     RESPONSE_BYE
 } response_code_t;
 
-// Conecta al servidor de administración, retorna el socket o -1 en error
 int connect_to_admin_server(const char* host, int port);
 
-// Loop principal del cliente administrador
 void admin_client_loop(int sockfd);
 
 #endif // ADMIN_CLIENT_H

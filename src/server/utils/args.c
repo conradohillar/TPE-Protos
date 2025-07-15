@@ -1,9 +1,8 @@
 #include <errno.h>
 #include <getopt.h>
-#include <limits.h> /* LONG_MIN et al */
-// #include <stdio.h>  /* for printf */
-#include <stdlib.h> /* for exit */
-#include <string.h> /* memset */
+#include <limits.h> 
+#include <stdlib.h> 
+#include <string.h>
 
 #include "args.h"
 #include "logger.h"

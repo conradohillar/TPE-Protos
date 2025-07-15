@@ -1,8 +1,7 @@
 #ifndef __SERVER__H__
 #define __SERVER__H__
 
-// Declaraciones para el entry point del servidor SOCKSv5
-// Inicialización, ciclo principal, manejo de argumentos, etc.
+
 #include <args.h>
 #include <auth_table.h>
 #include <stddef.h>

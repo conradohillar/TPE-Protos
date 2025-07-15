@@ -14,13 +14,13 @@
 #include <server.h>
 
 #include <arpa/inet.h>
-#include <assert.h> // assert
+#include <assert.h>
 #include <errno.h>
 #include <pthread.h>
 #include <stdio.h>
-#include <stdlib.h> // malloc
-#include <string.h> // memset
-#include <unistd.h> // close
+#include <stdlib.h> 
+#include <string.h> 
+#include <unistd.h> 
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netdb.h>

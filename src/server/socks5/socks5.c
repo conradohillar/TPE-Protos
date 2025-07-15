@@ -5,9 +5,6 @@
 
 #include <socks5.h>
 
-/* declaración forward de los handlers de selección de una conexión
- * establecida entre un cliente y el proxy.
- */
 static void socksv5_read(struct selector_key *key);
 static void socksv5_block(struct selector_key *key);
 static void socksv5_close(struct selector_key *key);
@@ -20,15 +17,13 @@ static const struct fd_handler socks5_handler = {
 };
 
 void socksv5_passive_accept(struct selector_key *key) {
-  // TODO: Fix max connections check
-  //   LOG_MSG(DEBUG, "Trying to accept a new SOCKSv5 connection");
-  //     if (get_server_data()->metrics->current_connections >=
-  //         get_server_data()->max_conn) {
-  //       LOG_MSG(WARNING, "Max connections reached, rejecting new
-  //       connection"); int fd = accept(key->fd, NULL, NULL); if (fd != -1)
-  //         close(fd);
-  //       return;
-  //     }
+    LOG_MSG(DEBUG, "Trying to accept a new SOCKSv5 connection");
+      if (get_server_data()->metrics->current_connections >= get_server_data()->max_conn) {
+        LOG_MSG(WARNING, "Max connections reached, rejecting new connection"); 
+        int fd = accept(key->fd, NULL, NULL); if (fd != -1)
+        close(fd);
+        return;
+      }
 
   socks5_conn_t *conn = calloc(1, sizeof(socks5_conn_t));
   if (conn == NULL) {
@@ -148,8 +143,6 @@ void socksv5_write(struct selector_key *key) {
       selector_set_interest(key->s, conn->client_fd, OP_READ);
     }
 
-    // if (buffer_can_write(&conn->in_buff)) { selector_set_interest(key->s,
-    // conn->client_fd, OP_READ); }
     if (buffer_can_read(&conn->in_buff)) {
       selector_set_interest(key->s, conn->origin_fd, OP_WRITE);
     }

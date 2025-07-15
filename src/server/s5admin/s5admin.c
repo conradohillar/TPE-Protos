@@ -40,9 +40,9 @@ void s5admin_passive_accept(struct selector_key* key) {
 static void admin_read(struct selector_key* key) {
     admin_conn_t* conn = key->data;
 
-    if (!buffer_can_write(&conn->in_buff)) { // Buffer de entrada lleno
+    if (!buffer_can_write(&conn->in_buff)) { 
         LOG(DEBUG, "Input buffer full for fd %d", key->fd);
-        // NO DEBERÍA PASAR
+        selector_unregister_fd(key->s, conn->fd);
         return;
     }
 
@@ -66,13 +66,12 @@ static void admin_read(struct selector_key* key) {
         LOG(DEBUG, "Processing admin command: %s", parse_ptr);
         if (!buffer_can_write(&conn->out_buff)) {
             LOG(WARNING, "Output buffer full for fd %d", key->fd);
-            // NO DEBERÍA PASAR
             return;
         }
         size_t n_response;
         char* response_ptr = (char*)buffer_write_ptr(&conn->out_buff, &n_response);
         int config_result;
-        if(parse_ptr[0] == '\0'){ // Comando vacío
+        if(parse_ptr[0] == '\0'){
             strcpy(response_ptr, parse_ptr);
             config_result = 1;
         } else {
@@ -84,10 +83,9 @@ static void admin_read(struct selector_key* key) {
                 return;
             }
         }
-        // Comando leído del in_buff
+        
         size_t cmd_len = (newline - parse_ptr) + 1;
         buffer_read_adv(&conn->in_buff, cmd_len);
-        // Respuesta generada y escrita en out_buff
         buffer_write_adv(&conn->out_buff, config_result);
 
         selector_set_interest_key(key, OP_WRITE);
