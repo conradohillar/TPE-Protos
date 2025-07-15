@@ -119,6 +119,7 @@ void handle_write_connecting(struct selector_key* key) {
     }
 
     freeaddrinfo(conn->addr_info);
+    conn->addr_info = NULL;
     selector_unregister_fd(key->s, conn->origin_fd);
     stm_handler_read(conn->stm, key);
    
