@@ -81,6 +81,9 @@ Esto conecta el cliente al servidor de administración corriendo en `localhost` 
 .
 ├── bin/                          # Binarios generados
 ├── docs/                         # Documentación del proyecto
+|   ├── 20251-r1.txt              # Consigna del TPE
+|   ├── Informe.pdf               # Informe sobre el desarrollo del proyecto
+|   └── S5Admin.md                # Especificación del protocolo S5ADMIN
 ├── obj/                          # Archivos objeto generados durante la compilación
 ├── src/                          # Código fuente
 │   ├── admin_client/             # Cliente de administración
@@ -95,7 +98,7 @@ Esto conecta el cliente al servidor de administración corriendo en `localhost` 
 ├── Makefile                      # Archivo principal de compilación
 ├── Makefile.inc                  # Configuraciones adicionales del Makefile
 ├── README.md                     # Documento con instrucciones generales
-└── S5Admin.md                    # Especificación del protocolo S5ADMIN
+
 
 ```
 
