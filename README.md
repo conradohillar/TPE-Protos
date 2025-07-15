@@ -1,8 +1,8 @@
-# SOCKSv5 Proxy con Aplicacion de Administración
+# SOCKSv5 Proxy con Aplicación de Administración
 
 Este proyecto implementa un servidor proxy que utiliza el protocolo SOCKS versión 5 (RFC 1928) para intermediar conexiones entre clientes y servidores finales. Además, incluye una aplicación de administración que permite configurar y monitorear el servidor en tiempo real, mediante un protocolo propio denominado S5ADMIN, cuya especificación se encuentra en el archivo S5Admin.md.
 
-## 🛠️ Compilación
+## Compilación
 
 El código fuente incluye un `Makefile` que facilita la compilación del proyecto. Luego de descomprimir el directorio, desde la carpeta raíz se puede compilar utilizando el siguiente comando:
 
@@ -16,17 +16,17 @@ make <target> [MODE=release]
   * Si **se omite**, se compila con herramientas de análisis como `-fsanitize=address`, útiles para debugging.
   * Si **se incluye**, se compila en modo producción (sin sanitizadores).
 
-> ⚠️ Es necesario tener el compilador GCC instalado para compilar el proyecto.
+> Es necesario tener el compilador GCC instalado para compilar el proyecto.
 
 Los binarios generados (`socks5d` y/o `admin_client`) se ubicarán en el directorio `bin/`, en la raíz del proyecto.
 
 ---
 
-## ⚙️ Configuración
+## Configuración
 
 La configuración se realiza por línea de comandos. No se utilizan archivos de configuración.
 
-### 🧹 Configuración del Servidor
+### Configuración del Servidor
 
 El servidor se configura al momento de su ejecución. Opciones disponibles:
 
@@ -42,7 +42,7 @@ El servidor se configura al momento de su ejecución. Opciones disponibles:
 | `-g <nivel>`     | Nivel de log (`DEBUG`, `INFO`, `WARNING`, `ERROR`). Por defecto `INFO`.     |
 | `-f <archivo>`   | Archivo de log. Si se omite, los logs se imprimen en la salida estándar.    |
 
-#### 📌 Ejemplo de ejecución del servidor
+#### Ejemplo de ejecución del servidor
 
 ```bash
 ./bin/socks5d -p 1080 -P 8080 -u user1:pass1 -u user2:pass2
@@ -52,7 +52,7 @@ Esto ejecuta el servidor SOCKSv5 en el puerto `1080`, la interfaz de administrac
 
 ---
 
-### 💻 Configuración del Cliente de Administración
+### Configuración del Cliente de Administración
 
 El cliente de administración se conecta al servidor para consultar y modificar su estado. Opciones disponibles:
 
@@ -65,7 +65,7 @@ El cliente de administración se conecta al servidor para consultar y modificar 
 | `-g <nivel>`   | Nivel de log (`ERROR`, `WARNING`, `INFO`, `DEBUG`). Por defecto `INFO`.  |
 | `-f <archivo>` | Archivo de log. Si se omite, los logs se imprimen en la salida estándar. |
 
-#### 📌 Ejemplo de ejecución del cliente
+#### Ejemplo de ejecución del cliente
 
 ```bash
 ./bin/admin_client -L 127.0.0.1 -P 8080
@@ -75,7 +75,7 @@ Esto conecta el cliente al servidor de administración corriendo en `localhost` 
 
 ---
 
-## 📂 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 .
@@ -101,7 +101,7 @@ Esto conecta el cliente al servidor de administración corriendo en `localhost` 
 
 ---
 
-## 📋 Requisitos
+## Requisitos
 
 * GCC
 * Make
