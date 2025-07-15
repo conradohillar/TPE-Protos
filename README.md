@@ -79,13 +79,24 @@ Esto conecta el cliente al servidor de administración corriendo en `localhost` 
 
 ```
 .
-├── src/                # Código fuente
-│   ├── socks5d/        # Código del servidor SOCKSv5
-│   ├── admin_client/   # Código del cliente de administración
-│   └── common/         # Código compartido (logger, parser, etc.)
-├── bin/                # Binarios generados
-├── Makefile            # Archivo de compilación
-└── README.md           # Este archivo
+├── bin/                          # Binarios generados
+├── docs/                         # Documentación del proyecto
+├── obj/                          # Archivos objeto generados durante la compilación
+├── src/                          # Código fuente
+│   ├── admin_client/             # Cliente de administración
+│   ├── server/                   # Servidor SOCKSv5
+│   └── shared/                   # Código compartido (logger, buffer, etc.)
+├── test/                         # Scripts de pruebas de rendimiento y concurrencia
+│   ├── advanced_throughput_benchmark.sh
+│   ├── concurrency_benchmark.sh
+│   └── throughput_benchmark.sh
+├── .gitignore                   # Archivos ignorados por Git
+├── LICENSE                       # Licencia del proyecto
+├── Makefile                      # Archivo principal de compilación
+├── Makefile.inc                  # Configuraciones adicionales del Makefile
+├── README.md                     # Documento con instrucciones generales
+└── S5Admin.md                    # Especificación del protocolo S5ADMIN
+
 ```
 
 ---
