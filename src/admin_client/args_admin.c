@@ -6,8 +6,8 @@
 #include <stdlib.h> /* for exit */
 #include <string.h> /* memset */
 
-#include "args_admin.h"
-#include "logger.h"
+#include <args_admin.h>
+#include <logger.h>
 log_level_t log_level_from_string(const char *level);
 
 static unsigned short port(const char *s) {
@@ -42,8 +42,8 @@ void parse_args(const int argc, char **argv, admin_args *args) {
   memset(args, 0,
          sizeof(*args)); 
 
-  args->host = "127.0.0.1";
-  args->port = 1080;
+  args->host = DEFAULT_SERVER_HOST;
+  args->port = DEFAULT_SERVER_PORT;
 
   args->log_file = NULL;
 

@@ -194,7 +194,7 @@ static void socksv5_close(struct selector_key *key) {
     conn->origin_fd = -1;
   }
 
-  if(conn->stm != NULL) free(conn->stm);
+  if(conn->stm != NULL) socks5_stm_free(conn->stm);
   if(conn->handshake_parser != NULL) handshake_parser_close(conn->handshake_parser);
   if(conn->auth_parser != NULL) auth_parser_close(conn->auth_parser);
   if(conn->conn_req_parser != NULL) conn_req_parser_close(conn->conn_req_parser);

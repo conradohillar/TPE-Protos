@@ -3,6 +3,9 @@
 
 #include <logger.h>
 
+#define DEFAULT_SERVER_HOST "127.0.0.1"
+#define DEFAULT_SERVER_PORT 8080
+
 typedef struct admin_args {
     char* host;
     int port;

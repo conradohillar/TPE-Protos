@@ -10,9 +10,6 @@
 #include <logger.h>
 #include <unistd.h>
 
-#define DEFAULT_SERVER_HOST "127.0.0.1"
-#define DEFAULT_SERVER_PORT 8080
-
 typedef enum response_code {
     RESPONSE_OK,
     RESPONSE_ERROR,
